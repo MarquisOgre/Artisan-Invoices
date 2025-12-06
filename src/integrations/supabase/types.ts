@@ -14,16 +14,426 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      customers: {
+        Row: {
+          address: string | null
+          city: string | null
+          company: string | null
+          created_at: string
+          email: string | null
+          gst_no: string | null
+          id: string
+          name: string
+          phone: string | null
+          pincode: string | null
+          shirt_size: string | null
+          state: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          gst_no?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+          pincode?: string | null
+          shirt_size?: string | null
+          state?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          gst_no?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          pincode?: string | null
+          shirt_size?: string | null
+          state?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      expense_register: {
+        Row: {
+          amount: number
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          month: number
+          updated_at: string
+          user_id: string
+          year: number
+        }
+        Insert: {
+          amount: number
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          month: number
+          updated_at?: string
+          user_id: string
+          year: number
+        }
+        Update: {
+          amount?: number
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          month?: number
+          updated_at?: string
+          user_id?: string
+          year?: number
+        }
+        Relationships: []
+      }
+      invoices: {
+        Row: {
+          created_at: string
+          customer_address: string | null
+          customer_city: string | null
+          customer_company: string | null
+          customer_email: string | null
+          customer_gst_no: string | null
+          customer_id: string | null
+          customer_name: string
+          customer_phone: string | null
+          customer_pincode: string | null
+          customer_state: string | null
+          discount: number | null
+          due_date: string | null
+          gst_amount: number | null
+          id: string
+          invoice_date: string
+          invoice_number: string
+          items: Json
+          notes: string | null
+          status: string
+          subtotal: number
+          total_amount: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_address?: string | null
+          customer_city?: string | null
+          customer_company?: string | null
+          customer_email?: string | null
+          customer_gst_no?: string | null
+          customer_id?: string | null
+          customer_name: string
+          customer_phone?: string | null
+          customer_pincode?: string | null
+          customer_state?: string | null
+          discount?: number | null
+          due_date?: string | null
+          gst_amount?: number | null
+          id?: string
+          invoice_date: string
+          invoice_number: string
+          items?: Json
+          notes?: string | null
+          status?: string
+          subtotal?: number
+          total_amount?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_address?: string | null
+          customer_city?: string | null
+          customer_company?: string | null
+          customer_email?: string | null
+          customer_gst_no?: string | null
+          customer_id?: string | null
+          customer_name?: string
+          customer_phone?: string | null
+          customer_pincode?: string | null
+          customer_state?: string | null
+          discount?: number | null
+          due_date?: string | null
+          gst_amount?: number | null
+          id?: string
+          invoice_date?: string
+          invoice_number?: string
+          items?: Json
+          notes?: string | null
+          status?: string
+          subtotal?: number
+          total_amount?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          invoice_id: string | null
+          notes: string | null
+          payment_date: string
+          payment_method: string | null
+          reference_number: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          invoice_id?: string | null
+          notes?: string | null
+          payment_date: string
+          payment_method?: string | null
+          reference_number?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          invoice_id?: string | null
+          notes?: string | null
+          payment_date?: string
+          payment_method?: string | null
+          reference_number?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quotations: {
+        Row: {
+          created_at: string
+          customer_address: string | null
+          customer_city: string | null
+          customer_company: string | null
+          customer_email: string | null
+          customer_gst_no: string | null
+          customer_id: string | null
+          customer_name: string
+          customer_phone: string | null
+          customer_pincode: string | null
+          customer_state: string | null
+          discount: number | null
+          gst_amount: number | null
+          id: string
+          items: Json
+          notes: string | null
+          quotation_date: string
+          quotation_number: string
+          status: string
+          subtotal: number
+          total_amount: number
+          updated_at: string
+          user_id: string
+          valid_until: string | null
+        }
+        Insert: {
+          created_at?: string
+          customer_address?: string | null
+          customer_city?: string | null
+          customer_company?: string | null
+          customer_email?: string | null
+          customer_gst_no?: string | null
+          customer_id?: string | null
+          customer_name: string
+          customer_phone?: string | null
+          customer_pincode?: string | null
+          customer_state?: string | null
+          discount?: number | null
+          gst_amount?: number | null
+          id?: string
+          items?: Json
+          notes?: string | null
+          quotation_date: string
+          quotation_number: string
+          status?: string
+          subtotal?: number
+          total_amount?: number
+          updated_at?: string
+          user_id: string
+          valid_until?: string | null
+        }
+        Update: {
+          created_at?: string
+          customer_address?: string | null
+          customer_city?: string | null
+          customer_company?: string | null
+          customer_email?: string | null
+          customer_gst_no?: string | null
+          customer_id?: string | null
+          customer_name?: string
+          customer_phone?: string | null
+          customer_pincode?: string | null
+          customer_state?: string | null
+          discount?: number | null
+          gst_amount?: number | null
+          id?: string
+          items?: Json
+          notes?: string | null
+          quotation_date?: string
+          quotation_number?: string
+          status?: string
+          subtotal?: number
+          total_amount?: number
+          updated_at?: string
+          user_id?: string
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quotations_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      settings: {
+        Row: {
+          created_at: string
+          id: string
+          setting_data: Json
+          setting_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          setting_data?: Json
+          setting_type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          setting_data?: Json
+          setting_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      stock_register: {
+        Row: {
+          closing_stock: number
+          created_at: string
+          id: string
+          month: number
+          notes: string | null
+          opening_stock: number
+          product_name: string
+          purchases: number
+          sales: number
+          unit_price: number | null
+          updated_at: string
+          user_id: string
+          year: number
+        }
+        Insert: {
+          closing_stock?: number
+          created_at?: string
+          id?: string
+          month: number
+          notes?: string | null
+          opening_stock?: number
+          product_name: string
+          purchases?: number
+          sales?: number
+          unit_price?: number | null
+          updated_at?: string
+          user_id: string
+          year: number
+        }
+        Update: {
+          closing_stock?: number
+          created_at?: string
+          id?: string
+          month?: number
+          notes?: string | null
+          opening_stock?: number
+          product_name?: string
+          purchases?: number
+          sales?: number
+          unit_price?: number | null
+          updated_at?: string
+          user_id?: string
+          year?: number
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +560,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
