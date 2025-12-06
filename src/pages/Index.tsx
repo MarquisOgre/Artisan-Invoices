@@ -182,8 +182,7 @@ const Index = () => {
     try {
       const currentDate = new Date().toISOString().split('T')[0];
       const updatedInvoice = await updateInvoice(invoiceId, { 
-        status: "paid",
-        paid_date: currentDate
+        status: "paid"
       });
       if (updatedInvoice) {
         toast({
@@ -436,14 +435,14 @@ const Index = () => {
                 customer_state: customer.state || "",
                 customer_pincode: customer.pincode || "",
                 subtotal: quotation.subtotal,
-                tax_amount: quotation.tax_amount,
-                total_amount: quotation.amount,
+                gst_amount: quotation.gst_amount || 0,
+                discount: quotation.discount || 0,
+                total_amount: quotation.total_amount,
                 invoice_date: invoiceDate.toISOString().split('T')[0],
                 due_date: dueDate.toISOString().split('T')[0],
                 status: "unpaid",
                 items: quotation.items,
-                notes: quotation.notes || "",
-                tax_type: quotation.tax_type
+                notes: quotation.notes || ""
               };
 
               const newInvoice = await addInvoice(invoiceData, invoiceSettings.prefix);

@@ -3,7 +3,6 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface StockData {
   product_name: string;
-  size: string;
   closing_stock: number;
 }
 
@@ -23,7 +22,7 @@ export const useStockCheck = () => {
 
       const { data, error } = await supabase
         .from('stock_register')
-        .select('product_name, size, closing_stock')
+        .select('product_name, closing_stock')
         .eq('month', month)
         .eq('year', year);
 
@@ -36,15 +35,15 @@ export const useStockCheck = () => {
     }
   };
 
-  const getAvailableStock = (productName: string, size: string): number => {
+  const getAvailableStock = (productName: string): number => {
     const stock = stockData.find(
-      s => s.product_name === productName && s.size === size
+      s => s.product_name === productName
     );
     return stock?.closing_stock || 0;
   };
 
-  const isStockAvailable = (productName: string, size: string): boolean => {
-    return getAvailableStock(productName, size) > 0;
+  const isStockAvailable = (productName: string): boolean => {
+    return getAvailableStock(productName) > 0;
   };
 
   return { getAvailableStock, isStockAvailable, loading, refreshStock: fetchStock };
