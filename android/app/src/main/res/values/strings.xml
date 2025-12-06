@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">artisan-invoicess</string>
+    <string name="title_activity_main">artisan-invoicess</string>
+    <string name="package_name">com.artisanpparels.artisan</string>
+    <string name="custom_url_scheme">com.artisanpparels.artisan</string>
+</resources>
