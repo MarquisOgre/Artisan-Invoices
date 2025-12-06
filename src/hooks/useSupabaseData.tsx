@@ -8,74 +8,83 @@ export interface Quotation {
   quotation_number: string;
   customer_id: string | null;
   customer?: Customer | null;
-  date: string;
+  quotation_date: string;
   valid_until: string | null;
-  amount: number;
+  total_amount: number;
   subtotal: number;
-  tax_amount: number;
-  tax_type: string | null;
+  gst_amount: number | null;
+  discount: number | null;
   status: string;
   items: any[];
   notes?: string | null;
+  customer_name: string;
+  customer_email?: string | null;
+  customer_phone?: string | null;
+  customer_address?: string | null;
+  customer_company?: string | null;
+  customer_gst_no?: string | null;
+  customer_city?: string | null;
+  customer_state?: string | null;
+  customer_pincode?: string | null;
   created_at: string;
   updated_at: string;
-  user_id: string | null;
+  user_id: string;
 }
 
 export interface Customer {
   id: string;
   name: string;
-  email?: string;
-  phone?: string;
-  company?: string;
-  address?: string;
-  gst_no?: string;
-  city?: string;
-  state?: string;
-  pincode?: string;
-  shirt_size?: string;
+  email?: string | null;
+  phone?: string | null;
+  company?: string | null;
+  address?: string | null;
+  gst_no?: string | null;
+  city?: string | null;
+  state?: string | null;
+  pincode?: string | null;
+  shirt_size?: string | null;
   created_at: string;
   updated_at: string;
-  user_id?: string;
+  user_id: string;
 }
 
 export interface Invoice {
   id: string;
   invoice_number: string;
+  customer_id?: string | null;
   customer_name: string;
-  customer_email?: string;
-  customer_phone?: string;
-  customer_address?: string;
-  customer_company?: string;
-  customer_gst_no?: string;
-  customer_city?: string;
-  customer_state?: string;
-  customer_pincode?: string;
+  customer_email?: string | null;
+  customer_phone?: string | null;
+  customer_address?: string | null;
+  customer_company?: string | null;
+  customer_gst_no?: string | null;
+  customer_city?: string | null;
+  customer_state?: string | null;
+  customer_pincode?: string | null;
   subtotal: number;
-  tax_amount: number;
-  tax_rate?: number;
+  gst_amount: number | null;
+  discount: number | null;
   total_amount: number;
   invoice_date: string;
-  due_date?: string;
-  paid_date?: string;
+  due_date?: string | null;
   status: string;
   items: any[];
-  notes?: string;
+  notes?: string | null;
   created_at: string;
   updated_at: string;
-  user_id?: string;
+  user_id: string;
 }
 
 export interface Payment {
   id: string;
   amount: number;
   payment_date: string;
-  payment_method: string;
-  customer_name: string;
-  invoice_id?: string;
-  notes?: string;
+  payment_method?: string | null;
+  invoice_id?: string | null;
+  reference_number?: string | null;
+  notes?: string | null;
   created_at: string;
-  user_id?: string;
+  user_id: string;
 }
 
 export const useSupabaseData = () => {
@@ -337,7 +346,7 @@ export const useSupabaseData = () => {
     return null;
   };
 
-  const addInvoice = async (invoiceData: Omit<Invoice, "id" | "invoice_number" | "created_at" | "updated_at">, invoicePrefix: string = "INV-") => {
+  const addInvoice = async (invoiceData: Omit<Invoice, "id" | "invoice_number" | "created_at" | "updated_at" | "user_id">, invoicePrefix: string = "INV-") => {
     if (!user) {
       toast({
         title: "Error",
@@ -378,13 +387,12 @@ export const useSupabaseData = () => {
       
       for (const item of processedData.items) {
         const invoiceItem = item as any;
-        if (invoiceItem.description && invoiceItem.shirt_size && invoiceItem.quantity) {
+        if (invoiceItem.description && invoiceItem.quantity) {
           // Fetch existing stock entry
-      const { data: existingStock } = await supabase
+          const { data: existingStock } = await supabase
             .from("stock_register")
             .select("*")
             .eq("product_name", invoiceItem.description)
-            .eq("size", invoiceItem.shirt_size)
             .eq("month", month)
             .eq("year", year)
             .maybeSingle();
@@ -392,7 +400,7 @@ export const useSupabaseData = () => {
           if (existingStock) {
             // Update existing entry
             const newSales = existingStock.sales + invoiceItem.quantity;
-            const newClosingStock = existingStock.opening_stock + existingStock.production - newSales;
+            const newClosingStock = existingStock.opening_stock + existingStock.purchases - newSales;
             
             await supabase
               .from("stock_register")
@@ -408,11 +416,10 @@ export const useSupabaseData = () => {
               .insert([{
                 user_id: user.id,
                 product_name: invoiceItem.description,
-                size: invoiceItem.shirt_size,
                 month: month,
                 year: year,
                 opening_stock: 0,
-                production: 0,
+                purchases: 0,
                 sales: invoiceItem.quantity,
                 closing_stock: -invoiceItem.quantity
               }]);

@@ -49,7 +49,7 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
   return (
     <div className="flex flex-col h-screen bg-background">
       {/* Header Navigation */}
-      <header className="bg-card border-b shadow-sm py-3" style={{ height: HEADER_HEIGHT }}>
+      <header className="relative bg-card border-b shadow-sm py-3" style={{ height: HEADER_HEIGHT }}>
         <div className="w-full h-full px-2.5">
           <div className="flex items-center h-full">
             {/* Logo and Brand */}
@@ -94,9 +94,9 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
           </div>
         </div>
 
-        {/* Mobile Navigation Menu */}
+        {/* Mobile Navigation Menu - positioned absolute with high z-index */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t bg-card">
+          <div className="md:hidden absolute top-full left-0 right-0 z-50 border-t bg-card shadow-lg">
             <div className="px-4 py-2 space-y-1">
               {navigation.map((item) => (
                 <Button

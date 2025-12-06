@@ -21,7 +21,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useSupabaseData } from "@/hooks/useSupabaseData";
 import { useUserRole } from "@/hooks/useUserRole";
 
-const SIZES = ["39", "40", "42", "44", "46"];
 const PRODUCTS = [
   "Dark Blue",
   "Ratan Blue",
@@ -49,19 +48,38 @@ const MONTHS = [
   { value: 12, label: "December" },
 ];
 
+interface ProductData {
+  product: string;
+  openingStock: number;
+  purchases: number;
+  sales: number;
+  closingStock: number;
+  id?: string;
+}
+
+interface EditFormData {
+  openingStock: number;
+  purchases: number;
+  sales: number;
+}
+
 const StockRegister = () => {
   const currentDate = new Date();
   const [selectedMonth, setSelectedMonth] = useState(
     currentDate.getMonth() + 1
   );
   const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
-  const [products, setProducts] = useState([]);
-  const [editingProduct, setEditingProduct] = useState(null);
-  const [viewingProduct, setViewingProduct] = useState(null);
+  const [products, setProducts] = useState<ProductData[]>([]);
+  const [editingProduct, setEditingProduct] = useState<ProductData | null>(null);
+  const [viewingProduct, setViewingProduct] = useState<ProductData | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
-  const [stockEntries, setStockEntries] = useState([]);
-  const [editFormData, setEditFormData] = useState({});
+  const [stockEntries, setStockEntries] = useState<any[]>([]);
+  const [editFormData, setEditFormData] = useState<EditFormData>({
+    openingStock: 0,
+    purchases: 0,
+    sales: 0
+  });
 
   const { toast } = useToast();
   const {
@@ -88,105 +106,95 @@ const StockRegister = () => {
     }
     const prevEntries = await fetchStockRegister(prevMonth, prevYear);
 
-    const productData = PRODUCTS.map((productName) => {
-      const sizes = {};
-      SIZES.forEach((size) => {
-        const entry = entries.find(
-          (e) => e.product_name === productName && e.size === size
-        );
-        const prev = prevEntries.find(
-          (e) => e.product_name === productName && e.size === size
-        );
+    const productData: ProductData[] = PRODUCTS.map((productName) => {
+      const entry = entries.find(
+        (e: any) => e.product_name === productName
+      );
+      const prev = prevEntries.find(
+        (e: any) => e.product_name === productName
+      );
 
-        sizes[size] = {
-          openingStock: entry?.opening_stock ?? prev?.closing_stock ?? 0,
-          production: entry?.production ?? 0,
-          sales: entry?.sales ?? 0,
-          closingStock: entry?.closing_stock ?? prev?.closing_stock ?? 0,
-        };
-      });
-
-      return { product: productName, sizes };
+      return {
+        product: productName,
+        openingStock: entry?.opening_stock ?? prev?.closing_stock ?? 0,
+        purchases: entry?.purchases ?? 0,
+        sales: entry?.sales ?? 0,
+        closingStock: entry?.closing_stock ?? prev?.closing_stock ?? 0,
+        id: entry?.id
+      };
     });
 
     setProducts(productData);
   };
 
-  const calculateClosingStock = (os, p, s) => os + p - s;
+  const calculateClosingStock = (os: number, p: number, s: number) => os + p - s;
 
   const handlePrint = () => window.print();
 
-  const handleView = (product) => {
+  const handleView = (product: ProductData) => {
     setViewingProduct(product);
     setIsViewDialogOpen(true);
   };
 
-  const handleEdit = (product) => {
+  const handleEdit = (product: ProductData) => {
     setEditingProduct(product);
-    const formData = {};
-    SIZES.forEach((size) => {
-      formData[size] = product.sizes[size];
+    setEditFormData({
+      openingStock: product.openingStock,
+      purchases: product.purchases,
+      sales: product.sales
     });
-    setEditFormData(formData);
     setIsEditDialogOpen(true);
   };
 
-  const handleDelete = async (productName) => {
-    if (!confirm(`Are you sure you want to delete all stock entries for ${productName}?`)) {
+  const handleDelete = async (productName: string) => {
+    if (!confirm(`Are you sure you want to delete stock entry for ${productName}?`)) {
       return;
     }
 
-    const entriesToDelete = stockEntries.filter(
-      (e) => e.product_name === productName
+    const entry = stockEntries.find(
+      (e: any) => e.product_name === productName
     );
 
-    for (const entry of entriesToDelete) {
+    if (entry) {
       await deleteStockEntry(entry.id);
+      toast({
+        title: "Success",
+        description: `Deleted stock entry for ${productName}`,
+      });
+      loadStockData();
     }
-
-    toast({
-      title: "Success",
-      description: `Deleted all stock entries for ${productName}`,
-    });
-
-    loadStockData();
   };
 
   const handleSaveEdit = async () => {
     if (!editingProduct) return;
 
-    for (const size of SIZES) {
-      const data = editFormData[size];
-      const entry = stockEntries.find(
-        (e) =>
-          e.product_name === editingProduct.product && e.size === size
-      );
+    const entry = stockEntries.find(
+      (e: any) => e.product_name === editingProduct.product
+    );
 
-      const closingStock = calculateClosingStock(
-        data.openingStock,
-        data.production,
-        data.sales
-      );
+    const closingStock = calculateClosingStock(
+      editFormData.openingStock || 0,
+      editFormData.purchases || 0,
+      editFormData.sales || 0
+    );
 
-      if (entry) {
-        await updateStockEntry(entry.id, {
-          opening_stock: data.openingStock,
-          production: data.production,
-          sales: data.sales,
-          closing_stock: closingStock,
-        });
-      } else {
-        await addStockEntry({
-          product_name: editingProduct.product,
-          size: size,
-          month: selectedMonth,
-          year: selectedYear,
-          opening_stock: data.openingStock,
-          production: data.production,
-          sales: data.sales,
-          closing_stock: closingStock,
-        });
-      }
+    if (entry) {
+      await updateStockEntry(entry.id, {
+        opening_stock: editFormData.openingStock || 0,
+        purchases: editFormData.purchases || 0,
+        sales: editFormData.sales || 0,
+        closing_stock: closingStock,
+      });
+    } else {
+      await addStockEntry({
+        product_name: editingProduct.product,
+        month: selectedMonth,
+        year: selectedYear,
+        opening_stock: editFormData.openingStock || 0,
+        purchases: editFormData.purchases || 0,
+        sales: editFormData.sales || 0,
+        closing_stock: closingStock,
+      });
     }
 
     toast({
@@ -208,7 +216,6 @@ const StockRegister = () => {
             margin: 0.5cm;
           }
 
-          /* First hide everything, then show just the print wrapper */
           body * {
             visibility: hidden;
           }
@@ -222,8 +229,6 @@ const StockRegister = () => {
             width: 100%;
           }
 
-          /* Ensure header controls (selectors, print button, large header) are hidden in print */
-          /* target elements with these helper classes: no-print and screen-only */
           #stock-register-print .no-print,
           #stock-register-print .screen-only {
             display: none !important;
@@ -233,13 +238,11 @@ const StockRegister = () => {
             padding: 0 !important;
           }
 
-          /* Hide the actions column in print */
           th.no-print,
           td.no-print {
             display: none !important;
           }
 
-          /* Print-only centered title (we show it only once on page 1) */
           .print-title {
             display: block !important;
             text-align: center;
@@ -248,13 +251,11 @@ const StockRegister = () => {
             margin-bottom: 8px;
           }
 
-          /* Page break before Jacuard Black */
           .print-page-break {
             page-break-before: always !important;
             break-before: page !important;
           }
 
-          /* Table print styling */
           #stock-register-print table {
             width: 100%;
             border-collapse: collapse;
@@ -268,14 +269,12 @@ const StockRegister = () => {
           }
         }
 
-        /* Hide the print-title on screen; visible only in print */
         .print-title { display: none; }
       `}</style>
 
       {/* WRAPPER */}
       <Card className="w-full" id="stock-register-print">
         <CardHeader className="p-0">
-          {/* on-screen controls — we mark them with no-print + screen-only so CSS hides them while printing */}
           <div className="flex items-center justify-between gap-4 no-print screen-only p-4">
             <div className="flex gap-4">
               <div className="flex items-center gap-2">
@@ -320,7 +319,6 @@ const StockRegister = () => {
               </div>
             </div>
 
-            {/* center header visible on screen; hidden in print due to .screen-only wrapper above */}
             <CardTitle className="text-2xl font-bold text-center flex-1">
               Stock Register -{" "}
               {MONTHS.find((m) => m.value === selectedMonth)?.label}{" "}
@@ -335,29 +333,31 @@ const StockRegister = () => {
         </CardHeader>
 
         <CardContent className="p-6">
-          {/* PRINT TITLE (print-only, appears centered at top of printed page 1) */}
           <div className="print-title">
             Stock Register -{" "}
             {MONTHS.find((m) => m.value === selectedMonth)?.label}{" "}
             {selectedYear}
           </div>
 
-          {/* SINGLE TABLE (screen + print). Print rules will hide actions and break at Jacuard Black */}
           <div className="overflow-x-auto">
             <table className="w-full border-collapse min-w-full">
               <thead>
                 <tr>
-                  <th className="text-left p-4 font-semibold text-lg min-w-[120px]">
+                  <th className="text-left p-4 font-semibold text-lg min-w-[150px]">
                     Product
                   </th>
-                  {SIZES.map((size) => (
-                    <th
-                      key={size}
-                      className="text-center p-4 font-semibold text-lg min-w-[140px]"
-                    >
-                      Size {size}
-                    </th>
-                  ))}
+                  <th className="text-center p-4 font-semibold text-lg min-w-[100px]">
+                    Opening Stock
+                  </th>
+                  <th className="text-center p-4 font-semibold text-lg min-w-[100px]">
+                    Purchases
+                  </th>
+                  <th className="text-center p-4 font-semibold text-lg min-w-[100px]">
+                    Sales
+                  </th>
+                  <th className="text-center p-4 font-semibold text-lg min-w-[100px]">
+                    Closing Stock
+                  </th>
                   <th className="no-print text-center p-4 font-semibold min-w-[120px]">
                     Actions
                   </th>
@@ -375,30 +375,16 @@ const StockRegister = () => {
                       className={`border-b ${pageBreakClass}`}
                     >
                       <td className="p-4 font-medium">{product.product}</td>
-
-                      {SIZES.map((size) => {
-                        const d = product.sizes[size];
-                        return (
-                          <td key={size} className="p-4 text-center">
-                            <div className="text-sm space-y-1">
-                              <div className="font-medium">
-                                OS: {d.openingStock}
-                              </div>
-                              <div className="font-medium">P: {d.production}</div>
-                              <div className="font-medium">S: {d.sales}</div>
-                              <div className="font-bold text-primary text-base">
-                                CS:{" "}
-                                {calculateClosingStock(
-                                  d.openingStock,
-                                  d.production,
-                                  d.sales
-                                )}
-                              </div>
-                            </div>
-                          </td>
-                        );
-                      })}
-
+                      <td className="p-4 text-center">{product.openingStock}</td>
+                      <td className="p-4 text-center">{product.purchases}</td>
+                      <td className="p-4 text-center">{product.sales}</td>
+                      <td className="p-4 text-center font-bold text-primary">
+                        {calculateClosingStock(
+                          product.openingStock,
+                          product.purchases,
+                          product.sales
+                        )}
+                      </td>
                       <td className="p-4 no-print">
                         <div className="flex justify-center space-x-2">
                           <Button
@@ -437,7 +423,7 @@ const StockRegister = () => {
 
       {/* View Dialog */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>
               View Stock - {viewingProduct?.product}
@@ -445,37 +431,30 @@ const StockRegister = () => {
           </DialogHeader>
           {viewingProduct && (
             <div className="space-y-4">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left p-3">Size</th>
-                    <th className="text-center p-3">Opening Stock</th>
-                    <th className="text-center p-3">Production</th>
-                    <th className="text-center p-3">Sales</th>
-                    <th className="text-center p-3">Closing Stock</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {SIZES.map((size) => {
-                    const d = viewingProduct.sizes[size];
-                    return (
-                      <tr key={size} className="border-b">
-                        <td className="p-3 font-medium">{size}</td>
-                        <td className="text-center p-3">{d.openingStock}</td>
-                        <td className="text-center p-3">{d.production}</td>
-                        <td className="text-center p-3">{d.sales}</td>
-                        <td className="text-center p-3 font-bold text-primary">
-                          {calculateClosingStock(
-                            d.openingStock,
-                            d.production,
-                            d.sales
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-muted-foreground">Opening Stock</Label>
+                  <p className="text-lg font-semibold">{viewingProduct.openingStock}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Purchases</Label>
+                  <p className="text-lg font-semibold">{viewingProduct.purchases}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Sales</Label>
+                  <p className="text-lg font-semibold">{viewingProduct.sales}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Closing Stock</Label>
+                  <p className="text-lg font-bold text-primary">
+                    {calculateClosingStock(
+                      viewingProduct.openingStock,
+                      viewingProduct.purchases,
+                      viewingProduct.sales
+                    )}
+                  </p>
+                </div>
+              </div>
             </div>
           )}
         </DialogContent>
@@ -483,7 +462,7 @@ const StockRegister = () => {
 
       {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>
               Edit Stock - {editingProduct?.product}
@@ -491,82 +470,58 @@ const StockRegister = () => {
           </DialogHeader>
           {editingProduct && (
             <div className="space-y-4">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left p-3">Size</th>
-                    <th className="text-center p-3">Opening Stock</th>
-                    <th className="text-center p-3">Production</th>
-                    <th className="text-center p-3">Sales</th>
-                    <th className="text-center p-3">Closing Stock</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {SIZES.map((size) => {
-                    const d = editFormData[size] || {};
-                    return (
-                      <tr key={size} className="border-b">
-                        <td className="p-3 font-medium">{size}</td>
-                        <td className="text-center p-3">
-                          <Input
-                            type="number"
-                            value={d.openingStock || 0}
-                            onChange={(e) =>
-                              setEditFormData({
-                                ...editFormData,
-                                [size]: {
-                                  ...d,
-                                  openingStock: parseInt(e.target.value) || 0,
-                                },
-                              })
-                            }
-                            className="w-20 text-center"
-                          />
-                        </td>
-                        <td className="text-center p-3">
-                          <Input
-                            type="number"
-                            value={d.production || 0}
-                            onChange={(e) =>
-                              setEditFormData({
-                                ...editFormData,
-                                [size]: {
-                                  ...d,
-                                  production: parseInt(e.target.value) || 0,
-                                },
-                              })
-                            }
-                            className="w-20 text-center"
-                          />
-                        </td>
-                        <td className="text-center p-3">
-                          <Input
-                            type="number"
-                            value={d.sales || 0}
-                            onChange={(e) =>
-                              setEditFormData({
-                                ...editFormData,
-                                [size]: {
-                                  ...d,
-                                  sales: parseInt(e.target.value) || 0,
-                                },
-                              })
-                            }
-                            className="w-20 text-center"
-                          />
-                        </td>
-                        <td className="text-center p-3 font-bold text-primary">
-                          {calculateClosingStock(
-                            d.openingStock || 0,
-                            d.production || 0,
-                            d.sales || 0
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+              <div className="space-y-2">
+                <Label htmlFor="openingStock">Opening Stock</Label>
+                <Input
+                  id="openingStock"
+                  type="number"
+                  value={editFormData.openingStock}
+                  onChange={(e) =>
+                    setEditFormData({
+                      ...editFormData,
+                      openingStock: parseInt(e.target.value) || 0,
+                    })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="purchases">Purchases</Label>
+                <Input
+                  id="purchases"
+                  type="number"
+                  value={editFormData.purchases}
+                  onChange={(e) =>
+                    setEditFormData({
+                      ...editFormData,
+                      purchases: parseInt(e.target.value) || 0,
+                    })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="sales">Sales</Label>
+                <Input
+                  id="sales"
+                  type="number"
+                  value={editFormData.sales}
+                  onChange={(e) =>
+                    setEditFormData({
+                      ...editFormData,
+                      sales: parseInt(e.target.value) || 0,
+                    })
+                  }
+                />
+              </div>
+              <div className="pt-2">
+                <Label className="text-muted-foreground">Calculated Closing Stock</Label>
+                <p className="text-xl font-bold text-primary">
+                  {calculateClosingStock(
+                    editFormData.openingStock,
+                    editFormData.purchases,
+                    editFormData.sales
+                  )}
+                </p>
+              </div>
               <div className="flex justify-end gap-2 pt-4">
                 <Button
                   variant="outline"
