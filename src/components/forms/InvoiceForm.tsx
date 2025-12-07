@@ -28,6 +28,18 @@ interface InvoiceItem {
   customDescription?: string;
 }
 
+const PRODUCTS = [
+  "Dark Blue",
+  "Ratan Blue",
+  "White",
+  "Black Plain",
+  "Brown",
+  "Jacuard White",
+  "Jacuard Black",
+  "White Dotted",
+  "Blue Dotted",
+];
+
 const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'create' }: InvoiceFormProps) => {
   const [formData, setFormData] = useState({
     customerId: "",
@@ -45,25 +57,8 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
   ]);
 
   const [loading, setLoading] = useState(false);
-  const [products, setProducts] = useState<string[]>([]);
   const { toast } = useToast();
   const { getAvailableStock, isStockAvailable } = useStockCheck();
-
-  // Fetch unique products from stock register
-  useEffect(() => {
-    const fetchProducts = async () => {
-      const { data } = await supabase
-        .from("stock_register")
-        .select("product_name")
-        .order("product_name");
-      
-      if (data) {
-        const uniqueProducts = Array.from(new Set(data.map(p => p.product_name)));
-        setProducts(uniqueProducts);
-      }
-    };
-    fetchProducts();
-  }, []);
 
   useEffect(() => {
     if (initialData && mode === 'edit') {
@@ -83,7 +78,7 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
       
       // Process items to handle products not in dropdown
       const processedItems = (initialData.items || []).map((item: InvoiceItem) => {
-        const isInProductList = products.includes(item.description);
+        const isInProductList = PRODUCTS.includes(item.description);
         if (!isInProductList && item.description) {
           return {
             ...item,
@@ -95,7 +90,7 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
       });
       setItems(processedItems);
     }
-  }, [initialData, mode, customers, products]);
+  }, [initialData, mode, customers]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -514,7 +509,7 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
                         </SelectTrigger>
                         <SelectContent className="bg-popover z-50">
                           <SelectItem value="__custom__">Custom Description</SelectItem>
-                          {products.map((product) => (
+                          {PRODUCTS.map((product) => (
                             <SelectItem key={product} value={product}>
                               {product}
                             </SelectItem>
@@ -546,7 +541,7 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
                         </SelectTrigger>
                         <SelectContent className="bg-popover z-50">
                           <SelectItem value="__custom__">Custom Description</SelectItem>
-                          {products.map((product) => (
+                          {PRODUCTS.map((product) => (
                             <SelectItem key={product} value={product}>
                               {product}
                             </SelectItem>
