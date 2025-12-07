@@ -387,12 +387,13 @@ export const useSupabaseData = () => {
       
       for (const item of processedData.items) {
         const invoiceItem = item as any;
-        if (invoiceItem.description && invoiceItem.quantity) {
-          // Fetch existing stock entry
+        if (invoiceItem.description && invoiceItem.quantity && invoiceItem.shirt_size) {
+          // Fetch existing stock entry for this product + size
           const { data: existingStock } = await supabase
             .from("stock_register")
             .select("*")
             .eq("product_name", invoiceItem.description)
+            .eq("size", invoiceItem.shirt_size)
             .eq("month", month)
             .eq("year", year)
             .maybeSingle();
@@ -400,7 +401,7 @@ export const useSupabaseData = () => {
           if (existingStock) {
             // Update existing entry
             const newSales = existingStock.sales + invoiceItem.quantity;
-            const newClosingStock = existingStock.opening_stock + existingStock.purchases - newSales;
+            const newClosingStock = existingStock.opening_stock + existingStock.production - newSales;
             
             await supabase
               .from("stock_register")
@@ -410,16 +411,17 @@ export const useSupabaseData = () => {
               })
               .eq("id", existingStock.id);
           } else {
-            // Create new entry with sales
+            // Create new entry for this product + size
             await supabase
               .from("stock_register")
               .insert([{
                 user_id: user.id,
                 product_name: invoiceItem.description,
+                size: invoiceItem.shirt_size,
                 month: month,
                 year: year,
                 opening_stock: 0,
-                purchases: 0,
+                production: 0,
                 sales: invoiceItem.quantity,
                 closing_stock: -invoiceItem.quantity
               }]);

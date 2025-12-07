@@ -49,19 +49,31 @@ const MONTHS = [
   { value: 12, label: "December" },
 ];
 
+interface SizeData {
+  openingStock: number;
+  production: number;
+  sales: number;
+  closingStock: number;
+}
+
+interface ProductData {
+  product: string;
+  sizes: Record<string, SizeData>;
+}
+
 const StockRegister = () => {
   const currentDate = new Date();
   const [selectedMonth, setSelectedMonth] = useState(
     currentDate.getMonth() + 1
   );
   const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
-  const [products, setProducts] = useState([]);
-  const [editingProduct, setEditingProduct] = useState(null);
-  const [viewingProduct, setViewingProduct] = useState(null);
+  const [products, setProducts] = useState<ProductData[]>([]);
+  const [editingProduct, setEditingProduct] = useState<ProductData | null>(null);
+  const [viewingProduct, setViewingProduct] = useState<ProductData | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
-  const [stockEntries, setStockEntries] = useState([]);
-  const [editFormData, setEditFormData] = useState({});
+  const [stockEntries, setStockEntries] = useState<any[]>([]);
+  const [editFormData, setEditFormData] = useState<Record<string, SizeData>>({});
 
   const { toast } = useToast();
   const {
@@ -89,13 +101,13 @@ const StockRegister = () => {
     const prevEntries = await fetchStockRegister(prevMonth, prevYear);
 
     const productData = PRODUCTS.map((productName) => {
-      const sizes = {};
+      const sizes: Record<string, SizeData> = {};
       SIZES.forEach((size) => {
         const entry = entries.find(
-          (e) => e.product_name === productName && e.size === size
+          (e: any) => e.product_name === productName && e.size === size
         );
         const prev = prevEntries.find(
-          (e) => e.product_name === productName && e.size === size
+          (e: any) => e.product_name === productName && e.size === size
         );
 
         sizes[size] = {
@@ -112,18 +124,18 @@ const StockRegister = () => {
     setProducts(productData);
   };
 
-  const calculateClosingStock = (os, p, s) => os + p - s;
+  const calculateClosingStock = (os: number, p: number, s: number) => os + p - s;
 
   const handlePrint = () => window.print();
 
-  const handleView = (product) => {
+  const handleView = (product: ProductData) => {
     setViewingProduct(product);
     setIsViewDialogOpen(true);
   };
 
-  const handleEdit = (product) => {
+  const handleEdit = (product: ProductData) => {
     setEditingProduct(product);
-    const formData = {};
+    const formData: Record<string, SizeData> = {};
     SIZES.forEach((size) => {
       formData[size] = product.sizes[size];
     });
@@ -131,13 +143,13 @@ const StockRegister = () => {
     setIsEditDialogOpen(true);
   };
 
-  const handleDelete = async (productName) => {
+  const handleDelete = async (productName: string) => {
     if (!confirm(`Are you sure you want to delete all stock entries for ${productName}?`)) {
       return;
     }
 
     const entriesToDelete = stockEntries.filter(
-      (e) => e.product_name === productName
+      (e: any) => e.product_name === productName
     );
 
     for (const entry of entriesToDelete) {
@@ -158,7 +170,7 @@ const StockRegister = () => {
     for (const size of SIZES) {
       const data = editFormData[size];
       const entry = stockEntries.find(
-        (e) =>
+        (e: any) =>
           e.product_name === editingProduct.product && e.size === size
       );
 
@@ -449,10 +461,10 @@ const StockRegister = () => {
                 <thead>
                   <tr className="border-b">
                     <th className="text-left p-3">Size</th>
-                    <th className="text-center p-3">Opening Stock</th>
-                    <th className="text-center p-3">Production</th>
-                    <th className="text-center p-3">Sales</th>
-                    <th className="text-center p-3">Closing Stock</th>
+                    <th className="text-center p-3">Opening Stock (OS)</th>
+                    <th className="text-center p-3">Production (P)</th>
+                    <th className="text-center p-3">Sales (S)</th>
+                    <th className="text-center p-3">Closing Stock (CS)</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -481,7 +493,7 @@ const StockRegister = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Dialog */}
+      {/* Edit Dialog - Only OS and P are editable, S comes from invoices */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
@@ -491,19 +503,22 @@ const StockRegister = () => {
           </DialogHeader>
           {editingProduct && (
             <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                OS (Opening Stock) and P (Production) are editable. S (Sales) is automatically calculated from invoices. CS = OS + P - S
+              </p>
               <table className="w-full border-collapse">
                 <thead>
                   <tr className="border-b">
                     <th className="text-left p-3">Size</th>
-                    <th className="text-center p-3">Opening Stock</th>
-                    <th className="text-center p-3">Production</th>
-                    <th className="text-center p-3">Sales</th>
-                    <th className="text-center p-3">Closing Stock</th>
+                    <th className="text-center p-3">Opening Stock (OS)</th>
+                    <th className="text-center p-3">Production (P)</th>
+                    <th className="text-center p-3">Sales (S)</th>
+                    <th className="text-center p-3">Closing Stock (CS)</th>
                   </tr>
                 </thead>
                 <tbody>
                   {SIZES.map((size) => {
-                    const d = editFormData[size] || {};
+                    const d = editFormData[size] || { openingStock: 0, production: 0, sales: 0, closingStock: 0 };
                     return (
                       <tr key={size} className="border-b">
                         <td className="p-3 font-medium">{size}</td>
@@ -540,20 +555,7 @@ const StockRegister = () => {
                           />
                         </td>
                         <td className="text-center p-3">
-                          <Input
-                            type="number"
-                            value={d.sales || 0}
-                            onChange={(e) =>
-                              setEditFormData({
-                                ...editFormData,
-                                [size]: {
-                                  ...d,
-                                  sales: parseInt(e.target.value) || 0,
-                                },
-                              })
-                            }
-                            className="w-20 text-center"
-                          />
+                          <span className="text-muted-foreground">{d.sales || 0}</span>
                         </td>
                         <td className="text-center p-3 font-bold text-primary">
                           {calculateClosingStock(
