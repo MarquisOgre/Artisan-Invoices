@@ -359,8 +359,9 @@ export type Database = {
           notes: string | null
           opening_stock: number
           product_name: string
-          purchases: number
+          production: number
           sales: number
+          size: string | null
           unit_price: number | null
           updated_at: string
           user_id: string
@@ -374,8 +375,9 @@ export type Database = {
           notes?: string | null
           opening_stock?: number
           product_name: string
-          purchases?: number
+          production?: number
           sales?: number
+          size?: string | null
           unit_price?: number | null
           updated_at?: string
           user_id: string
@@ -389,8 +391,9 @@ export type Database = {
           notes?: string | null
           opening_stock?: number
           product_name?: string
-          purchases?: number
+          production?: number
           sales?: number
+          size?: string | null
           unit_price?: number | null
           updated_at?: string
           user_id?: string
