@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface StockData {
   product_name: string;
+  size: string | null;
   closing_stock: number;
 }
 
@@ -22,7 +23,7 @@ export const useStockCheck = () => {
 
       const { data, error } = await supabase
         .from('stock_register')
-        .select('product_name, closing_stock')
+        .select('product_name, size, closing_stock')
         .eq('month', month)
         .eq('year', year);
 
@@ -35,16 +36,41 @@ export const useStockCheck = () => {
     }
   };
 
-  const getAvailableStock = (productName: string): number => {
+  const getAvailableStock = (productName: string, size?: string): number => {
+    if (size) {
+      const stock = stockData.find(
+        s => s.product_name === productName && s.size === size
+      );
+      return stock?.closing_stock || 0;
+    }
+    // Sum all sizes for the product if no size specified
+    return stockData
+      .filter(s => s.product_name === productName)
+      .reduce((sum, s) => sum + (s.closing_stock || 0), 0);
+  };
+
+  const isStockAvailable = (productName: string, size?: string, quantity: number = 1): boolean => {
+    return getAvailableStock(productName, size) >= quantity;
+  };
+
+  const hasAnyStock = (productName: string): boolean => {
+    return stockData.some(s => s.product_name === productName && s.closing_stock > 0);
+  };
+
+  const isProductInStock = (productName: string, size: string): boolean => {
     const stock = stockData.find(
-      s => s.product_name === productName
+      s => s.product_name === productName && s.size === size
     );
-    return stock?.closing_stock || 0;
+    return stock !== undefined && stock.closing_stock > 0;
   };
 
-  const isStockAvailable = (productName: string): boolean => {
-    return getAvailableStock(productName) > 0;
+  return { 
+    stockData,
+    getAvailableStock, 
+    isStockAvailable, 
+    hasAnyStock,
+    isProductInStock,
+    loading, 
+    refreshStock: fetchStock 
   };
-
-  return { getAvailableStock, isStockAvailable, loading, refreshStock: fetchStock };
 };

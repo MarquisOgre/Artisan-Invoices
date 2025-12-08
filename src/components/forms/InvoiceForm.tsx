@@ -153,6 +153,29 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
       return;
     }
 
+    // Check stock availability for each item
+    for (const item of validItems) {
+      if (item.description !== "__custom__") {
+        const availableStock = getAvailableStock(item.description, item.shirt_size);
+        if (availableStock <= 0) {
+          toast({
+            title: "Stock Not Available",
+            description: `No stock available for ${item.description} (Size: ${item.shirt_size}). Please add stock in Stock Register first.`,
+            variant: "destructive"
+          });
+          return;
+        }
+        if (availableStock < item.quantity) {
+          toast({
+            title: "Insufficient Stock",
+            description: `Only ${availableStock} units available for ${item.description} (Size: ${item.shirt_size}). Requested: ${item.quantity}`,
+            variant: "destructive"
+          });
+          return;
+        }
+      }
+    }
+
     // Calculate totals
     let subtotal = items.reduce((sum, item) => sum + (item.amount || 0), 0);
     const getTaxRate = (taxType: string) => {
