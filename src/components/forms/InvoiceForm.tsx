@@ -206,7 +206,7 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
 
     const selectedCustomer = customers.find(c => c.id === formData.customerId);
     
-    const invoiceData = {
+    const invoiceData: any = {
       customer_id: formData.customerId || null,
       customer_name: selectedCustomer?.name || "",
       customer_email: selectedCustomer?.email || null,
@@ -224,7 +224,8 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
       total_amount: grandTotal,
       subtotal: subtotal,
       gst_amount: taxAmount,
-      status: formData.status
+      status: formData.status,
+      paid_date: formData.status === 'paid' ? (initialData?.paid_date || new Date().toISOString().split('T')[0]) : null
     };
 
     setLoading(true);
