@@ -54,7 +54,7 @@ const QuotationList = ({
   const { companySettings, invoiceSettings } = useSettings();
 
   const displayQuotations = quotations.map(q => {
-    const shirtSizes = q.items
+    const shirtSizes = (q.items || [])
       .map((item: any) => item.shirt_size)
       .filter((size: string) => size)
       .join(', ');
@@ -62,10 +62,10 @@ const QuotationList = ({
     return {
       id: q.id,
       quotationNumber: q.quotation_number,
-      customer: q.customer?.name || 'Unknown Customer',
-      amount: q.amount,
+      customer: q.customer?.name || q.customer_name || 'Unknown Customer',
+      amount: q.total_amount || 0,
       status: q.status,
-      date: q.date,
+      date: q.quotation_date,
       validUntil: q.valid_until,
       shirtSizes: shirtSizes || '-',
       fullQuotation: q
