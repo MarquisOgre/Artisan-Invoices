@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
 import Dashboard from "@/components/Dashboard";
 import InvoiceList from "@/components/InvoiceList";
@@ -15,11 +15,12 @@ import QuotationDetails from "@/components/QuotationDetails";
 import { useSupabaseData } from "@/hooks/useSupabaseData";
 import { useToast } from "@/hooks/use-toast";
 import { useSettings } from "@/hooks/useSettings";
+import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect } from "react";
 
 const Index = () => {
-  const [currentPage, setCurrentPage] = useState("dashboard");
+  const { isAdmin, loading: roleLoading } = useUserRole();
+  const [currentPage, setCurrentPage] = useState("");
   const [editingCustomer, setEditingCustomer] = useState(null);
   const [editingInvoice, setEditingInvoice] = useState(null);
   const [editingQuotation, setEditingQuotation] = useState(null);
@@ -42,6 +43,13 @@ const Index = () => {
     deleteInvoice,
     deleteQuotation
   } = useSupabaseData();
+
+  // Set default page based on role
+  useEffect(() => {
+    if (!roleLoading && !currentPage) {
+      setCurrentPage(isAdmin ? "dashboard" : "stock-register");
+    }
+  }, [isAdmin, roleLoading, currentPage]);
 
   // Load expenses for dashboard
   useEffect(() => {
