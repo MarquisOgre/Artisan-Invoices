@@ -178,18 +178,27 @@ const QuotationForm = ({ customers, onSubmit, onCancel, initialData, mode = 'cre
       grandTotal = subtotal + taxAmount;
     }
 
+    // Get customer details for the quotation
+    const selectedCustomer = customers.find(c => c.id === formData.customerId);
+    
     const quotationData = {
       customer_id: formData.customerId,
-      date: formData.date,
+      customer_name: selectedCustomer?.name || "",
+      customer_email: selectedCustomer?.email || null,
+      customer_phone: selectedCustomer?.phone || null,
+      customer_address: selectedCustomer?.address || null,
+      customer_company: selectedCustomer?.company || null,
+      customer_gst_no: selectedCustomer?.gst_no || null,
+      customer_city: selectedCustomer?.city || null,
+      customer_state: selectedCustomer?.state || null,
+      customer_pincode: selectedCustomer?.pincode || null,
+      quotation_date: formData.date,
       valid_until: formData.validUntil,
       notes: formData.notes,
-      tax_type: formData.taxType,
-      tax_mode: formData.taxMode,
-      complimentary: formData.complimentary,
       items: processedItems,
-      amount: grandTotal,
+      total_amount: grandTotal,
       subtotal: subtotal,
-      tax_amount: taxAmount,
+      gst_amount: taxAmount,
       status: formData.status
     };
 
