@@ -183,35 +183,26 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
 
     const selectedCustomer = customers.find(c => c.id === formData.customerId);
     
-    const invoiceData: any = {
+    const invoiceData = {
+      customer_id: formData.customerId || null,
       customer_name: selectedCustomer?.name || "",
-      customer_email: selectedCustomer?.email || "",
-      customer_phone: selectedCustomer?.phone || "",
-      customer_address: selectedCustomer?.address || "",
-      customer_company: selectedCustomer?.company || "",
-      customer_gst_no: selectedCustomer?.gst_no || "",
-      customer_city: selectedCustomer?.city || "",
-      customer_state: selectedCustomer?.state || "",
-      customer_pincode: selectedCustomer?.pincode || "",
+      customer_email: selectedCustomer?.email || null,
+      customer_phone: selectedCustomer?.phone || null,
+      customer_address: selectedCustomer?.address || null,
+      customer_company: selectedCustomer?.company || null,
+      customer_gst_no: selectedCustomer?.gst_no || null,
+      customer_city: selectedCustomer?.city || null,
+      customer_state: selectedCustomer?.state || null,
+      customer_pincode: selectedCustomer?.pincode || null,
       invoice_date: formData.date,
-      due_date: formData.dueDate,
+      due_date: formData.dueDate || null,
       notes: formData.notes,
-      tax_type: formData.taxType,
-      tax_mode: formData.taxMode,
-      complimentary: formData.complimentary,
       items: validItems,
       total_amount: grandTotal,
       subtotal: subtotal,
-      tax_amount: taxAmount,
+      gst_amount: taxAmount,
       status: formData.status
     };
-
-    // Only set paid_date if status is paid, otherwise clear it
-    if (formData.status === 'paid') {
-      invoiceData.paid_date = initialData?.paid_date || new Date().toISOString().split('T')[0];
-    } else {
-      invoiceData.paid_date = null;
-    }
 
     setLoading(true);
     try {
