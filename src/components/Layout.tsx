@@ -30,7 +30,7 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
   const { isAdmin } = useUserRole();
 
   const allNavigation = [
-    { name: "Dashboard", icon: BarChart3, key: "dashboard" },
+    { name: "Dashboard", icon: BarChart3, key: "dashboard", adminOnly: true },
     { name: "Quotations", icon: FileText, key: "quotations", adminOnly: true },
     { name: "Invoices", icon: Receipt, key: "invoices", adminOnly: true },
     { name: "Customers", icon: Users, key: "customers", adminOnly: true },
