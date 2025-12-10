@@ -58,7 +58,7 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
 
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
-  const { getAvailableStock, isStockAvailable } = useStockCheck();
+  const { getAvailableStock, isStockAvailable, stockData } = useStockCheck();
 
   useEffect(() => {
     if (initialData && mode === 'edit') {
@@ -255,10 +255,38 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
 
   const handleItemChange = (index: number, field: keyof InvoiceItem, value: string | number) => {
     const newItems = [...items];
-    
-    // Stock check temporarily disabled - allow all items to be added
-    
     newItems[index] = { ...newItems[index], [field]: value };
+
+    // Immediate stock check when product is selected
+    if (field === 'description' && value !== '__custom__' && typeof value === 'string') {
+      const hasStock = stockData.some(s => s.product_name === value && s.closing_stock > 0);
+      if (!hasStock) {
+        toast({
+          title: "No Stock Available",
+          description: `"${value}" has no stock. Please add stock in Stock Register first.`,
+          variant: "destructive"
+        });
+        // Reset the selection
+        newItems[index] = { ...newItems[index], description: "", shirt_size: "" };
+        setItems(newItems);
+        return;
+      }
+    }
+
+    // Check stock when size is selected
+    if (field === 'shirt_size' && typeof value === 'string' && newItems[index].description && newItems[index].description !== '__custom__') {
+      const availableStock = getAvailableStock(newItems[index].description, value);
+      if (availableStock <= 0) {
+        toast({
+          title: "No Stock for Size",
+          description: `No stock available for "${newItems[index].description}" in size ${value}.`,
+          variant: "destructive"
+        });
+        newItems[index] = { ...newItems[index], shirt_size: "" };
+        setItems(newItems);
+        return;
+      }
+    }
     
     if (field === 'quantity' || field === 'rate') {
       newItems[index].amount = newItems[index].quantity * newItems[index].rate;
