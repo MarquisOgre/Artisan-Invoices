@@ -199,11 +199,11 @@ export type Database = {
           entry_date: string
           from_party: string | null
           id: string
+          inward_number: string
+          items: Json
           month: number
           notes: string | null
-          product_name: string
-          quantity: number
-          size: string | null
+          total_quantity: number
           updated_at: string
           user_id: string
           year: number
@@ -213,11 +213,11 @@ export type Database = {
           entry_date: string
           from_party?: string | null
           id?: string
+          inward_number: string
+          items?: Json
           month: number
           notes?: string | null
-          product_name: string
-          quantity?: number
-          size?: string | null
+          total_quantity?: number
           updated_at?: string
           user_id: string
           year: number
@@ -227,11 +227,11 @@ export type Database = {
           entry_date?: string
           from_party?: string | null
           id?: string
+          inward_number?: string
+          items?: Json
           month?: number
           notes?: string | null
-          product_name?: string
-          quantity?: number
-          size?: string | null
+          total_quantity?: number
           updated_at?: string
           user_id?: string
           year?: number
@@ -243,12 +243,12 @@ export type Database = {
           created_at: string
           entry_date: string
           id: string
+          items: Json
           month: number
           notes: string | null
-          product_name: string
-          quantity: number
-          size: string | null
+          outward_number: string
           to_party: string | null
+          total_quantity: number
           updated_at: string
           user_id: string
           year: number
@@ -257,12 +257,12 @@ export type Database = {
           created_at?: string
           entry_date: string
           id?: string
+          items?: Json
           month: number
           notes?: string | null
-          product_name: string
-          quantity?: number
-          size?: string | null
+          outward_number: string
           to_party?: string | null
+          total_quantity?: number
           updated_at?: string
           user_id: string
           year: number
@@ -271,12 +271,12 @@ export type Database = {
           created_at?: string
           entry_date?: string
           id?: string
+          items?: Json
           month?: number
           notes?: string | null
-          product_name?: string
-          quantity?: number
-          size?: string | null
+          outward_number?: string
           to_party?: string | null
+          total_quantity?: number
           updated_at?: string
           user_id?: string
           year?: number

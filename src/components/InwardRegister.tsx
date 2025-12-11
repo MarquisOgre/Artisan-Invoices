@@ -5,18 +5,24 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Trash2, Edit, Plus, Printer } from "lucide-react";
+import { Trash2, Edit, Plus, Printer, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
+interface InwardItem {
+  product_name: string;
+  size: string;
+  quantity: number;
+}
+
 interface InwardEntry {
   id: string;
-  product_name: string;
-  size: string | null;
-  quantity: number;
-  from_party: string | null;
+  inward_number: string;
   entry_date: string;
+  from_party: string | null;
+  items: InwardItem[];
+  total_quantity: number;
   month: number;
   year: number;
   notes: string | null;
@@ -53,13 +59,15 @@ const InwardRegister = () => {
   const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
   const [entries, setEntries] = useState<InwardEntry[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<InwardEntry | null>(null);
-  const [productName, setProductName] = useState("");
-  const [size, setSize] = useState("");
-  const [quantity, setQuantity] = useState("");
+  const [viewingEntry, setViewingEntry] = useState<InwardEntry | null>(null);
+  
+  // Form state
   const [fromParty, setFromParty] = useState("");
   const [entryDate, setEntryDate] = useState(currentDate.toISOString().split('T')[0]);
   const [notes, setNotes] = useState("");
+  const [items, setItems] = useState<InwardItem[]>([{ product_name: "", size: "", quantity: 0 }]);
   
   const { toast } = useToast();
   const { user } = useAuth();
@@ -78,7 +86,11 @@ const InwardRegister = () => {
         .order('entry_date', { ascending: false });
 
       if (error) throw error;
-      setEntries(data || []);
+      const typedData = (data || []).map(entry => ({
+        ...entry,
+        items: (entry.items as unknown as InwardItem[]) || []
+      }));
+      setEntries(typedData);
     } catch (error) {
       console.error('Error loading inward entries:', error);
       toast({
@@ -89,116 +101,133 @@ const InwardRegister = () => {
     }
   };
 
+  const generateInwardNumber = async () => {
+    const { data } = await supabase
+      .from('inward_register')
+      .select('inward_number')
+      .order('created_at', { ascending: false })
+      .limit(1);
+    
+    if (data && data.length > 0) {
+      const lastNumber = parseInt(data[0].inward_number.replace('IN-', '')) || 0;
+      return `IN-${String(lastNumber + 1).padStart(4, '0')}`;
+    }
+    return 'IN-0001';
+  };
+
   const handleAddEntry = () => {
     setEditingEntry(null);
-    setProductName("");
-    setSize("");
-    setQuantity("");
     setFromParty("");
     setEntryDate(currentDate.toISOString().split('T')[0]);
     setNotes("");
+    setItems([{ product_name: "", size: "", quantity: 0 }]);
     setIsDialogOpen(true);
   };
 
   const handleEditEntry = (entry: InwardEntry) => {
     setEditingEntry(entry);
-    setProductName(entry.product_name);
-    setSize(entry.size || "");
-    setQuantity(entry.quantity.toString());
     setFromParty(entry.from_party || "");
     setEntryDate(entry.entry_date);
     setNotes(entry.notes || "");
+    setItems(entry.items.length > 0 ? entry.items : [{ product_name: "", size: "", quantity: 0 }]);
     setIsDialogOpen(true);
   };
 
+  const handleViewEntry = (entry: InwardEntry) => {
+    setViewingEntry(entry);
+    setIsViewDialogOpen(true);
+  };
+
+  const handleAddItem = () => {
+    setItems([...items, { product_name: "", size: "", quantity: 0 }]);
+  };
+
+  const handleRemoveItem = (index: number) => {
+    if (items.length > 1) {
+      setItems(items.filter((_, i) => i !== index));
+    }
+  };
+
+  const handleItemChange = (index: number, field: keyof InwardItem, value: string | number) => {
+    const newItems = [...items];
+    newItems[index] = { ...newItems[index], [field]: value };
+    setItems(newItems);
+  };
+
   const handleSaveEntry = async () => {
-    if (!productName || !quantity) {
+    const validItems = items.filter(item => item.product_name && item.quantity > 0);
+    
+    if (validItems.length === 0) {
       toast({
         title: "Validation Error",
-        description: "Product name and quantity are required.",
+        description: "Add at least one item with product and quantity.",
         variant: "destructive",
       });
       return;
     }
 
     try {
-      const entryData = {
-        product_name: productName,
-        size: size || null,
-        quantity: parseInt(quantity),
-        from_party: fromParty || null,
-        entry_date: entryDate,
-        month: selectedMonth,
-        year: selectedYear,
-        notes: notes || null,
-        user_id: user?.id
-      };
+      const totalQuantity = validItems.reduce((sum, item) => sum + item.quantity, 0);
+      const entryMonth = new Date(entryDate).getMonth() + 1;
+      const entryYear = new Date(entryDate).getFullYear();
 
       if (editingEntry) {
         const { error } = await supabase
           .from('inward_register')
-          .update(entryData)
+          .update({
+            from_party: fromParty || null,
+            entry_date: entryDate,
+            items: validItems as unknown as any,
+            total_quantity: totalQuantity,
+            month: entryMonth,
+            year: entryYear,
+            notes: notes || null,
+          })
           .eq('id', editingEntry.id);
 
         if (error) throw error;
-        toast({
-          title: "Entry updated",
-          description: "Inward entry has been updated successfully.",
-        });
+        toast({ title: "Entry updated", description: "Inward entry has been updated successfully." });
       } else {
+        const inwardNumber = await generateInwardNumber();
         const { error } = await supabase
           .from('inward_register')
-          .insert([entryData]);
+          .insert([{
+            inward_number: inwardNumber,
+            from_party: fromParty || null,
+            entry_date: entryDate,
+            items: validItems as unknown as any,
+            total_quantity: totalQuantity,
+            month: entryMonth,
+            year: entryYear,
+            notes: notes || null,
+            user_id: user?.id
+          }]);
 
         if (error) throw error;
-        toast({
-          title: "Entry added",
-          description: "Inward entry has been added successfully.",
-        });
+        toast({ title: "Entry added", description: `Inward ${inwardNumber} has been created.` });
       }
 
       setIsDialogOpen(false);
       loadEntries();
     } catch (error) {
       console.error('Error saving inward entry:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save inward entry.",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: "Failed to save inward entry.", variant: "destructive" });
     }
   };
 
   const handleDeleteEntry = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('inward_register')
-        .delete()
-        .eq('id', id);
-
+      const { error } = await supabase.from('inward_register').delete().eq('id', id);
       if (error) throw error;
-      
-      toast({
-        title: "Entry deleted",
-        description: "Inward entry has been removed.",
-      });
-      
+      toast({ title: "Entry deleted", description: "Inward entry has been removed." });
       loadEntries();
     } catch (error) {
       console.error('Error deleting inward entry:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete inward entry.",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: "Failed to delete inward entry.", variant: "destructive" });
     }
   };
 
-  const totalQuantity = entries.reduce((sum, entry) => sum + entry.quantity, 0);
-
-  const handlePrint = () => {
-    window.print();
-  };
+  const totalQuantity = entries.reduce((sum, entry) => sum + entry.total_quantity, 0);
 
   return (
     <div className="space-y-6">
@@ -216,54 +245,32 @@ const InwardRegister = () => {
       
       <Card className="w-full" id="inward-register-print">
         <CardHeader>
-          <div className="print-title">
-            Inward Register - {MONTHS.find(m => m.value === selectedMonth)?.label} {selectedYear}
-          </div>
-          <div className="flex items-center justify-between gap-4 no-print">
+          <div className="print-title">Inward Register - {MONTHS.find(m => m.value === selectedMonth)?.label} {selectedYear}</div>
+          <div className="flex flex-wrap items-center justify-between gap-4 no-print">
             <div className="flex gap-4">
               <div className="flex items-center gap-2">
-                <Label htmlFor="month-select">Month:</Label>
-                <Select value={selectedMonth.toString()} onValueChange={(value) => setSelectedMonth(parseInt(value))}>
-                  <SelectTrigger className="w-32">
-                    <SelectValue />
-                  </SelectTrigger>
+                <Label>Month:</Label>
+                <Select value={selectedMonth.toString()} onValueChange={(v) => setSelectedMonth(parseInt(v))}>
+                  <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {MONTHS.map((month) => (
-                      <SelectItem key={month.value} value={month.value.toString()}>
-                        {month.label}
-                      </SelectItem>
-                    ))}
+                    {MONTHS.map((m) => <SelectItem key={m.value} value={m.value.toString()}>{m.label}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
               <div className="flex items-center gap-2">
-                <Label htmlFor="year-select">Year:</Label>
-                <Select value={selectedYear.toString()} onValueChange={(value) => setSelectedYear(parseInt(value))}>
-                  <SelectTrigger className="w-32">
-                    <SelectValue />
-                  </SelectTrigger>
+                <Label>Year:</Label>
+                <Select value={selectedYear.toString()} onValueChange={(v) => setSelectedYear(parseInt(v))}>
+                  <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {[2023, 2024, 2025, 2026, 2027].map((year) => (
-                      <SelectItem key={year} value={year.toString()}>
-                        {year}
-                      </SelectItem>
-                    ))}
+                    {[2023, 2024, 2025, 2026, 2027].map((y) => <SelectItem key={y} value={y.toString()}>{y}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
             </div>
-            <CardTitle className="text-2xl font-bold text-center flex-1">
-              Inward Register - {MONTHS.find(m => m.value === selectedMonth)?.label} {selectedYear}
-            </CardTitle>
+            <CardTitle className="text-xl font-bold text-center flex-1">Inward Register</CardTitle>
             <div className="flex gap-2">
-              <Button onClick={handleAddEntry} variant="default" size="sm" className="no-print">
-                <Plus className="h-4 w-4 mr-2" />
-                Add Entry
-              </Button>
-              <Button onClick={handlePrint} variant="outline" size="sm">
-                <Printer className="h-4 w-4 mr-2" />
-                Print
-              </Button>
+              <Button onClick={handleAddEntry} size="sm"><Plus className="h-4 w-4 mr-2" />New Inward</Button>
+              <Button onClick={() => window.print()} variant="outline" size="sm"><Printer className="h-4 w-4 mr-2" />Print</Button>
             </div>
           </div>
         </CardHeader>
@@ -272,49 +279,40 @@ const InwardRegister = () => {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="border-b-2 border-border">
-                  <th className="text-left p-4 font-semibold">Date</th>
-                  <th className="text-left p-4 font-semibold">Product</th>
-                  <th className="text-left p-4 font-semibold">Size</th>
-                  <th className="text-right p-4 font-semibold">Quantity</th>
-                  <th className="text-left p-4 font-semibold">From Party</th>
-                  <th className="text-left p-4 font-semibold">Notes</th>
-                  <th className="text-center p-4 font-semibold no-print">Actions</th>
+                  <th className="text-left p-3 font-semibold">Inward No.</th>
+                  <th className="text-left p-3 font-semibold">Date</th>
+                  <th className="text-left p-3 font-semibold">From Party</th>
+                  <th className="text-center p-3 font-semibold">Items</th>
+                  <th className="text-right p-3 font-semibold">Total Qty</th>
+                  <th className="text-center p-3 font-semibold no-print">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {entries.map((entry) => (
                   <tr key={entry.id} className="border-b border-border hover:bg-muted/50">
-                    <td className="p-4">{new Date(entry.entry_date).toLocaleDateString()}</td>
-                    <td className="p-4 font-medium">{entry.product_name}</td>
-                    <td className="p-4">{entry.size || "-"}</td>
-                    <td className="p-4 text-right">{entry.quantity}</td>
-                    <td className="p-4">{entry.from_party || "-"}</td>
-                    <td className="p-4">{entry.notes || "-"}</td>
-                    <td className="p-4 no-print">
+                    <td className="p-3 font-medium">{entry.inward_number}</td>
+                    <td className="p-3">{new Date(entry.entry_date).toLocaleDateString()}</td>
+                    <td className="p-3">{entry.from_party || "-"}</td>
+                    <td className="p-3 text-center">{entry.items.length}</td>
+                    <td className="p-3 text-right">{entry.total_quantity}</td>
+                    <td className="p-3 no-print">
                       <div className="flex justify-center space-x-2">
-                        <Button variant="outline" size="sm" onClick={() => handleEditEntry(entry)}>
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={() => handleDeleteEntry(entry.id)}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <Button variant="outline" size="sm" onClick={() => handleViewEntry(entry)}><Eye className="h-4 w-4" /></Button>
+                        <Button variant="outline" size="sm" onClick={() => handleEditEntry(entry)}><Edit className="h-4 w-4" /></Button>
+                        <Button variant="outline" size="sm" onClick={() => handleDeleteEntry(entry.id)}><Trash2 className="h-4 w-4" /></Button>
                       </div>
                     </td>
                   </tr>
                 ))}
                 {entries.length === 0 && (
-                  <tr>
-                    <td colSpan={7} className="p-8 text-center text-muted-foreground">
-                      No inward entries recorded for this month
-                    </td>
-                  </tr>
+                  <tr><td colSpan={6} className="p-8 text-center text-muted-foreground">No inward entries for this month</td></tr>
                 )}
               </tbody>
               <tfoot>
                 <tr className="border-t-2 border-border font-bold">
-                  <td colSpan={3} className="p-4 text-right">Total Quantity:</td>
-                  <td className="p-4 text-right text-lg">{totalQuantity}</td>
-                  <td colSpan={3} className="no-print"></td>
+                  <td colSpan={4} className="p-3 text-right">Total:</td>
+                  <td className="p-3 text-right text-lg">{totalQuantity}</td>
+                  <td className="no-print"></td>
                 </tr>
               </tfoot>
             </table>
@@ -322,95 +320,116 @@ const InwardRegister = () => {
         </CardContent>
       </Card>
 
+      {/* Add/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editingEntry ? "Edit Entry" : "Add Inward Entry"}</DialogTitle>
+            <DialogTitle>{editingEntry ? `Edit ${editingEntry.inward_number}` : "New Inward Entry"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div>
-              <Label htmlFor="entry-date">Date *</Label>
-              <Input
-                id="entry-date"
-                type="date"
-                value={entryDate}
-                onChange={(e) => setEntryDate(e.target.value)}
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="product">Product *</Label>
-              <Select value={productName} onValueChange={setProductName}>
-                <SelectTrigger id="product">
-                  <SelectValue placeholder="Select product" />
-                </SelectTrigger>
-                <SelectContent>
-                  {PRODUCTS.map((product) => (
-                    <SelectItem key={product} value={product}>
-                      {product}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Date *</Label>
+                <Input type="date" value={entryDate} onChange={(e) => setEntryDate(e.target.value)} />
+              </div>
+              <div>
+                <Label>From Party</Label>
+                <Input value={fromParty} onChange={(e) => setFromParty(e.target.value)} placeholder="Enter party name" />
+              </div>
             </div>
 
             <div>
-              <Label htmlFor="size">Size</Label>
-              <Select value={size} onValueChange={setSize}>
-                <SelectTrigger id="size">
-                  <SelectValue placeholder="Select size" />
-                </SelectTrigger>
-                <SelectContent>
-                  {SIZES.map((s) => (
-                    <SelectItem key={s} value={s}>
-                      {s}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div>
-              <Label htmlFor="quantity">Quantity *</Label>
-              <Input
-                id="quantity"
-                type="number"
-                value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
-                placeholder="0"
-                min="1"
-              />
+              <div className="flex justify-between items-center mb-2">
+                <Label className="text-lg font-semibold">Items</Label>
+                <Button type="button" variant="outline" size="sm" onClick={handleAddItem}><Plus className="h-4 w-4 mr-1" />Add Item</Button>
+              </div>
+              <div className="space-y-2 border rounded-lg p-4">
+                <div className="grid grid-cols-12 gap-2 text-sm font-medium text-muted-foreground">
+                  <div className="col-span-5">Product</div>
+                  <div className="col-span-3">Size</div>
+                  <div className="col-span-3">Quantity</div>
+                  <div className="col-span-1"></div>
+                </div>
+                {items.map((item, index) => (
+                  <div key={index} className="grid grid-cols-12 gap-2 items-center">
+                    <div className="col-span-5">
+                      <Select value={item.product_name} onValueChange={(v) => handleItemChange(index, 'product_name', v)}>
+                        <SelectTrigger><SelectValue placeholder="Select product" /></SelectTrigger>
+                        <SelectContent>{PRODUCTS.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
+                      </Select>
+                    </div>
+                    <div className="col-span-3">
+                      <Select value={item.size} onValueChange={(v) => handleItemChange(index, 'size', v)}>
+                        <SelectTrigger><SelectValue placeholder="Size" /></SelectTrigger>
+                        <SelectContent>{SIZES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                      </Select>
+                    </div>
+                    <div className="col-span-3">
+                      <Input type="number" value={item.quantity || ''} onChange={(e) => handleItemChange(index, 'quantity', parseInt(e.target.value) || 0)} placeholder="Qty" min="1" />
+                    </div>
+                    <div className="col-span-1">
+                      <Button type="button" variant="ghost" size="sm" onClick={() => handleRemoveItem(index)} disabled={items.length === 1}><Trash2 className="h-4 w-4" /></Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div>
-              <Label htmlFor="from-party">From Party</Label>
-              <Input
-                id="from-party"
-                value={fromParty}
-                onChange={(e) => setFromParty(e.target.value)}
-                placeholder="Enter party name"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="notes">Notes</Label>
-              <Input
-                id="notes"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Optional notes"
-              />
+              <Label>Notes</Label>
+              <Input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional notes" />
             </div>
             
             <div className="flex justify-end space-x-2 pt-4">
-              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button onClick={handleSaveEntry}>
-                {editingEntry ? "Update" : "Add"} Entry
-              </Button>
+              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+              <Button onClick={handleSaveEntry}>{editingEntry ? "Update" : "Save"} Entry</Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Dialog */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{viewingEntry?.inward_number} Details</DialogTitle>
+          </DialogHeader>
+          {viewingEntry && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div><span className="text-muted-foreground">Date:</span> {new Date(viewingEntry.entry_date).toLocaleDateString()}</div>
+                <div><span className="text-muted-foreground">From Party:</span> {viewingEntry.from_party || "-"}</div>
+              </div>
+              <div>
+                <Label className="font-semibold">Items</Label>
+                <table className="w-full mt-2 border-collapse">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left p-2">Product</th>
+                      <th className="text-left p-2">Size</th>
+                      <th className="text-right p-2">Quantity</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {viewingEntry.items.map((item, i) => (
+                      <tr key={i} className="border-b">
+                        <td className="p-2">{item.product_name}</td>
+                        <td className="p-2">{item.size || "-"}</td>
+                        <td className="p-2 text-right">{item.quantity}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot>
+                    <tr className="font-bold">
+                      <td colSpan={2} className="p-2 text-right">Total:</td>
+                      <td className="p-2 text-right">{viewingEntry.total_quantity}</td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+              {viewingEntry.notes && <div><span className="text-muted-foreground">Notes:</span> {viewingEntry.notes}</div>}
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
