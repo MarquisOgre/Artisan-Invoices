@@ -6,6 +6,8 @@ import CustomerList from "@/components/CustomerList";
 import Settings from "@/pages/Settings";
 import StockRegister from "@/components/StockRegister";
 import ExpenseRegister from "@/components/ExpenseRegister";
+import InwardRegister from "@/components/InwardRegister";
+import OutwardRegister from "@/components/OutwardRegister";
 import CustomerForm from "@/components/forms/CustomerForm";
 import InvoiceForm from "@/components/forms/InvoiceForm";
 import InvoiceDetails from "@/components/InvoiceDetails";
@@ -377,6 +379,10 @@ const Index = () => {
         );
       case "stock-register":
         return <StockRegister />;
+      case "inward-register":
+        return <InwardRegister />;
+      case "outward-register":
+        return <OutwardRegister />;
       case "expense-register":
         return <ExpenseRegister />;
       case "settings":

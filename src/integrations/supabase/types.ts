@@ -193,6 +193,96 @@ export type Database = {
           },
         ]
       }
+      inward_register: {
+        Row: {
+          created_at: string
+          entry_date: string
+          from_party: string | null
+          id: string
+          month: number
+          notes: string | null
+          product_name: string
+          quantity: number
+          size: string | null
+          updated_at: string
+          user_id: string
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          entry_date: string
+          from_party?: string | null
+          id?: string
+          month: number
+          notes?: string | null
+          product_name: string
+          quantity?: number
+          size?: string | null
+          updated_at?: string
+          user_id: string
+          year: number
+        }
+        Update: {
+          created_at?: string
+          entry_date?: string
+          from_party?: string | null
+          id?: string
+          month?: number
+          notes?: string | null
+          product_name?: string
+          quantity?: number
+          size?: string | null
+          updated_at?: string
+          user_id?: string
+          year?: number
+        }
+        Relationships: []
+      }
+      outward_register: {
+        Row: {
+          created_at: string
+          entry_date: string
+          id: string
+          month: number
+          notes: string | null
+          product_name: string
+          quantity: number
+          size: string | null
+          to_party: string | null
+          updated_at: string
+          user_id: string
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          entry_date: string
+          id?: string
+          month: number
+          notes?: string | null
+          product_name: string
+          quantity?: number
+          size?: string | null
+          to_party?: string | null
+          updated_at?: string
+          user_id: string
+          year: number
+        }
+        Update: {
+          created_at?: string
+          entry_date?: string
+          id?: string
+          month?: number
+          notes?: string | null
+          product_name?: string
+          quantity?: number
+          size?: string | null
+          to_party?: string | null
+          updated_at?: string
+          user_id?: string
+          year?: number
+        }
+        Relationships: []
+      }
       payments: {
         Row: {
           amount: number
