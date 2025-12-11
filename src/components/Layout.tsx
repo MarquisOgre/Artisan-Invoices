@@ -10,6 +10,8 @@ import {
   X,
   Package,
   LogOut,
+  ArrowDownToLine,
+  ArrowUpFromLine,
 } from "lucide-react";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/hooks/useAuth";
@@ -35,6 +37,8 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
     { name: "Invoices", icon: Receipt, key: "invoices", adminOnly: true },
     { name: "Customers", icon: Users, key: "customers", adminOnly: true },
     { name: "Stock Reg", icon: Package, key: "stock-register" },
+    { name: "Inward", icon: ArrowDownToLine, key: "inward-register" },
+    { name: "Outward", icon: ArrowUpFromLine, key: "outward-register" },
     { name: "Expenses", icon: Receipt, key: "expense-register" },
     { name: "Settings", icon: Settings, key: "settings", adminOnly: true },
   ];
