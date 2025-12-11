@@ -47,8 +47,15 @@ const MONTHS = [
 ];
 
 const PRODUCTS = [
-  "Dark Blue", "Light Blue", "Black", "White", "Navy Blue",
-  "Grey", "Maroon", "Green", "Red", "Yellow"
+  "Dark Blue",
+  "Ratan Blue",
+  "White",
+  "Black Plain",
+  "Brown",
+  "Jacuard White",
+  "Jacuard Black",
+  "White Dotted",
+  "Blue Dotted",
 ];
 
 const SIZES = ["39", "40", "42", "44", "46"];
