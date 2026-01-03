@@ -8,8 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Trash2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useStockCheck } from "@/hooks/useStockCheck";
 
 interface QuotationFormProps {
   customers: any[];
@@ -58,7 +56,6 @@ const QuotationForm = ({ customers, onSubmit, onCancel, initialData, mode = 'cre
 
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
-  const { getAvailableStock, isStockAvailable, stockData } = useStockCheck();
 
   useEffect(() => {
     if (initialData && mode === 'edit') {
@@ -150,29 +147,6 @@ const QuotationForm = ({ customers, onSubmit, onCancel, initialData, mode = 'cre
       return item;
     });
 
-    // Check stock availability for each item
-    for (const item of processedItems) {
-      if (item.description !== "__custom__") {
-        const availableStock = getAvailableStock(item.description, item.shirt_size);
-        if (availableStock <= 0) {
-          toast({
-            title: "Stock Not Available",
-            description: `No stock available for ${item.description} (Size: ${item.shirt_size}). Please add stock in Stock Register first.`,
-            variant: "destructive"
-          });
-          return;
-        }
-        if (availableStock < item.quantity) {
-          toast({
-            title: "Insufficient Stock",
-            description: `Only ${availableStock} units available for ${item.description} (Size: ${item.shirt_size}). Requested: ${item.quantity}`,
-            variant: "destructive"
-          });
-          return;
-        }
-      }
-    }
-
     // Calculate totals using processed items
     let subtotal = processedItems.reduce((sum, item) => sum + (item.amount || 0), 0);
     const getTaxRate = (taxType: string) => {
@@ -253,37 +227,6 @@ const QuotationForm = ({ customers, onSubmit, onCancel, initialData, mode = 'cre
   const handleItemChange = (index: number, field: keyof QuotationItem, value: string | number) => {
     const newItems = [...items];
     newItems[index] = { ...newItems[index], [field]: value };
-
-    // Immediate stock check when product is selected
-    if (field === 'description' && value !== '__custom__' && typeof value === 'string') {
-      const hasStock = stockData.some(s => s.product_name === value && s.closing_stock > 0);
-      if (!hasStock) {
-        toast({
-          title: "No Stock Available",
-          description: `"${value}" has no stock. Please add stock in Stock Register first.`,
-          variant: "destructive"
-        });
-        // Reset the selection
-        newItems[index] = { ...newItems[index], description: "", shirt_size: "" };
-        setItems(newItems);
-        return;
-      }
-    }
-
-    // Check stock when size is selected
-    if (field === 'shirt_size' && typeof value === 'string' && newItems[index].description && newItems[index].description !== '__custom__') {
-      const availableStock = getAvailableStock(newItems[index].description, value);
-      if (availableStock <= 0) {
-        toast({
-          title: "No Stock for Size",
-          description: `No stock available for "${newItems[index].description}" in size ${value}.`,
-          variant: "destructive"
-        });
-        newItems[index] = { ...newItems[index], shirt_size: "" };
-        setItems(newItems);
-        return;
-      }
-    }
     
     if (field === 'quantity' || field === 'rate') {
       newItems[index].amount = newItems[index].quantity * newItems[index].rate;
