@@ -41,6 +41,7 @@ const PRODUCTS = [
 const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'create' }: InvoiceFormProps) => {
   const [formData, setFormData] = useState({
     customerId: "",
+    invoiceNumber: "",
     date: new Date().toISOString().split('T')[0],
     dueDate: "",
     notes: "",
@@ -64,6 +65,7 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
       
       setFormData({
         customerId: matchingCustomer?.id || "",
+        invoiceNumber: initialData.invoice_number || "",
         date: initialData.invoice_date || new Date().toISOString().split('T')[0],
         dueDate: initialData.due_date || "",
         notes: initialData.notes || "",
@@ -110,7 +112,8 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
       return;
     }
 
-    if (!formData.dueDate) {
+    // Due date is only required when status is not 'paid'
+    if (!formData.dueDate && formData.status !== 'paid') {
       toast({
         title: "Validation Error",
         description: "Please enter due date.",
@@ -181,6 +184,7 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
     const selectedCustomer = customers.find(c => c.id === formData.customerId);
     
     const invoiceData: any = {
+      ...(mode === 'edit' && formData.invoiceNumber ? { invoice_number: formData.invoiceNumber } : {}),
       customer_id: formData.customerId || null,
       customer_name: selectedCustomer?.name || "",
       customer_email: selectedCustomer?.email || null,
@@ -309,6 +313,19 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
                 </Select>
               </div>
 
+              {mode === 'edit' && (
+                <div>
+                  <Label htmlFor="invoiceNumber">Invoice ID *</Label>
+                  <Input
+                    id="invoiceNumber"
+                    type="text"
+                    value={formData.invoiceNumber}
+                    onChange={(e) => handleChange("invoiceNumber", e.target.value)}
+                    placeholder="e.g., INV-0001"
+                  />
+                </div>
+              )}
+
               <div>
                 <Label htmlFor="date">Invoice Date *</Label>
                 <Input
@@ -321,13 +338,13 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
               </div>
 
               <div>
-                <Label htmlFor="dueDate">Due Date *</Label>
+                <Label htmlFor="dueDate">Due Date {formData.status !== 'paid' && '*'}</Label>
                 <Input
                   id="dueDate"
                   type="date"
                   value={formData.dueDate}
                   onChange={(e) => handleChange("dueDate", e.target.value)}
-                  required
+                  required={formData.status !== 'paid'}
                 />
               </div>
 
