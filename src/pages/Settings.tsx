@@ -7,10 +7,11 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { useSettings } from "@/hooks/useSettings";
 import { useUserRole } from "@/hooks/useUserRole";
-import { Upload, Settings as SettingsIcon, Building, Bell, Trash2 } from "lucide-react";
+import { Upload, Settings as SettingsIcon, Building, Bell, Trash2, Folder } from "lucide-react";
 import { useSupabaseData } from "@/hooks/useSupabaseData";
 import { UserManagement } from "@/components/UserManagement";
 import { UserList } from "@/components/UserList";
+import { ExpenseCategoryManager } from "@/components/ExpenseCategoryManager";
 
 const Settings = () => {
   const { toast } = useToast();
@@ -146,6 +147,9 @@ const Settings = () => {
 
       {/* User List - Admin Only */}
       <UserList />
+
+      {/* Expense Categories Management */}
+      <ExpenseCategoryManager />
 
       {/* Company Information */}
       <Card>
