@@ -48,7 +48,8 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
     taxType: "IGST_18",
     status: "unpaid",
     complimentary: false,
-    taxMode: "inclusive"
+    taxMode: "inclusive",
+    advanceAmount: 0
   });
 
   const [items, setItems] = useState<InvoiceItem[]>([
@@ -70,9 +71,10 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
         dueDate: initialData.due_date || "",
         notes: initialData.notes || "",
         taxType: initialData.tax_type || "IGST_18",
-        status: initialData.status?.toLowerCase() || "sent",
+        status: initialData.status?.toLowerCase() || "unpaid",
         complimentary: initialData.complimentary || false,
-        taxMode: initialData.tax_mode || "exclusive"
+        taxMode: initialData.tax_mode || "exclusive",
+        advanceAmount: initialData.advance_amount || 0
       });
       
       // Process items to handle products not in dropdown
@@ -203,6 +205,7 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
       subtotal: subtotal,
       gst_amount: taxAmount,
       status: formData.status,
+      advance_amount: formData.status === 'advance' ? formData.advanceAmount : 0,
       paid_date: formData.status === 'paid' ? (initialData?.paid_date || new Date().toISOString().split('T')[0]) : null
     };
 
@@ -355,12 +358,27 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="sent">Sent</SelectItem>
                     <SelectItem value="paid">Paid</SelectItem>
                     <SelectItem value="unpaid">Unpaid</SelectItem>
+                    <SelectItem value="advance">Advance</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
+
+              {formData.status === 'advance' && (
+                <div>
+                  <Label htmlFor="advanceAmount">Advance Amount (₹)</Label>
+                  <Input
+                    id="advanceAmount"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={formData.advanceAmount}
+                    onChange={(e) => handleChange("advanceAmount", parseFloat(e.target.value) || 0)}
+                    placeholder="Enter advance amount"
+                  />
+                </div>
+              )}
             </div>
 
             {/* Right Column */}
@@ -647,7 +665,7 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
 
             {/* Totals */}
             <div className="flex justify-end mt-6">
-              <div className="w-64 space-y-2">
+              <div className="w-72 space-y-2">
                 <div className="flex justify-between">
                   <span>Subtotal:</span>
                   <span>₹{subtotal.toFixed(2)}</span>
@@ -674,6 +692,19 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
                   <span>Grand Total:</span>
                   <span>₹{grandTotal.toFixed(2)}</span>
                 </div>
+                {formData.status === 'advance' && formData.advanceAmount > 0 && (
+                  <>
+                    <div className="flex justify-between text-warning">
+                      <span>Less: Advance:</span>
+                      <span>- ₹{formData.advanceAmount.toFixed(2)}</span>
+                    </div>
+                    <Separator />
+                    <div className="flex justify-between text-xl font-bold text-primary">
+                      <span>Net Payable:</span>
+                      <span>₹{(grandTotal - formData.advanceAmount).toFixed(2)}</span>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>

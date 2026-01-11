@@ -65,12 +65,40 @@ export type Database = {
         }
         Relationships: []
       }
+      expense_categories: {
+        Row: {
+          created_at: string
+          icon: string
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          icon?: string
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          icon?: string
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       expense_register: {
         Row: {
           amount: number
           category: string
           created_at: string
           description: string | null
+          expense_date: string | null
           id: string
           month: number
           updated_at: string
@@ -82,6 +110,7 @@ export type Database = {
           category: string
           created_at?: string
           description?: string | null
+          expense_date?: string | null
           id?: string
           month: number
           updated_at?: string
@@ -93,6 +122,7 @@ export type Database = {
           category?: string
           created_at?: string
           description?: string | null
+          expense_date?: string | null
           id?: string
           month?: number
           updated_at?: string
@@ -103,6 +133,7 @@ export type Database = {
       }
       invoices: {
         Row: {
+          advance_amount: number | null
           created_at: string
           customer_address: string | null
           customer_city: string | null
@@ -130,6 +161,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          advance_amount?: number | null
           created_at?: string
           customer_address?: string | null
           customer_city?: string | null
@@ -157,6 +189,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          advance_amount?: number | null
           created_at?: string
           customer_address?: string | null
           customer_city?: string | null

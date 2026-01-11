@@ -195,12 +195,15 @@ export const generateInvoicePrintHTML = (invoice: any, companySettings: CompanyS
   const subtotal = invoice.subtotal || 0;
   const taxAmount = invoice.tax_amount || 0;
   const totalAmount = invoice.total_amount || invoice.amount || 0;
+  const advanceAmount = invoice.advance_amount || 0;
+  const netPayable = totalAmount - advanceAmount;
   const cgstAmount = taxAmount / 2;
   const sgstAmount = taxAmount / 2;
   const fullTaxRate = getTaxRate(invoice.tax_type || 'IGST_18');
   const halfTaxRate = fullTaxRate / 2;
   const isIGST = invoice.tax_type?.startsWith('IGST');
-  const amountInWords = numberToWords(Math.floor(totalAmount));
+  const isAdvance = invoice.status === 'advance' && advanceAmount > 0;
+  const amountInWords = numberToWords(Math.floor(isAdvance ? netPayable : totalAmount));
   const logoUrl = companySettings.logo || `${window.location.origin}/Logo - IAM Ratan.png`;
 
   return `
@@ -270,7 +273,11 @@ export const generateInvoicePrintHTML = (invoice: any, companySettings: CompanyS
           ? `<tr><td colspan="4" class="text-right">ADD IGST ${fullTaxRate}%:</td><td class="text-right">${taxAmount.toFixed(2)}</td></tr>`
           : `<tr><td colspan="4" class="text-right">ADD CGST ${halfTaxRate}%:</td><td class="text-right">${cgstAmount.toFixed(2)}</td></tr>
              <tr><td colspan="4" class="text-right">ADD SGST ${halfTaxRate}%:</td><td class="text-right">${sgstAmount.toFixed(2)}</td></tr>`}
-        <tr><td colspan="4" class="text-right bold">Total:</td><td class="text-right bold">${totalAmount.toFixed(2)}</td></tr>
+        <tr><td colspan="4" class="text-right bold">Grand Total:</td><td class="text-right bold">${totalAmount.toFixed(2)}</td></tr>
+        ${isAdvance ? `
+        <tr><td colspan="4" class="text-right" style="color: #d97706;">Less: Advance:</td><td class="text-right" style="color: #d97706;">-${advanceAmount.toFixed(2)}</td></tr>
+        <tr style="background-color: #f0fdf4;"><td colspan="4" class="text-right bold" style="font-size: 14px;">Net Payable:</td><td class="text-right bold" style="font-size: 14px;">${netPayable.toFixed(2)}</td></tr>
+        ` : ''}
       </table>
     </div>
 

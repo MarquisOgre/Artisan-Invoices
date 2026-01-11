@@ -9,6 +9,7 @@ import { Trash2, Edit, Plus, Printer } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { getIconComponent } from "@/components/ExpenseCategoryManager";
 
 interface ExpenseEntry {
   id: string;
@@ -17,9 +18,16 @@ interface ExpenseEntry {
   category: string;
   description: string | null;
   amount: number;
+  expense_date: string | null;
   created_at: string;
   updated_at: string;
   user_id: string | null;
+}
+
+interface ExpenseCategory {
+  id: string;
+  name: string;
+  icon: string;
 }
 
 const MONTHS = [
@@ -37,7 +45,7 @@ const MONTHS = [
   { value: 12, label: "December" }
 ];
 
-const EXPENSE_CATEGORIES = [
+const DEFAULT_EXPENSE_CATEGORIES = [
   "Raw Materials",
   "Labor",
   "Utilities",
@@ -54,17 +62,20 @@ const ExpenseRegister = () => {
   const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
   const [expenses, setExpenses] = useState<ExpenseEntry[]>([]);
+  const [categories, setCategories] = useState<ExpenseCategory[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState<ExpenseEntry | null>(null);
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
+  const [expenseDate, setExpenseDate] = useState(new Date().toISOString().split('T')[0]);
   
   const { toast } = useToast();
   const { user } = useAuth();
 
   useEffect(() => {
     loadExpenses();
+    loadCategories();
   }, [selectedMonth, selectedYear]);
 
   const loadExpenses = async () => {
@@ -74,7 +85,7 @@ const ExpenseRegister = () => {
         .select('*')
         .eq('month', selectedMonth)
         .eq('year', selectedYear)
-        .order('created_at', { ascending: false });
+        .order('expense_date', { ascending: false });
 
       if (error) throw error;
       setExpenses(data || []);
@@ -88,11 +99,30 @@ const ExpenseRegister = () => {
     }
   };
 
+  const loadCategories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('expense_categories')
+        .select('*')
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+      setCategories(data || []);
+    } catch (error) {
+      console.error('Error loading categories:', error);
+    }
+  };
+
+  const allCategories = categories.length > 0 
+    ? categories.map(c => c.name)
+    : DEFAULT_EXPENSE_CATEGORIES;
+
   const handleAddExpense = () => {
     setEditingExpense(null);
     setCategory("");
     setDescription("");
     setAmount("");
+    setExpenseDate(new Date().toISOString().split('T')[0]);
     setIsDialogOpen(true);
   };
 
@@ -101,6 +131,7 @@ const ExpenseRegister = () => {
     setCategory(expense.category);
     setDescription(expense.description || "");
     setAmount(expense.amount.toString());
+    setExpenseDate(expense.expense_date || new Date().toISOString().split('T')[0]);
     setIsDialogOpen(true);
   };
 
@@ -114,13 +145,19 @@ const ExpenseRegister = () => {
       return;
     }
 
+    // Parse the expense date to get month and year
+    const dateObj = new Date(expenseDate);
+    const expenseMonth = dateObj.getMonth() + 1;
+    const expenseYear = dateObj.getFullYear();
+
     try {
       const expenseData = {
-        month: selectedMonth,
-        year: selectedYear,
+        month: expenseMonth,
+        year: expenseYear,
         category,
         description: description || null,
         amount: parseFloat(amount),
+        expense_date: expenseDate,
         user_id: user?.id
       };
 
@@ -284,6 +321,7 @@ const ExpenseRegister = () => {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="border-b-2 border-border">
+                  <th className="text-left p-4 font-semibold">Date</th>
                   <th className="text-left p-4 font-semibold">Category</th>
                   <th className="text-left p-4 font-semibold">Description</th>
                   <th className="text-right p-4 font-semibold">Amount (₹)</th>
@@ -291,34 +329,44 @@ const ExpenseRegister = () => {
                 </tr>
               </thead>
               <tbody>
-                {expenses.map((expense) => (
-                  <tr key={expense.id} className="border-b border-border hover:bg-muted/50">
-                    <td className="p-4 font-medium">{expense.category}</td>
-                    <td className="p-4">{expense.description || "-"}</td>
-                    <td className="p-4 text-right">₹{expense.amount.toLocaleString()}</td>
-                    <td className="p-4 no-print">
-                      <div className="flex justify-center space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEditExpense(expense)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDeleteExpense(expense.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                {expenses.map((expense) => {
+                  const categoryData = categories.find(c => c.name === expense.category);
+                  const IconComponent = categoryData ? getIconComponent(categoryData.icon) : null;
+                  return (
+                    <tr key={expense.id} className="border-b border-border hover:bg-muted/50">
+                      <td className="p-4">{expense.expense_date || '-'}</td>
+                      <td className="p-4 font-medium">
+                        <div className="flex items-center gap-2">
+                          {IconComponent && <IconComponent className="h-4 w-4 text-primary" />}
+                          {expense.category}
+                        </div>
+                      </td>
+                      <td className="p-4">{expense.description || "-"}</td>
+                      <td className="p-4 text-right">₹{expense.amount.toLocaleString()}</td>
+                      <td className="p-4 no-print">
+                        <div className="flex justify-center space-x-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEditExpense(expense)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDeleteExpense(expense.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
                 {expenses.length === 0 && (
                   <tr>
-                    <td colSpan={4} className="p-8 text-center text-muted-foreground">
+                    <td colSpan={5} className="p-8 text-center text-muted-foreground">
                       No expenses recorded for this month
                     </td>
                   </tr>
@@ -326,7 +374,7 @@ const ExpenseRegister = () => {
               </tbody>
               <tfoot>
                 <tr className="border-t-2 border-border font-bold">
-                  <td colSpan={2} className="p-4 text-right">Total Expenses:</td>
+                  <td colSpan={3} className="p-4 text-right">Total Expenses:</td>
                   <td className="p-4 text-right text-lg">₹{totalExpenses.toLocaleString()}</td>
                   <td className="no-print"></td>
                 </tr>
@@ -344,17 +392,34 @@ const ExpenseRegister = () => {
           </DialogHeader>
           <div className="space-y-4">
             <div>
+              <Label htmlFor="expenseDate">Date *</Label>
+              <Input
+                id="expenseDate"
+                type="date"
+                value={expenseDate}
+                onChange={(e) => setExpenseDate(e.target.value)}
+              />
+            </div>
+            
+            <div>
               <Label htmlFor="category">Category *</Label>
               <Select value={category} onValueChange={setCategory}>
                 <SelectTrigger id="category">
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>
-                  {EXPENSE_CATEGORIES.map((cat) => (
-                    <SelectItem key={cat} value={cat}>
-                      {cat}
-                    </SelectItem>
-                  ))}
+                  {allCategories.map((cat) => {
+                    const categoryData = categories.find(c => c.name === cat);
+                    const IconComponent = categoryData ? getIconComponent(categoryData.icon) : null;
+                    return (
+                      <SelectItem key={cat} value={cat}>
+                        <div className="flex items-center gap-2">
+                          {IconComponent && <IconComponent className="h-4 w-4" />}
+                          {cat}
+                        </div>
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
             </div>

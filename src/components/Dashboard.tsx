@@ -1,6 +1,9 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   FileText, 
   ReceiptIndianRupee, 
@@ -28,25 +31,57 @@ interface DashboardProps {
   onViewInvoices: () => void;
 }
 
+const MONTHS = [
+  { value: 0, label: "All Months" },
+  { value: 1, label: "January" },
+  { value: 2, label: "February" },
+  { value: 3, label: "March" },
+  { value: 4, label: "April" },
+  { value: 5, label: "May" },
+  { value: 6, label: "June" },
+  { value: 7, label: "July" },
+  { value: 8, label: "August" },
+  { value: 9, label: "September" },
+  { value: 10, label: "October" },
+  { value: 11, label: "November" },
+  { value: 12, label: "December" }
+];
+
 const Dashboard = ({ quotations, invoices, customers, expenses = [], onCreateQuotation, onCreateInvoice, onCreateCustomer, onViewQuotations, onViewInvoices }: DashboardProps) => {
   const { isAdmin } = useUserRole();
+  const currentDate = new Date();
+  const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth() + 1);
+  const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
+
+  // Filter data based on selected month/year
+  const filteredInvoices = invoices.filter(inv => {
+    if (selectedMonth === 0) return true;
+    const invDate = new Date(inv.invoice_date);
+    return invDate.getMonth() + 1 === selectedMonth && invDate.getFullYear() === selectedYear;
+  });
+
+  const filteredQuotations = quotations.filter(q => {
+    if (selectedMonth === 0) return true;
+    const qDate = new Date(q.quotation_date || q.date);
+    return qDate.getMonth() + 1 === selectedMonth && qDate.getFullYear() === selectedYear;
+  });
+
+  const filteredExpenses = expenses.filter(e => {
+    if (selectedMonth === 0) return true;
+    return e.month === selectedMonth && e.year === selectedYear;
+  });
   
-  const totalRevenue = invoices
+  const totalRevenue = filteredInvoices
     .filter(i => i.status === "paid")
     .reduce((sum, i) => sum + (i.total_amount || i.subtotal || 0), 0);
 
-  const totalInvoiced = invoices
-    .filter(i => i.status === "unpaid" || i.status === "sent")
+  const totalInvoiced = filteredInvoices
+    .filter(i => i.status === "unpaid" || i.status === "sent" || i.status === "advance")
     .reduce((sum, i) => sum + (i.total_amount || i.subtotal || 0), 0);
   
-  const activeQuotations = quotations.filter(q => q.status !== "invoiced" && q.status !== "rejected").length;
+  const activeQuotations = filteredQuotations.filter(q => q.status !== "invoiced" && q.status !== "rejected").length;
 
-  // Monthly expenses
-  const currentDate = new Date();
-  const currentMonth = currentDate.getMonth() + 1;
-  const currentYear = currentDate.getFullYear();
-  const totalExpenses = expenses
-    .filter(e => e.month === currentMonth && e.year === currentYear)
+  const totalExpenses = filteredExpenses
     .reduce((sum, e) => sum + (e.amount || 0), 0);
 
   // Generate monthly data for charts (last 6 months)
@@ -175,6 +210,40 @@ const Dashboard = ({ quotations, invoices, customers, expenses = [], onCreateQuo
 
   return (
     <div className="space-y-6">
+      {/* Month/Year Filter */}
+      <div className="flex items-center gap-4 bg-card p-4 rounded-lg border">
+        <div className="flex items-center gap-2">
+          <Label htmlFor="month-filter">Month:</Label>
+          <Select value={selectedMonth.toString()} onValueChange={(value) => setSelectedMonth(parseInt(value))}>
+            <SelectTrigger className="w-36">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {MONTHS.map((month) => (
+                <SelectItem key={month.value} value={month.value.toString()}>
+                  {month.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex items-center gap-2">
+          <Label htmlFor="year-filter">Year:</Label>
+          <Select value={selectedYear.toString()} onValueChange={(value) => setSelectedYear(parseInt(value))}>
+            <SelectTrigger className="w-28">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {[2023, 2024, 2025, 2026, 2027].map((year) => (
+                <SelectItem key={year} value={year.toString()}>
+                  {year}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
         {stats.map((stat, index) => (

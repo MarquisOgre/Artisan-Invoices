@@ -3,7 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useSettings } from "@/hooks/useSettings";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -40,6 +42,22 @@ interface QuotationListProps {
   onSendToCustomer?: (id: string) => void;
 }
 
+const MONTHS = [
+  { value: 0, label: "All Months" },
+  { value: 1, label: "January" },
+  { value: 2, label: "February" },
+  { value: 3, label: "March" },
+  { value: 4, label: "April" },
+  { value: 5, label: "May" },
+  { value: 6, label: "June" },
+  { value: 7, label: "July" },
+  { value: 8, label: "August" },
+  { value: 9, label: "September" },
+  { value: 10, label: "October" },
+  { value: 11, label: "November" },
+  { value: 12, label: "December" }
+];
+
 const QuotationList = ({ 
   quotations, 
   onCreateNew, 
@@ -51,6 +69,9 @@ const QuotationList = ({
   onSendToCustomer
 }: QuotationListProps) => {
   const [searchTerm, setSearchTerm] = useState("");
+  const currentDate = new Date();
+  const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth() + 1);
+  const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
   const { companySettings, invoiceSettings } = useSettings();
 
   const displayQuotations = quotations.map(q => {
@@ -90,23 +111,62 @@ const QuotationList = ({
     );
   };
 
-  const filteredQuotations = displayQuotations.filter(quotation =>
-    quotation.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    quotation.quotationNumber?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredQuotations = displayQuotations.filter(quotation => {
+    const matchesSearch = quotation.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      quotation.quotationNumber?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    if (selectedMonth === 0) return matchesSearch;
+    
+    const qDate = new Date(quotation.date);
+    return matchesSearch && 
+      qDate.getMonth() + 1 === selectedMonth && 
+      qDate.getFullYear() === selectedYear;
+  });
 
   return (
     <div className="space-y-6">
-      {/* Header with Search */}
+      {/* Header with Search and Filter */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-          <Input
-            placeholder="Search quotations..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="relative flex-1 min-w-[200px]">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Input
+              placeholder="Search quotations..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <Label>Month:</Label>
+            <Select value={selectedMonth.toString()} onValueChange={(value) => setSelectedMonth(parseInt(value))}>
+              <SelectTrigger className="w-36">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {MONTHS.map((month) => (
+                  <SelectItem key={month.value} value={month.value.toString()}>
+                    {month.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex items-center gap-2">
+            <Label>Year:</Label>
+            <Select value={selectedYear.toString()} onValueChange={(value) => setSelectedYear(parseInt(value))}>
+              <SelectTrigger className="w-28">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {[2023, 2024, 2025, 2026, 2027].map((year) => (
+                  <SelectItem key={year} value={year.toString()}>
+                    {year}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
         <Button onClick={onCreateNew}>
           <FileText className="mr-2 h-4 w-4" />
