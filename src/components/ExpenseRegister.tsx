@@ -321,6 +321,7 @@ const ExpenseRegister = () => {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="border-b-2 border-border">
+                  <th className="text-center p-4 font-semibold w-16">S.No</th>
                   <th className="text-left p-4 font-semibold">Date</th>
                   <th className="text-left p-4 font-semibold">Category</th>
                   <th className="text-left p-4 font-semibold">Description</th>
@@ -329,11 +330,12 @@ const ExpenseRegister = () => {
                 </tr>
               </thead>
               <tbody>
-                {expenses.map((expense) => {
+                {expenses.map((expense, index) => {
                   const categoryData = categories.find(c => c.name === expense.category);
                   const IconComponent = categoryData ? getIconComponent(categoryData.icon) : null;
                   return (
                     <tr key={expense.id} className="border-b border-border hover:bg-muted/50">
+                      <td className="p-4 text-center">{index + 1}</td>
                       <td className="p-4">{expense.expense_date || '-'}</td>
                       <td className="p-4 font-medium">
                         <div className="flex items-center gap-2">
@@ -366,7 +368,7 @@ const ExpenseRegister = () => {
                 })}
                 {expenses.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="p-8 text-center text-muted-foreground">
+                    <td colSpan={6} className="p-8 text-center text-muted-foreground">
                       No expenses recorded for this month
                     </td>
                   </tr>
@@ -374,7 +376,7 @@ const ExpenseRegister = () => {
               </tbody>
               <tfoot>
                 <tr className="border-t-2 border-border font-bold">
-                  <td colSpan={3} className="p-4 text-right">Total Expenses:</td>
+                  <td colSpan={4} className="p-4 text-right">Total Expenses:</td>
                   <td className="p-4 text-right text-lg">₹{totalExpenses.toLocaleString()}</td>
                   <td className="no-print"></td>
                 </tr>
