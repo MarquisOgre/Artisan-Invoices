@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Trash2, Edit, Plus, Printer } from "lucide-react";
+import { Trash2, Edit, Plus, Printer, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -69,6 +69,7 @@ const ExpenseRegister = () => {
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
   const [expenseDate, setExpenseDate] = useState(new Date().toISOString().split('T')[0]);
+  const [searchTerm, setSearchTerm] = useState("");
   
   const { toast } = useToast();
   const { user } = useAuth();
@@ -116,6 +117,15 @@ const ExpenseRegister = () => {
   const allCategories = categories.length > 0 
     ? categories.map(c => c.name)
     : DEFAULT_EXPENSE_CATEGORIES;
+
+  // Filter expenses based on search term
+  const filteredExpenses = expenses.filter(expense => {
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      expense.category.toLowerCase().includes(searchLower) ||
+      (expense.description?.toLowerCase() || '').includes(searchLower)
+    );
+  });
 
   const handleAddExpense = () => {
     setEditingExpense(null);
@@ -221,7 +231,7 @@ const ExpenseRegister = () => {
     }
   };
 
-  const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+  const totalExpenses = filteredExpenses.reduce((sum, expense) => sum + expense.amount, 0);
 
   const handlePrint = () => {
     window.print();
@@ -317,6 +327,18 @@ const ExpenseRegister = () => {
           </div>
         </CardHeader>
         <CardContent className="p-6">
+          {/* Search Bar */}
+          <div className="mb-4 no-print">
+            <div className="relative max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by category or description..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
               <thead>
@@ -330,7 +352,7 @@ const ExpenseRegister = () => {
                 </tr>
               </thead>
               <tbody>
-                {expenses.map((expense, index) => {
+                {filteredExpenses.map((expense, index) => {
                   const categoryData = categories.find(c => c.name === expense.category);
                   const IconComponent = categoryData ? getIconComponent(categoryData.icon) : null;
                   return (
@@ -366,10 +388,10 @@ const ExpenseRegister = () => {
                     </tr>
                   );
                 })}
-                {expenses.length === 0 && (
+                {filteredExpenses.length === 0 && (
                   <tr>
                     <td colSpan={6} className="p-8 text-center text-muted-foreground">
-                      No expenses recorded for this month
+                      {searchTerm ? 'No expenses match your search' : 'No expenses recorded for this month'}
                     </td>
                   </tr>
                 )}

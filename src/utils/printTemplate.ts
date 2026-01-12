@@ -27,7 +27,11 @@ const getTaxRate = (taxType: string) => {
   return 18;
 };
 
-const generateCommonHeader = (title: string, companySettings: CompanySettings, logoUrl: string) => `
+const generateCommonHeader = (title: string, companySettings: CompanySettings) => {
+  // Use printLogo if available, otherwise fall back to logo
+  const logoUrl = companySettings.printLogo || companySettings.logo || `${window.location.origin}/Logo - IAM Ratan.png`;
+  
+  return `
   <div class="header">
     <div class="header-top">
       <img src="${logoUrl}" alt="Company Logo" class="logo" />
@@ -41,6 +45,7 @@ const generateCommonHeader = (title: string, companySettings: CompanySettings, l
     </div>
   </div>
 `;
+};
 
 const generateStyles = () => `
   <style>
@@ -204,7 +209,6 @@ export const generateInvoicePrintHTML = (invoice: any, companySettings: CompanyS
   const isIGST = invoice.tax_type?.startsWith('IGST');
   const isAdvance = invoice.status === 'advance' && advanceAmount > 0;
   const amountInWords = numberToWords(Math.floor(isAdvance ? netPayable : totalAmount));
-  const logoUrl = companySettings.logo || `${window.location.origin}/Logo - IAM Ratan.png`;
 
   return `
   <!DOCTYPE html>
@@ -214,7 +218,7 @@ export const generateInvoicePrintHTML = (invoice: any, companySettings: CompanyS
     ${generateStyles()}
   </head>
   <body>
-    ${generateCommonHeader('TAX INVOICE', companySettings, logoUrl)}
+    ${generateCommonHeader('TAX INVOICE', companySettings)}
 
     <div class="invoice-info">
       <div class="bill-to">
@@ -316,7 +320,6 @@ export const generateQuotationPrintHTML = (quotation: any, companySettings: Comp
   const halfTaxRate = fullTaxRate / 2;
   const isIGST = quotation.tax_type?.startsWith('IGST');
   const amountInWords = numberToWords(Math.floor(totalAmount));
-  const logoUrl = companySettings.logo || `${window.location.origin}/Logo - IAM Ratan.png`;
 
   return `
   <!DOCTYPE html>
@@ -326,7 +329,7 @@ export const generateQuotationPrintHTML = (quotation: any, companySettings: Comp
     ${generateStyles()}
   </head>
   <body>
-    ${generateCommonHeader('QUOTATION', companySettings, logoUrl)}
+    ${generateCommonHeader('QUOTATION', companySettings)}
 
     <div class="quotation-info">
       <div class="bill-to">
