@@ -128,7 +128,7 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {/* Quo/Invoices Dropdown (Admin only) */}
+              {/* Quotations/Invoices Dropdown (Admin only) */}
               {isAdmin && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -137,7 +137,7 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
                       className="flex items-center gap-2"
                     >
                       <FileText className="h-4 w-4" />
-                      Quo / Invoices
+                      Quotations / Invoices
                       <ChevronDown className="h-3 w-3" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -242,7 +242,7 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
                 </CollapsibleContent>
               </Collapsible>
 
-              {/* Quo/Invoices Collapsible (Admin only) */}
+              {/* Quotations/Invoices Collapsible (Admin only) */}
               {isAdmin && (
                 <Collapsible open={quoInvoicesOpen} onOpenChange={setQuoInvoicesOpen}>
                   <CollapsibleTrigger asChild>
@@ -252,7 +252,7 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
                     >
                       <span className="flex items-center">
                         <FileText className="mr-3 h-4 w-4" />
-                        Quo / Invoices
+                        Quotations / Invoices
                       </span>
                       <ChevronDown className={`h-4 w-4 transition-transform ${quoInvoicesOpen ? 'rotate-180' : ''}`} />
                     </Button>

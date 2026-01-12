@@ -266,7 +266,7 @@ const ExpenseRegister = () => {
       <Card className="w-full" id="expense-register-print">
         <CardHeader>
           <div className="print-title">
-            Expense Register - {MONTHS.find(m => m.value === selectedMonth)?.label} {selectedYear}
+            Expenses - {MONTHS.find(m => m.value === selectedMonth)?.label} {selectedYear}
           </div>
           <div className="flex items-center justify-between gap-4 no-print">
             <div className="flex gap-4">
@@ -302,7 +302,7 @@ const ExpenseRegister = () => {
               </div>
             </div>
             <CardTitle className="text-2xl font-bold text-center flex-1">
-              Expense Register - {MONTHS.find(m => m.value === selectedMonth)?.label} {selectedYear}
+              Expenses - {MONTHS.find(m => m.value === selectedMonth)?.label} {selectedYear}
             </CardTitle>
             <div className="flex gap-2">
               <Button onClick={handleAddExpense} variant="default" size="sm" className="no-print">
