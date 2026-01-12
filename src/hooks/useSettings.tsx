@@ -10,6 +10,7 @@ export interface CompanySettings {
   website: string;
   taxNumber: string;
   logo: string;
+  printLogo?: string; // Logo specifically for print documents
   favicon?: string;
   bankName?: string;
   accountNumber?: string;

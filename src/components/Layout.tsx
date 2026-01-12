@@ -45,7 +45,7 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
   const { signOut } = useAuth();
   const { isAdmin } = useUserRole();
 
-  // Standalone navigation items
+  // Standalone navigation items - ordered as: Dashboard, Quo/Invoices, Customers, Stock, Expenses
   const standaloneNavigation = [
     { name: "Dashboard", icon: BarChart3, key: "dashboard" },
     { name: "Customers", icon: Users, key: "customers", adminOnly: true },
@@ -88,19 +88,57 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
               <h1 className="text-lg sm:text-xl font-bold text-primary">ARTISAN</h1>
             </div>
 
-            {/* Desktop Navigation - pushed to right */}
+            {/* Desktop Navigation - ordered: Dashboard, Quo/Invoices (admin), Customers (admin), Stock, Expenses, Settings, Logout */}
             <nav className="hidden md:flex items-center space-x-1 ml-auto">
-              {filteredStandaloneNav.map((item) => (
+              {/* Dashboard */}
+              <Button
+                variant={currentPage === "dashboard" ? "default" : "ghost"}
+                className="flex items-center gap-2"
+                onClick={() => onPageChange("dashboard")}
+              >
+                <BarChart3 className="h-4 w-4" />
+                Dashboard
+              </Button>
+
+              {/* Quotations/Invoices Dropdown (Admin only) - Second item */}
+              {isAdmin && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant={isQuoInvoicesActive ? "default" : "ghost"}
+                      className="flex items-center gap-2"
+                    >
+                      <FileText className="h-4 w-4" />
+                      Quotations / Invoices
+                      <ChevronDown className="h-3 w-3" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start">
+                    {quoInvoicesItems.map((item) => (
+                      <DropdownMenuItem
+                        key={item.key}
+                        onClick={() => onPageChange(item.key)}
+                        className={currentPage === item.key ? "bg-muted" : ""}
+                      >
+                        <item.icon className="h-4 w-4 mr-2" />
+                        {item.name}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+
+              {/* Customers (Admin only) */}
+              {isAdmin && (
                 <Button
-                  key={item.key}
-                  variant={currentPage === item.key ? "default" : "ghost"}
+                  variant={currentPage === "customers" ? "default" : "ghost"}
                   className="flex items-center gap-2"
-                  onClick={() => onPageChange(item.key)}
+                  onClick={() => onPageChange("customers")}
                 >
-                  <item.icon className="h-4 w-4" />
-                  {item.name}
+                  <Users className="h-4 w-4" />
+                  Customers
                 </Button>
-              ))}
+              )}
 
               {/* Stock Dropdown */}
               <DropdownMenu>
@@ -128,33 +166,15 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {/* Quotations/Invoices Dropdown (Admin only) */}
-              {isAdmin && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant={isQuoInvoicesActive ? "default" : "ghost"}
-                      className="flex items-center gap-2"
-                    >
-                      <FileText className="h-4 w-4" />
-                      Quotations / Invoices
-                      <ChevronDown className="h-3 w-3" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start">
-                    {quoInvoicesItems.map((item) => (
-                      <DropdownMenuItem
-                        key={item.key}
-                        onClick={() => onPageChange(item.key)}
-                        className={currentPage === item.key ? "bg-muted" : ""}
-                      >
-                        <item.icon className="h-4 w-4 mr-2" />
-                        {item.name}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
+              {/* Expenses */}
+              <Button
+                variant={currentPage === "expense-register" ? "default" : "ghost"}
+                className="flex items-center gap-2"
+                onClick={() => onPageChange("expense-register")}
+              >
+                <Receipt className="h-4 w-4" />
+                Expenses
+              </Button>
 
               {/* Settings icon only (Admin only) */}
               {isAdmin && (
@@ -195,52 +215,18 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
         {mobileMenuOpen && (
           <div className="md:hidden absolute top-full left-0 right-0 z-50 border-t bg-card shadow-lg">
             <div className="px-4 py-2 space-y-1">
-              {filteredStandaloneNav.map((item) => (
-                <Button
-                  key={item.key}
-                  variant={currentPage === item.key ? "default" : "ghost"}
-                  className="w-full justify-start"
-                  onClick={() => {
-                    onPageChange(item.key);
-                    setMobileMenuOpen(false);
-                  }}
-                >
-                  <item.icon className="mr-3 h-4 w-4" />
-                  {item.name}
-                </Button>
-              ))}
-
-              {/* Stock Collapsible */}
-              <Collapsible open={stockOpen} onOpenChange={setStockOpen}>
-                <CollapsibleTrigger asChild>
-                  <Button
-                    variant={isStockActive ? "default" : "ghost"}
-                    className="w-full justify-between"
-                  >
-                    <span className="flex items-center">
-                      <Package className="mr-3 h-4 w-4" />
-                      Stock
-                    </span>
-                    <ChevronDown className={`h-4 w-4 transition-transform ${stockOpen ? 'rotate-180' : ''}`} />
-                  </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="pl-6 space-y-1">
-                  {stockItems.map((item) => (
-                    <Button
-                      key={item.key}
-                      variant={currentPage === item.key ? "default" : "ghost"}
-                      className="w-full justify-start"
-                      onClick={() => {
-                        onPageChange(item.key);
-                        setMobileMenuOpen(false);
-                      }}
-                    >
-                      <item.icon className="mr-3 h-4 w-4" />
-                      {item.name}
-                    </Button>
-                  ))}
-                </CollapsibleContent>
-              </Collapsible>
+              {/* Dashboard */}
+              <Button
+                variant={currentPage === "dashboard" ? "default" : "ghost"}
+                className="w-full justify-start"
+                onClick={() => {
+                  onPageChange("dashboard");
+                  setMobileMenuOpen(false);
+                }}
+              >
+                <BarChart3 className="mr-3 h-4 w-4" />
+                Dashboard
+              </Button>
 
               {/* Quotations/Invoices Collapsible (Admin only) */}
               {isAdmin && (
@@ -275,6 +261,66 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
                   </CollapsibleContent>
                 </Collapsible>
               )}
+
+              {/* Customers (Admin only) */}
+              {isAdmin && (
+                <Button
+                  variant={currentPage === "customers" ? "default" : "ghost"}
+                  className="w-full justify-start"
+                  onClick={() => {
+                    onPageChange("customers");
+                    setMobileMenuOpen(false);
+                  }}
+                >
+                  <Users className="mr-3 h-4 w-4" />
+                  Customers
+                </Button>
+              )}
+
+              {/* Stock Collapsible */}
+              <Collapsible open={stockOpen} onOpenChange={setStockOpen}>
+                <CollapsibleTrigger asChild>
+                  <Button
+                    variant={isStockActive ? "default" : "ghost"}
+                    className="w-full justify-between"
+                  >
+                    <span className="flex items-center">
+                      <Package className="mr-3 h-4 w-4" />
+                      Stock
+                    </span>
+                    <ChevronDown className={`h-4 w-4 transition-transform ${stockOpen ? 'rotate-180' : ''}`} />
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pl-6 space-y-1">
+                  {stockItems.map((item) => (
+                    <Button
+                      key={item.key}
+                      variant={currentPage === item.key ? "default" : "ghost"}
+                      className="w-full justify-start"
+                      onClick={() => {
+                        onPageChange(item.key);
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      <item.icon className="mr-3 h-4 w-4" />
+                      {item.name}
+                    </Button>
+                  ))}
+                </CollapsibleContent>
+              </Collapsible>
+
+              {/* Expenses */}
+              <Button
+                variant={currentPage === "expense-register" ? "default" : "ghost"}
+                className="w-full justify-start"
+                onClick={() => {
+                  onPageChange("expense-register");
+                  setMobileMenuOpen(false);
+                }}
+              >
+                <Receipt className="mr-3 h-4 w-4" />
+                Expenses
+              </Button>
 
               {/* Settings (Admin only) */}
               {isAdmin && (
