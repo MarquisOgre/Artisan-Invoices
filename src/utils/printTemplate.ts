@@ -198,15 +198,15 @@ const generateStyles = () => `
 
 export const generateInvoicePrintHTML = (invoice: any, companySettings: CompanySettings, termsAndConditions?: string): string => {
   const subtotal = invoice.subtotal || 0;
-  const taxAmount = invoice.tax_amount || 0;
+  const taxAmount = invoice.gst_amount || invoice.tax_amount || 0;
   const totalAmount = invoice.total_amount || invoice.amount || 0;
   const advanceAmount = invoice.advance_amount || 0;
   const netPayable = totalAmount - advanceAmount;
-  const cgstAmount = taxAmount / 2;
-  const sgstAmount = taxAmount / 2;
   const fullTaxRate = getTaxRate(invoice.tax_type || 'IGST_18');
   const halfTaxRate = fullTaxRate / 2;
   const isIGST = invoice.tax_type?.startsWith('IGST');
+  const cgstAmount = taxAmount / 2;
+  const sgstAmount = taxAmount / 2;
   const isAdvance = invoice.status === 'advance' && advanceAmount > 0;
   const amountInWords = numberToWords(Math.floor(isAdvance ? netPayable : totalAmount));
 
@@ -312,13 +312,13 @@ export const generateInvoicePrintHTML = (invoice: any, companySettings: CompanyS
 
 export const generateQuotationPrintHTML = (quotation: any, companySettings: CompanySettings, termsAndConditions?: string, defaultNotes?: string): string => {
   const subtotal = quotation.subtotal || 0;
-  const taxAmount = quotation.tax_amount || 0;
-  const totalAmount = quotation.amount || 0;
-  const cgstAmount = taxAmount / 2;
-  const sgstAmount = taxAmount / 2;
+  const taxAmount = quotation.gst_amount || quotation.tax_amount || 0;
+  const totalAmount = quotation.total_amount || quotation.amount || 0;
   const fullTaxRate = getTaxRate(quotation.tax_type || 'IGST_18');
   const halfTaxRate = fullTaxRate / 2;
   const isIGST = quotation.tax_type?.startsWith('IGST');
+  const cgstAmount = taxAmount / 2;
+  const sgstAmount = taxAmount / 2;
   const amountInWords = numberToWords(Math.floor(totalAmount));
 
   return `

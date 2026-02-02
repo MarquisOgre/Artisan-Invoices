@@ -17,10 +17,8 @@ const QuotationDetails = ({ quotation, isOpen, onClose }: QuotationDetailsProps)
   if (!quotation) return null;
 
   const subtotal = quotation.subtotal || 0;
-  const taxAmount = quotation.tax_amount || 0;
-  const totalAmount = quotation.amount || 0;
-  const cgstAmount = taxAmount / 2;
-  const sgstAmount = taxAmount / 2;
+  const taxAmount = quotation.gst_amount || quotation.tax_amount || 0;
+  const totalAmount = quotation.total_amount || quotation.amount || 0;
   
   const getTaxRate = (taxType: string) => {
     if (taxType?.includes('18')) return 18;
@@ -32,6 +30,8 @@ const QuotationDetails = ({ quotation, isOpen, onClose }: QuotationDetailsProps)
   const fullTaxRate = getTaxRate(quotation.tax_type || 'IGST_18');
   const halfTaxRate = fullTaxRate / 2;
   const isIGST = quotation.tax_type?.startsWith('IGST');
+  const cgstAmount = taxAmount / 2;
+  const sgstAmount = taxAmount / 2;
 
   const handlePrint = () => {
     const printWindow = window.open('', '_blank');

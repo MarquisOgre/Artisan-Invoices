@@ -206,7 +206,9 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
       gst_amount: taxAmount,
       status: formData.status,
       advance_amount: formData.status === 'advance' ? formData.advanceAmount : 0,
-      paid_date: formData.status === 'paid' ? (initialData?.paid_date || new Date().toISOString().split('T')[0]) : null
+      paid_date: formData.status === 'paid' ? (initialData?.paid_date || new Date().toISOString().split('T')[0]) : null,
+      tax_type: formData.taxType,
+      tax_mode: formData.taxMode
     };
 
     setLoading(true);

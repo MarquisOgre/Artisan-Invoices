@@ -196,7 +196,9 @@ const QuotationForm = ({ customers, onSubmit, onCancel, initialData, mode = 'cre
       total_amount: grandTotal,
       subtotal: subtotal,
       gst_amount: taxAmount,
-      status: formData.status
+      status: formData.status,
+      tax_type: formData.taxType,
+      tax_mode: formData.taxMode
     };
 
     setLoading(true);
