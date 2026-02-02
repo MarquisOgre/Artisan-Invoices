@@ -156,6 +156,8 @@ export type Database = {
           paid_date: string | null
           status: string
           subtotal: number
+          tax_mode: string | null
+          tax_type: string | null
           total_amount: number
           updated_at: string
           user_id: string
@@ -184,6 +186,8 @@ export type Database = {
           paid_date?: string | null
           status?: string
           subtotal?: number
+          tax_mode?: string | null
+          tax_type?: string | null
           total_amount?: number
           updated_at?: string
           user_id: string
@@ -212,6 +216,8 @@ export type Database = {
           paid_date?: string | null
           status?: string
           subtotal?: number
+          tax_mode?: string | null
+          tax_type?: string | null
           total_amount?: number
           updated_at?: string
           user_id?: string
@@ -382,6 +388,8 @@ export type Database = {
           quotation_number: string
           status: string
           subtotal: number
+          tax_mode: string | null
+          tax_type: string | null
           total_amount: number
           updated_at: string
           user_id: string
@@ -408,6 +416,8 @@ export type Database = {
           quotation_number: string
           status?: string
           subtotal?: number
+          tax_mode?: string | null
+          tax_type?: string | null
           total_amount?: number
           updated_at?: string
           user_id: string
@@ -434,6 +444,8 @@ export type Database = {
           quotation_number?: string
           status?: string
           subtotal?: number
+          tax_mode?: string | null
+          tax_type?: string | null
           total_amount?: number
           updated_at?: string
           user_id?: string

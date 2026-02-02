@@ -18,10 +18,8 @@ const InvoiceDetails = ({ invoice, isOpen, onClose }: InvoiceDetailsProps) => {
   if (!invoice) return null;
 
   const subtotal = invoice.subtotal || 0;
-  const taxAmount = invoice.tax_amount || 0;
+  const taxAmount = invoice.gst_amount || invoice.tax_amount || 0;
   const totalAmount = invoice.total_amount || invoice.amount || 0;
-  const cgstAmount = taxAmount / 2;
-  const sgstAmount = taxAmount / 2;
   
   const getTaxRate = (taxType: string) => {
     if (taxType?.includes('18')) return 18;
@@ -33,6 +31,8 @@ const InvoiceDetails = ({ invoice, isOpen, onClose }: InvoiceDetailsProps) => {
   const fullTaxRate = getTaxRate(invoice.tax_type || 'IGST_18');
   const halfTaxRate = fullTaxRate / 2;
   const isIGST = invoice.tax_type?.startsWith('IGST');
+  const cgstAmount = taxAmount / 2;
+  const sgstAmount = taxAmount / 2;
 
   const handlePrint = () => {
     const printWindow = window.open('', '_blank');
