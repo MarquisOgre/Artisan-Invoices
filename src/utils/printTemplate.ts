@@ -344,7 +344,7 @@ export const generateQuotationPrintHTML = (quotation: any, companySettings: Comp
         </div>
       <div>
         <p><strong>Quotation No:</strong> ${quotation.quotation_number}</p>
-        <p><strong>Date:</strong> ${quotation.date}</p>
+        <p><strong>Date:</strong> ${quotation.quotation_date}</p>
         ${quotation.valid_until ? `
         <div class="validity">
           <strong>Valid Until:</strong> ${quotation.valid_until}
