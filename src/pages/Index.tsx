@@ -452,6 +452,8 @@ const Index = () => {
                 gst_amount: quotation.gst_amount || 0,
                 discount: quotation.discount || 0,
                 total_amount: quotation.total_amount,
+                tax_type: (quotation as any).tax_type || 'IGST_18',
+                tax_mode: (quotation as any).tax_mode || 'exclusive',
                 invoice_date: invoiceDate.toISOString().split('T')[0],
                 due_date: dueDate.toISOString().split('T')[0],
                 status: "unpaid",
