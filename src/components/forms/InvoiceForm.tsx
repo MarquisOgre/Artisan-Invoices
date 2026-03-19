@@ -588,40 +588,57 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
                   {index === 0 && (
                     <div className="col-span-1">
                       <Label htmlFor={`shirt_size-${index}`}>Size *</Label>
-                      <Select 
-                        value={item.shirt_size} 
-                        onValueChange={(value) => handleItemChange(index, "shirt_size", value)}
-                      >
-                        <SelectTrigger id={`shirt_size-${index}`} className="bg-background">
-                          <SelectValue placeholder="Size" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-popover z-50">
-                          <SelectItem value="39">39</SelectItem>
-                          <SelectItem value="40">40</SelectItem>
-                          <SelectItem value="42">42</SelectItem>
-                          <SelectItem value="44">44</SelectItem>
-                          <SelectItem value="46">46</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      {item.description === "__custom__" ? (
+                        <Input
+                          id={`shirt_size-${index}`}
+                          value={item.shirt_size}
+                          onChange={(e) => handleItemChange(index, "shirt_size", e.target.value)}
+                          placeholder="Size"
+                        />
+                      ) : (
+                        <Select 
+                          value={item.shirt_size} 
+                          onValueChange={(value) => handleItemChange(index, "shirt_size", value)}
+                        >
+                          <SelectTrigger id={`shirt_size-${index}`} className="bg-background">
+                            <SelectValue placeholder="Size" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-popover z-50">
+                            <SelectItem value="39">39</SelectItem>
+                            <SelectItem value="40">40</SelectItem>
+                            <SelectItem value="42">42</SelectItem>
+                            <SelectItem value="44">44</SelectItem>
+                            <SelectItem value="46">46</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      )}
                     </div>
                   )}
                   {index > 0 && (
                     <div className="col-span-1">
-                      <Select 
-                        value={item.shirt_size} 
-                        onValueChange={(value) => handleItemChange(index, "shirt_size", value)}
-                      >
-                        <SelectTrigger className="bg-background">
-                          <SelectValue placeholder="Size" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-popover z-50">
-                          <SelectItem value="39">39</SelectItem>
-                          <SelectItem value="40">40</SelectItem>
-                          <SelectItem value="42">42</SelectItem>
-                          <SelectItem value="44">44</SelectItem>
-                          <SelectItem value="46">46</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      {item.description === "__custom__" ? (
+                        <Input
+                          value={item.shirt_size}
+                          onChange={(e) => handleItemChange(index, "shirt_size", e.target.value)}
+                          placeholder="Size"
+                        />
+                      ) : (
+                        <Select 
+                          value={item.shirt_size} 
+                          onValueChange={(value) => handleItemChange(index, "shirt_size", value)}
+                        >
+                          <SelectTrigger className="bg-background">
+                            <SelectValue placeholder="Size" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-popover z-50">
+                            <SelectItem value="39">39</SelectItem>
+                            <SelectItem value="40">40</SelectItem>
+                            <SelectItem value="42">42</SelectItem>
+                            <SelectItem value="44">44</SelectItem>
+                            <SelectItem value="46">46</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      )}
                     </div>
                   )}
                   <div className="col-span-1">

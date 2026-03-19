@@ -396,7 +396,7 @@ export const generateQuotationPrintHTML = (quotation: any, companySettings: Comp
 
     ${defaultNotes ? `<div class="amount-words"><strong>Default Notes:</strong> ${defaultNotes}</div>` : ''}
 
-    ${termsAndConditions ? `<div class="amount-words"><strong>Terms and Conditions:</strong> ${termsAndConditions}</div>` : ''}
+    ${termsAndConditions ? `<div class="amount-words"><strong>Terms and Conditions:</strong><ol style="margin: 8px 0 0 20px; padding: 0;">${termsAndConditions.split(/\d+\.\s*/).filter(Boolean).map(t => `<li style="margin-bottom: 4px;">${t.trim()}</li>`).join('')}</ol></div>` : ''}
 
     <div class="footer-section">
       <div class="bank-details">
