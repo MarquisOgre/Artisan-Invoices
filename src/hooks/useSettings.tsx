@@ -59,7 +59,7 @@ export const useSettings = () => {
     defaultTerms: "Payment is due within 30 days of invoice date.",
     defaultNotes: "Thank you for your business!",
     currency: "INR",
-    termsAndConditions: ""
+    termsAndConditions: "1. 75% Advance Payment: An advance of 75% of the total quoted amount is required at the time of work order confirmation. Production will commence only after receipt of the advance payment. 2. 25% Balance Payment: The remaining 25% shall be payable at the time of delivery prior to dispatch of goods. 3. Mode of Payment: Payments can be made via bank transfer, UPI, or any other mutually agreed payment method. 4. Delay in Payment: Any delay in balance payment may result in delay of delivery or holding of goods until full payment is received. 5. Order Confirmation: The order will be considered confirmed only after receipt of the advance payment and final approval of design, sizes, and specifications."
   });
 
   const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>({
