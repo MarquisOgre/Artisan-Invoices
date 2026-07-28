@@ -23,7 +23,7 @@ export default function Auth() {
   const [sendingReset, setSendingReset] = useState(false);
 
   const handleForgotPassword = async () => {
-    const parsed = z.string().trim().email().max(255).safeParse(email);
+    const parsed = z.string().trim().email("Enter a valid email address").max(255).safeParse(email);
     if (!parsed.success) {
       toast({
         title: "Enter your email first",
@@ -38,12 +38,18 @@ export default function Auth() {
     });
     setSendingReset(false);
     if (error) {
-      toast({ title: "Could not send reset email", description: error.message, variant: "destructive" });
+      toast({
+        title: "Could not send reset email",
+        description: error.message,
+        variant: "destructive",
+      });
       return;
     }
     toast({
       title: "Check your email",
-      description: "If an account exists for that address, a password reset link is on its way.",
+      description:
+        "If an account exists for that address, a password reset link is on its way. The link expires shortly — use it right away.",
+      duration: 6000,
     });
   };
 

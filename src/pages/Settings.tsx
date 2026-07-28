@@ -10,6 +10,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { Upload, Settings as SettingsIcon, Building, Bell, Trash2, Folder } from "lucide-react";
 import { useSupabaseData } from "@/hooks/useSupabaseData";
 import { UserManagement } from "@/components/UserManagement";
+import { AdminSeed } from "@/components/AdminSeed";
 import { UserList } from "@/components/UserList";
 import { ExpenseCategoryManager } from "@/components/ExpenseCategoryManager";
 
@@ -144,6 +145,9 @@ const Settings = () => {
 
       {/* User Management - Admin Only */}
       <UserManagement />
+
+      {/* Admin Seeding - Admin Only */}
+      <AdminSeed />
 
       {/* User List - Admin Only */}
       <UserList />

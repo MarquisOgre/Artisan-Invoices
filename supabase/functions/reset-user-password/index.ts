@@ -10,15 +10,9 @@ Deno.serve(async (req) => {
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-      {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false
-        }
-      }
+      { auth: { autoRefreshToken: false, persistSession: false } }
     )
 
-    // Verify the requester is an admin
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
       return new Response(
@@ -37,7 +31,6 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Check if user is admin
     const { data: roleData } = await supabaseAdmin
       .from('user_roles')
       .select('role')
@@ -51,7 +44,6 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Get target user ID and new password from request
     const { userId, newPassword } = await req.json()
 
     if (!userId || !newPassword) {
@@ -61,14 +53,15 @@ Deno.serve(async (req) => {
       )
     }
 
-    if (newPassword.length < 6) {
+    if (typeof newPassword !== 'string' || newPassword.length < 8 || newPassword.length > 100) {
       return new Response(
-        JSON.stringify({ error: 'Password must be at least 6 characters' }),
+        JSON.stringify({ error: 'Password must be between 8 and 100 characters' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // Update the user's password
+    const { data: targetUser } = await supabaseAdmin.auth.admin.getUserById(userId)
+
     const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
       userId,
       { password: newPassword }
@@ -82,26 +75,25 @@ Deno.serve(async (req) => {
       )
     }
 
+    await supabaseAdmin.from('audit_log').insert({
+      event_type: 'password_reset',
+      target_email: targetUser?.user?.email ?? null,
+      target_user_id: userId,
+      actor_user_id: user.id,
+      actor_email: user.email ?? null,
+      details: { method: 'admin_reset' },
+    })
+
     return new Response(
-      JSON.stringify({ 
-        success: true,
-        message: 'Password updated successfully',
-        userId
-      }),
-      { 
-        status: 200,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      }
+      JSON.stringify({ success: true, message: 'Password updated successfully', userId }),
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
   } catch (error: unknown) {
     console.error('Error resetting password:', error)
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
-      { 
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      }
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
 })
