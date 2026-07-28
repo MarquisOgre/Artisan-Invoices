@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import Install from "./pages/Install";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -19,6 +20,7 @@ const App = () => (
         <Sonner />
         <Routes>
           <Route path="/auth" element={<Auth />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/install" element={<Install />} />
           <Route 
             path="/" 
