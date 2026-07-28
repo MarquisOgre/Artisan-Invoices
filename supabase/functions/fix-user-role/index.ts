@@ -18,10 +18,43 @@ Deno.serve(async (req) => {
       }
     )
 
+    // Require authentication
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Missing authorization header' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    const token = authHeader.replace('Bearer ', '')
+    const { data: { user: caller }, error: authError } = await supabaseAdmin.auth.getUser(token)
+
+    if (authError || !caller) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Require admin
+    const { data: callerRole, error: callerRoleError } = await supabaseAdmin
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', caller.id)
+      .single()
+
+    if (callerRoleError || callerRole?.role !== 'admin') {
+      return new Response(
+        JSON.stringify({ error: 'Only admins can fix user roles' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
     // Get email from request
     const { email } = await req.json()
 
-    if (!email) {
+    if (!email || typeof email !== 'string') {
       return new Response(
         JSON.stringify({ error: 'Email is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -30,7 +63,7 @@ Deno.serve(async (req) => {
 
     // Find user by email
     const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers()
-    
+
     if (listError) {
       console.error('Error listing users:', listError)
       return new Response(
@@ -40,7 +73,7 @@ Deno.serve(async (req) => {
     }
 
     const user = users.find(u => u.email === email)
-    
+
     if (!user) {
       return new Response(
         JSON.stringify({ error: 'User not found' }),
@@ -57,7 +90,7 @@ Deno.serve(async (req) => {
 
     if (existingRole) {
       return new Response(
-        JSON.stringify({ 
+        JSON.stringify({
           success: true,
           message: 'User already has a role',
           role: existingRole.role
@@ -83,7 +116,7 @@ Deno.serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         success: true,
         message: 'Role added successfully',
         user: {
@@ -92,7 +125,7 @@ Deno.serve(async (req) => {
           role: 'user'
         }
       }),
-      { 
+      {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
@@ -102,7 +135,7 @@ Deno.serve(async (req) => {
     console.error('Error fixing user role:', error)
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
-      { 
+      {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
