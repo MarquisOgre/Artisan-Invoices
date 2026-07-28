@@ -20,6 +20,32 @@ export default function Auth() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [sendingReset, setSendingReset] = useState(false);
+
+  const handleForgotPassword = async () => {
+    const parsed = z.string().trim().email().max(255).safeParse(email);
+    if (!parsed.success) {
+      toast({
+        title: "Enter your email first",
+        description: "Type the email for your account above, then click Forgot password.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setSendingReset(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(parsed.data, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setSendingReset(false);
+    if (error) {
+      toast({ title: "Could not send reset email", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({
+      title: "Check your email",
+      description: "If an account exists for that address, a password reset link is on its way.",
+    });
+  };
 
   // Clear any stored session on component mount to handle expired tokens
   useEffect(() => {
@@ -184,6 +210,19 @@ export default function Auth() {
           >
             {isSubmitting ? "Processing..." : isLogin ? "Sign In" : "Sign Up"}
           </Button>
+
+          {isLogin && (
+            <div className="text-right">
+              <button
+                type="button"
+                onClick={handleForgotPassword}
+                disabled={sendingReset}
+                className="text-blue-300 underline hover:text-blue-200 text-sm disabled:opacity-60"
+              >
+                {sendingReset ? "Sending reset link…" : "Forgot password?"}
+              </button>
+            </div>
+          )}
         </form>
 
         <div className="mt-6 text-center">
