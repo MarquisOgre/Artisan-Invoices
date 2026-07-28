@@ -5,18 +5,12 @@ import { corsHeaders } from '../_shared/cors.ts'
  * Bootstrap / seed admin users.
  *
  * Modes:
- *  - First-run bootstrap: if NO admin exists in user_roles yet, the caller
- *    may create/promote an admin without being authenticated. This is how the
- *    very first admin is seeded.
+ *  - First-run bootstrap: if NO admin exists in user_roles yet, the caller may
+ *    create/promote an admin without being authenticated.
  *  - Ongoing seeding: once at least one admin exists, the caller MUST be
  *    authenticated AND have the admin role.
  *
- * Behavior:
- *  - If the target email already exists as an auth user, ensure they have the
- *    admin role (idempotent). Password is only set if provided AND the caller
- *    is authorized to (bootstrap mode or admin).
- *  - If the target email does not exist, create the user with the provided
- *    password (email auto-confirmed) and assign the admin role.
+ * Writes an entry to public.audit_log on every successful run.
  */
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -41,7 +35,6 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Check whether any admin exists.
     const { count: adminCount, error: countError } = await supabaseAdmin
       .from('user_roles')
       .select('*', { count: 'exact', head: true })
@@ -56,7 +49,9 @@ Deno.serve(async (req) => {
 
     const isBootstrap = (adminCount ?? 0) === 0
 
-    // If not bootstrap, require an authenticated admin caller.
+    let actorId: string | null = null
+    let actorEmail: string | null = null
+
     if (!isBootstrap) {
       const authHeader = req.headers.get('Authorization')
       if (!authHeader) {
@@ -84,9 +79,10 @@ Deno.serve(async (req) => {
           { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
+      actorId = caller.id
+      actorEmail = caller.email ?? null
     }
 
-    // Password validation when creating a user or when explicitly resetting.
     if (password !== undefined) {
       if (typeof password !== 'string' || password.length < 8 || password.length > 100) {
         return new Response(
@@ -96,7 +92,6 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Look up user by email.
     const { data: listData, error: listError } = await supabaseAdmin.auth.admin.listUsers()
     if (listError) {
       return new Response(
@@ -108,10 +103,10 @@ Deno.serve(async (req) => {
 
     let userId: string
     let createdUser = false
+    let passwordUpdated = false
 
     if (existing) {
       userId = existing.id
-      // Optionally reset password if provided.
       if (password) {
         const { error: updErr } = await supabaseAdmin.auth.admin.updateUserById(userId, { password })
         if (updErr) {
@@ -120,6 +115,7 @@ Deno.serve(async (req) => {
             { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
           )
         }
+        passwordUpdated = true
       }
     } else {
       if (!password) {
@@ -143,13 +139,13 @@ Deno.serve(async (req) => {
       createdUser = true
     }
 
-    // Ensure admin role assignment (idempotent).
     const { data: existingRole } = await supabaseAdmin
       .from('user_roles')
       .select('role')
       .eq('user_id', userId)
-      .single()
+      .maybeSingle()
 
+    let rolePromoted = false
     if (!existingRole) {
       const { error: insErr } = await supabaseAdmin
         .from('user_roles')
@@ -160,6 +156,7 @@ Deno.serve(async (req) => {
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
+      rolePromoted = true
     } else if (existingRole.role !== 'admin') {
       const { error: updErr } = await supabaseAdmin
         .from('user_roles')
@@ -171,7 +168,23 @@ Deno.serve(async (req) => {
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
+      rolePromoted = true
     }
+
+    // Audit log entry (best-effort; do not block response on log errors)
+    await supabaseAdmin.from('audit_log').insert({
+      event_type: 'bootstrap_admin',
+      target_email: email,
+      target_user_id: userId,
+      actor_user_id: actorId,
+      actor_email: actorEmail,
+      details: {
+        bootstrap: isBootstrap,
+        created: createdUser,
+        password_updated: passwordUpdated,
+        role_promoted: rolePromoted,
+      },
+    })
 
     return new Response(
       JSON.stringify({
