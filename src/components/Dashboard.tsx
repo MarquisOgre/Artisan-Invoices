@@ -176,9 +176,9 @@ const Dashboard = ({ quotations, invoices, customers, expenses = [], onCreateQuo
   const recentQuotations = quotations.slice(0, 3).map(q => ({
     id: q.quotation_number || q.id,
     customer: customers.find(c => c.id === q.customer_id)?.name || "Unknown Customer", 
-    amount: `₹${(q.amount || 0).toLocaleString()}`,
+    amount: `₹${(q.total_amount || q.subtotal || q.amount || 0).toLocaleString()}`,
     status: q.status,
-    date: q.date
+    date: q.quotation_date || q.date
   }));
 
   const recentInvoices = invoices.slice(0, 3).map(i => ({
