@@ -118,3 +118,11 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+/* Recharts uses --secondary for the invoice series. The default secondary
+   token is intentionally very light in the application theme, which made
+   the invoice bars nearly invisible. Scope a chart-only value so the rest
+   of the UI keeps its existing secondary styling. */
+.recharts-wrapper {
+  --secondary: 210 84% 62%;
+}
