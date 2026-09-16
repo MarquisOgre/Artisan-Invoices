@@ -75,6 +75,8 @@ const numericAmount = (...values: unknown[]) => {
   return 0;
 };
 
+const monthKey = (year: number, month: number) => `${year}-${String(month).padStart(2, "0")}`;
+
 const Dashboard = ({ quotations, invoices, customers, expenses = [], onCreateQuotation, onCreateInvoice, onCreateCustomer, onViewQuotations, onViewInvoices }: DashboardProps) => {
   const { isAdmin } = useUserRole();
   const currentDate = new Date();
@@ -114,15 +116,52 @@ const Dashboard = ({ quotations, invoices, customers, expenses = [], onCreateQuo
   const totalExpenses = filteredExpenses.reduce((sum, e) => sum + numericAmount(e.amount), 0);
 
   const getMonthlyData = () => {
-    const months = [];
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+    // Build a set of months that actually contain business activity.
+    // This lets the chart fall back to the available business history instead
+    // of rendering an almost-empty six-month window when records are sparse.
+    const availableMonths = new Set<string>();
+
+    invoices.forEach(inv => {
+      const date = parseDateValue(inv.invoice_date || inv.date || inv.created_at);
+      if (date) availableMonths.add(monthKey(date.getFullYear(), date.getMonth() + 1));
+    });
+
+    quotations.forEach(q => {
+      const date = parseDateValue(q.quotation_date || q.date || q.created_at);
+      if (date) availableMonths.add(monthKey(date.getFullYear(), date.getMonth() + 1));
+    });
+
+    expenses.forEach(e => {
+      const month = Number(e.month);
+      const year = Number(e.year);
+      if (month >= 1 && month <= 12 && Number.isFinite(year)) {
+        availableMonths.add(monthKey(year, month));
+      }
+    });
+
     const anchorMonth = selectedMonth === 0 ? currentDate.getMonth() : selectedMonth - 1;
     const anchorYear = selectedMonth === 0 ? currentDate.getFullYear() : selectedYear;
 
+    let keys: string[] = [];
     for (let i = 5; i >= 0; i--) {
       const date = new Date(anchorYear, anchorMonth - i, 1);
-      const month = date.getMonth() + 1;
-      const year = date.getFullYear();
+      keys.push(monthKey(date.getFullYear(), date.getMonth() + 1));
+    }
+
+    // If the selected six-month period contains one or fewer months with data,
+    // use the latest available business months (up to six) instead.
+    const populatedInWindow = keys.filter(key => availableMonths.has(key)).length;
+    if (availableMonths.size > 0 && populatedInWindow <= 1) {
+      const historicalKeys = Array.from(availableMonths).sort().slice(-6);
+      if (historicalKeys.length > 0) keys = historicalKeys;
+    }
+
+    return keys.map(key => {
+      const [yearText, monthText] = key.split('-');
+      const year = Number(yearText);
+      const month = Number(monthText);
 
       const monthRevenue = invoices
         .filter(inv => {
@@ -147,16 +186,14 @@ const Dashboard = ({ quotations, invoices, customers, expenses = [], onCreateQuo
         .filter(e => Number(e.month) === month && Number(e.year) === year)
         .reduce((sum, e) => sum + numericAmount(e.amount), 0);
 
-      months.push({
-        month: monthNames[date.getMonth()],
+      return {
+        month: monthNames[month - 1],
         revenue: Math.round(monthRevenue),
         quotations: monthQuotations,
         invoices: monthInvoices,
         expenses: Math.round(monthExpenses)
-      });
-    }
-
-    return months;
+      };
+    });
   };
 
   const monthlyData = getMonthlyData();
