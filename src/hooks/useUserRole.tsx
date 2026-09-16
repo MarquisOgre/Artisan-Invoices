@@ -4,22 +4,14 @@ import { useAuth } from "./useAuth";
 
 export type AppRole = 'admin' | 'user';
 
-// Temporary screenshot/demo mode. Remove this flag when returning to normal auth-only behavior.
-const SCREENSHOT_DEMO_MODE = true;
-
 export const useUserRole = () => {
   const { user } = useAuth();
-  const [role, setRole] = useState<AppRole | null>(SCREENSHOT_DEMO_MODE && !user ? 'admin' : null);
-  const [loading, setLoading] = useState(!(SCREENSHOT_DEMO_MODE && !user));
+  const [role, setRole] = useState<AppRole | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchUserRole = async () => {
       if (!user) {
-        if (SCREENSHOT_DEMO_MODE) {
-          setRole('admin');
-          setLoading(false);
-          return;
-        }
         setRole(null);
         setLoading(false);
         return;
