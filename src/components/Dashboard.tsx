@@ -14,7 +14,7 @@ import {
   BarChart3
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
-import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 interface DashboardProps {
   quotations: any[];
@@ -293,14 +293,8 @@ const Dashboard = ({ quotations, invoices, customers, expenses = [], onCreateQuo
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={monthlyData}>
                 <defs>
-                  <linearGradient id="colorQuotations" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.95}/>
-                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.65}/>
-                  </linearGradient>
-                  <linearGradient id="colorInvoices" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(262 83% 58%)" stopOpacity={0.95}/>
-                    <stop offset="95%" stopColor="hsl(262 83% 58%)" stopOpacity={0.65}/>
-                  </linearGradient>
+                  <linearGradient id="colorQuotations" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.95}/><stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.65}/></linearGradient>
+                  <linearGradient id="colorInvoices" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="hsl(24 94% 56%)" stopOpacity={0.95}/><stop offset="95%" stopColor="hsl(24 94% 56%)" stopOpacity={0.65}/></linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
                 <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" />
