@@ -72,7 +72,7 @@ const generateStyles = () => `
     }
 
     .logo {
-      height: 60px;
+      height: 100px;
       width: auto;
       object-fit: contain;
     }
