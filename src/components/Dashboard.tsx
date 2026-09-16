@@ -14,7 +14,7 @@ import {
   BarChart3
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
-import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
 interface DashboardProps {
   quotations: any[];
@@ -117,10 +117,6 @@ const Dashboard = ({ quotations, invoices, customers, expenses = [], onCreateQuo
 
   const getMonthlyData = () => {
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-    // Build a set of months that actually contain business activity.
-    // This lets the chart fall back to the available business history instead
-    // of rendering an almost-empty six-month window when records are sparse.
     const availableMonths = new Set<string>();
 
     invoices.forEach(inv => {
@@ -150,8 +146,6 @@ const Dashboard = ({ quotations, invoices, customers, expenses = [], onCreateQuo
       keys.push(monthKey(date.getFullYear(), date.getMonth() + 1));
     }
 
-    // If the selected six-month period contains one or fewer months with data,
-    // use the latest available business months (up to six) instead.
     const populatedInWindow = keys.filter(key => availableMonths.has(key)).length;
     if (availableMonths.size > 0 && populatedInWindow <= 1) {
       const historicalKeys = Array.from(availableMonths).sort().slice(-6);
@@ -299,8 +293,14 @@ const Dashboard = ({ quotations, invoices, customers, expenses = [], onCreateQuo
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={monthlyData}>
                 <defs>
-                  <linearGradient id="colorQuotations" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.9}/><stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.6}/></linearGradient>
-                  <linearGradient id="colorInvoices" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="hsl(var(--secondary))" stopOpacity={0.9}/><stop offset="95%" stopColor="hsl(var(--secondary))" stopOpacity={0.6}/></linearGradient>
+                  <linearGradient id="colorQuotations" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.95}/>
+                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.65}/>
+                  </linearGradient>
+                  <linearGradient id="colorInvoices" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(262 83% 58%)" stopOpacity={0.95}/>
+                    <stop offset="95%" stopColor="hsl(262 83% 58%)" stopOpacity={0.65}/>
+                  </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
                 <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" />
