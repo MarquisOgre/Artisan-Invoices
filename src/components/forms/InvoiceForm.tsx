@@ -475,7 +475,7 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
                       onChange={(e) => handleChange('taxType', e.target.value)}
                       className="mr-2"
                     />
-                    IGST 5%
+                    IGST 5% <span className="ml-1">(Different State)</span>
                   </Label>
 
                   <Label className="flex items-center">
@@ -487,7 +487,7 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
                       onChange={(e) => handleChange('taxType', e.target.value)}
                       className="mr-2"
                     />
-                    CGST 2.5% & SGST 2.5%
+                    CGST 2.5% & SGST 2.5% <span className="ml-1">(Within the State)</span>
                   </Label>
                 </div>
 
