@@ -466,30 +466,34 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
                     CGST 6% & SGST 6%
                   </Label>
 
-                  <Label className="flex items-center">
+                  <Label className="flex items-start">
                     <input
                       type="radio"
                       name="taxType"
                       value="IGST_5"
                       checked={formData.taxType === 'IGST_5'}
                       onChange={(e) => handleChange('taxType', e.target.value)}
-                      className="mr-2"
+                      className="mr-2 mt-1 shrink-0"
                     />
-                    <span className="block">IGST 5%</span>
-                    <span className="block">(Different State)</span>
+                    <span className="flex flex-col">
+                      <span>IGST 5%</span>
+                      <span>(Different State)</span>
+                    </span>
                   </Label>
 
-                  <Label className="flex items-center">
+                  <Label className="flex items-start">
                     <input
                       type="radio"
                       name="taxType"
                       value="CGST_SGST_5"
                       checked={formData.taxType === 'CGST_SGST_5'}
                       onChange={(e) => handleChange('taxType', e.target.value)}
-                      className="mr-2"
+                      className="mr-2 mt-1 shrink-0"
                     />
-                    <span className="block">CGST 2.5% & SGST 2.5%</span>
-                    <span className="block">(Within the State)</span>
+                    <span className="flex flex-col">
+                      <span>CGST 2.5% & SGST 2.5%</span>
+                      <span>(Within the State)</span>
+                    </span>
                   </Label>
                 </div>
 
