@@ -601,6 +601,13 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
                           onChange={(e) => handleItemChange(index, "shirt_size", e.target.value)}
                           placeholder="Size"
                         />
+                      ) : item.shirt_size === "__custom_size__" ? (
+                        <Input
+                          id={`shirt_size-${index}`}
+                          value=""
+                          onChange={(e) => handleItemChange(index, "shirt_size", e.target.value)}
+                          placeholder="Enter custom size"
+                        />
                       ) : (
                         <Select 
                           value={item.shirt_size} 
@@ -615,6 +622,7 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
                             <SelectItem value="42">42</SelectItem>
                             <SelectItem value="44">44</SelectItem>
                             <SelectItem value="46">46</SelectItem>
+                            <SelectItem value="__custom_size__">Custom Size</SelectItem>
                           </SelectContent>
                         </Select>
                       )}
@@ -622,11 +630,11 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
                   )}
                   {index > 0 && (
                     <div className="col-span-1">
-                      {item.description === "__custom__" ? (
+                      {item.description === "__custom__" || item.shirt_size === "__custom_size__" ? (
                         <Input
-                          value={item.shirt_size}
+                          value={item.shirt_size === "__custom_size__" ? "" : item.shirt_size}
                           onChange={(e) => handleItemChange(index, "shirt_size", e.target.value)}
-                          placeholder="Size"
+                          placeholder="Enter custom size"
                         />
                       ) : (
                         <Select 
@@ -642,6 +650,7 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
                             <SelectItem value="42">42</SelectItem>
                             <SelectItem value="44">44</SelectItem>
                             <SelectItem value="46">46</SelectItem>
+                            <SelectItem value="__custom_size__">Custom Size</SelectItem>
                           </SelectContent>
                         </Select>
                       )}
