@@ -80,6 +80,15 @@ const QuotationForm = ({ customers, onSubmit, onCancel, initialData, mode = 'cre
             customDescription: item.description
           };
         }
+
+        const standardSizes = ["39", "40", "42", "44", "46"];
+        if (item.shirt_size && !standardSizes.includes(item.shirt_size)) {
+          return {
+            ...item,
+            shirt_size: "__custom_size__"
+          };
+        }
+
         return item;
       });
       setItems(processedItems);
@@ -571,6 +580,7 @@ const QuotationForm = ({ customers, onSubmit, onCancel, initialData, mode = 'cre
                             <SelectItem value="42">42</SelectItem>
                             <SelectItem value="44">44</SelectItem>
                             <SelectItem value="46">46</SelectItem>
+                          <SelectItem value="__custom_size__">Custom Size</SelectItem>
                           </SelectContent>
                         </Select>
                       )}
@@ -598,6 +608,7 @@ const QuotationForm = ({ customers, onSubmit, onCancel, initialData, mode = 'cre
                             <SelectItem value="42">42</SelectItem>
                             <SelectItem value="44">44</SelectItem>
                             <SelectItem value="46">46</SelectItem>
+                            <SelectItem value="__custom_size__">Custom Size</SelectItem>
                           </SelectContent>
                         </Select>
                       )}
