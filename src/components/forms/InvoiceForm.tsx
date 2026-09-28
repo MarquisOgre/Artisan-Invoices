@@ -592,7 +592,7 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
                     </div>
                   )}
                   {index === 0 && (
-                    <div className="col-span-1">
+                    <div className="col-span-2">
                       <Label htmlFor={`shirt_size-${index}`}>Size *</Label>
                       {item.description === "__custom__" ? (
                         <Input
@@ -622,7 +622,7 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
                     </div>
                   )}
                   {index > 0 && (
-                    <div className="col-span-1">
+                    <div className="col-span-2">
                       {item.description === "__custom__" ? (
                         <Input
                           value={item.shirt_size}
@@ -649,7 +649,7 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
                       )}
                     </div>
                   )}
-                  <div className="col-span-1">
+                  <div className="col-span-2">
                     {index === 0 && <Label htmlFor={`quantity-${index}`}>Qty</Label>}
                     <Input
                       id={`quantity-${index}`}
@@ -674,7 +674,7 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
                     {index === 0 && <Label>Amount</Label>}
                     <Input value={`₹${item.amount.toFixed(2)}`} disabled />
                   </div>
-                  <div className="col-span-1">
+                  <div className="col-span-2">
                     {items.length > 1 && (
                       <Button
                         type="button"
