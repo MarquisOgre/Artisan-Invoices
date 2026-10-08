@@ -69,11 +69,21 @@ Deno.serve(async (req) => {
       )
     }
 
-    const { data: existingUsername } = await supabaseAdmin
+    const { data: existingUsername, error: usernameLookupError } = await supabaseAdmin
       .from('user_login_names')
       .select('user_id')
       .eq('username', normalizedUsername)
       .maybeSingle()
+
+    if (usernameLookupError) {
+      console.error('Username lookup failed:', usernameLookupError)
+      return new Response(
+        JSON.stringify({
+          error: 'Username login is not configured correctly. Please run the username login database migration.'
+        }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
 
     if (existingUsername) {
       return new Response(
@@ -128,6 +138,10 @@ Deno.serve(async (req) => {
       })
 
     if (roleInsertError) {
+      // Do not leave an orphaned auth user + username mapping when role creation fails.
+      await supabaseAdmin.from('user_login_names').delete().eq('user_id', newUser.user.id)
+      await supabaseAdmin.auth.admin.deleteUser(newUser.user.id)
+
       return new Response(
         JSON.stringify({ error: roleInsertError.message }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
