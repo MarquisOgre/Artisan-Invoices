@@ -199,11 +199,13 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
       }
 
       const resolvedCustomerCode = customer.customer_code || null;
+      const resolvedOrderNo = orderNo.endsWith("-TEMP") ? await requestOrderNo() : orderNo.trim();
       setCustomerCode(resolvedCustomerCode || "");
+      setOrderNo(resolvedOrderNo);
 
       const payload = {
         user_id: user.id,
-        order_no: orderNo.trim(),
+        order_no: resolvedOrderNo,
         order_date: orderDate,
         customer_id: customer.id,
         customer_code: resolvedCustomerCode,
@@ -231,7 +233,7 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
 
       toast({
         title: "Order sheet saved",
-        description: `Order ${orderNo} has been saved successfully.`,
+        description: `Order ${resolvedOrderNo} for customer ${resolvedCustomerCode || customer.name} has been saved successfully.`,
       });
       onSaved?.();
     } catch (error: any) {
