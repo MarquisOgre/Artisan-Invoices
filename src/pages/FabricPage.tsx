@@ -171,45 +171,38 @@ const FabricPage = (_props: FabricPageProps) => {
 
   return (
     <div className="mx-auto w-full max-w-[1500px] space-y-5">
-      <div className="flex flex-col gap-4 rounded-2xl border bg-card p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="text-sm font-medium text-muted-foreground">Artisan Apparels</p>
-          <h1 className="text-2xl font-bold text-primary">Fabric Master</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Maintain fabric codes and details used by Shirt & Pant Order Forms.
-          </p>
+      <div className="flex flex-col gap-4 rounded-2xl border bg-card p-5 shadow-sm lg:flex-row lg:items-center lg:justify-between">
+        <h1 className="text-2xl font-bold text-primary">Fabric Master</h1>
+
+        <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center lg:w-auto">
+          <div className="relative w-full sm:w-[420px]">
+            <Search className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search code, article, design, composition..."
+              className="h-10 pl-9 pr-9"
+            />
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch("")}
+                className="absolute right-2 top-2 rounded p-1 text-muted-foreground hover:bg-muted"
+                aria-label="Clear fabric search"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+
+          <Button onClick={openNew} className="h-10 shrink-0 sm:h-11">
+            <Plus className="mr-2 h-4 w-4" />
+            Add Fabric
+          </Button>
         </div>
-        <Button onClick={openNew} className="h-11">
-          <Plus className="mr-2 h-4 w-4" />
-          Add Fabric
-        </Button>
       </div>
 
       <Card>
-        <CardHeader className="pb-3">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <CardTitle className="text-lg">Fabric Details</CardTitle>
-            <div className="relative w-full lg:w-[420px]">
-              <Search className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                placeholder="Search code, article, design, composition..."
-                className="h-10 pl-9 pr-9"
-              />
-              {search && (
-                <button
-                  type="button"
-                  onClick={() => setSearch("")}
-                  className="absolute right-2 top-2 rounded p-1 text-muted-foreground hover:bg-muted"
-                  aria-label="Clear fabric search"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
-            </div>
-          </div>
-        </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1100px] text-sm">
