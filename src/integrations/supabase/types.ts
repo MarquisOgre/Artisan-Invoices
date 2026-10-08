@@ -21,6 +21,8 @@ export type Database = {
           order_no: string
           order_date: string
           customer_id: string | null
+          shirt_fabric_id: string | null
+          pant_fabric_id: string | null
           customer_code: string | null
           customer_name: string
           contact_no: string | null
@@ -48,6 +50,8 @@ export type Database = {
           order_no: string
           order_date?: string
           customer_id?: string | null
+          shirt_fabric_id?: string | null
+          pant_fabric_id?: string | null
           customer_code?: string | null
           customer_name: string
           contact_no?: string | null
@@ -75,6 +79,8 @@ export type Database = {
           order_no?: string
           order_date?: string
           customer_id?: string | null
+          shirt_fabric_id?: string | null
+          pant_fabric_id?: string | null
           customer_code?: string | null
           customer_name?: string
           contact_no?: string | null
@@ -105,6 +111,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      fabrics: {
+        Row: {
+          id: string
+          code: string
+          brand: string
+          article: string
+          design: string
+          finish: string | null
+          count_spec: string | null
+          composition: string | null
+          swatch_url: string | null
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          code: string
+          brand: string
+          article: string
+          design: string
+          finish?: string | null
+          count_spec?: string | null
+          composition?: string | null
+          swatch_url?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          code?: string
+          brand?: string
+          article?: string
+          design?: string
+          finish?: string | null
+          count_spec?: string | null
+          composition?: string | null
+          swatch_url?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       customers: {
         Row: {

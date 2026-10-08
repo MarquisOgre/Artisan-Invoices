@@ -6,6 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import FabricCombobox, { type FabricOption } from "@/components/forms/FabricCombobox";
 import {
   Select,
   SelectContent,
@@ -85,6 +86,7 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
   const [customerName, setCustomerName] = useState("");
   const [contactNo, setContactNo] = useState("");
   const [selectedCustomerId, setSelectedCustomerId] = useState("");
+  const [fabrics, setFabrics] = useState<FabricOption[]>([]);
 
   const existingCustomer = useMemo(
     () => customers.find(customer => customer.id === selectedCustomerId) || null,
@@ -96,6 +98,7 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
   const [customerSignature, setCustomerSignature] = useState("");
 
   const [shirtFabricCode, setShirtFabricCode] = useState("");
+  const [shirtFabricId, setShirtFabricId] = useState("");
   const [shirtPatterns, setShirtPatterns] = useState<string[]>(["", "", "", "", ""]);
   const [shirtStandardSize, setShirtStandardSize] = useState("");
   const [shirtMeasurements, setShirtMeasurements] = useState<Record<string, string>>(
@@ -106,6 +109,7 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
   const [shirtNotes, setShirtNotes] = useState("");
 
   const [pantFabricCode, setPantFabricCode] = useState("");
+  const [pantFabricId, setPantFabricId] = useState("");
   const [pantPatterns, setPantPatterns] = useState<string[]>(["", "", "", "", ""]);
   const [pantStandardSize, setPantStandardSize] = useState("");
   const [pantMeasurements, setPantMeasurements] = useState<Record<string, string>>(
@@ -142,6 +146,23 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
     setOrderNo("");
   }, [orderDate]);
 
+  useEffect(() => {
+    const loadFabrics = async () => {
+      const { data, error } = await supabase
+        .from("fabrics")
+        .select("id, code, brand, article, design, finish, count_spec, composition, swatch_url, is_active")
+        .eq("is_active", true)
+        .order("code", { ascending: true });
+      if (error) {
+        console.error("Error loading fabrics:", error);
+        toast({ title: "Unable to load fabrics", description: error.message, variant: "destructive" });
+        return;
+      }
+      setFabrics((data || []) as FabricOption[]);
+    };
+    loadFabrics();
+  }, [toast]);
+
   const toggleStyle = (
     value: string,
     selected: string[],
@@ -173,6 +194,7 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
     setDeliveryDate("");
     setCustomerSignature("");
     setShirtFabricCode("");
+    setShirtFabricId("");
     setShirtPatterns(["", "", "", "", ""]);
     setShirtStandardSize("");
     setShirtMeasurements(emptyMeasurements(SHIRT_MEASUREMENTS));
@@ -180,6 +202,7 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
     setShirtOtherStyle("");
     setShirtNotes("");
     setPantFabricCode("");
+    setPantFabricId("");
     setPantPatterns(["", "", "", "", ""]);
     setPantStandardSize("");
     setPantMeasurements(emptyMeasurements(PANT_MEASUREMENTS));
@@ -248,12 +271,14 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
         customer_code: resolvedCustomerCode,
         customer_name: customer.name,
         contact_no: contactNo.trim() || customer.phone || null,
+        shirt_fabric_id: shirtFabricId || null,
         shirt_fabric_code: shirtFabricCode.trim() || null,
         shirt_patterns: shirtPatterns.filter(Boolean),
         shirt_standard_size: shirtStandardSize.trim() || null,
         shirt_measurements: shirtMeasurements,
         shirt_style: { selected: shirtStyles, other: shirtOtherStyle.trim() },
         shirt_notes: shirtNotes.trim() || null,
+        pant_fabric_id: pantFabricId || null,
         pant_fabric_code: pantFabricCode.trim() || null,
         pant_patterns: pantPatterns.filter(Boolean),
         pant_standard_size: pantStandardSize.trim() || null,
@@ -411,6 +436,9 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
             tone="blue"
             icon={<Shirt className="h-10 w-10" strokeWidth={1.6} />}
             fabricCode={shirtFabricCode}
+            fabricId={shirtFabricId}
+            setFabricId={setShirtFabricId}
+            fabrics={fabrics}
             setFabricCode={setShirtFabricCode}
             patterns={shirtPatterns}
             setPatterns={setShirtPatterns}
@@ -434,6 +462,9 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
             tone="brown"
             icon={<Scissors className="h-10 w-10" strokeWidth={1.6} />}
             fabricCode={pantFabricCode}
+            fabricId={pantFabricId}
+            setFabricId={setPantFabricId}
+            fabrics={fabrics}
             setFabricCode={setPantFabricCode}
             patterns={pantPatterns}
             setPatterns={setPantPatterns}
@@ -545,6 +576,9 @@ type GarmentSectionProps = {
   tone: "blue" | "brown";
   icon: React.ReactNode;
   fabricCode: string;
+  fabricId: string;
+  setFabricId: (value: string) => void;
+  fabrics: FabricOption[];
   setFabricCode: (value: string) => void;
   patterns: string[];
   setPatterns: React.Dispatch<React.SetStateAction<string[]>>;
@@ -572,6 +606,9 @@ const GarmentSection = ({
   tone,
   icon,
   fabricCode,
+  fabricId,
+  setFabricId,
+  fabrics,
   setFabricCode,
   patterns,
   setPatterns,
@@ -613,12 +650,18 @@ const GarmentSection = ({
 
       <div className="grid lg:grid-cols-[0.95fr_1.35fr_1.55fr_1.1fr_1.45fr]">
         <GarmentInfo title="Fabric Code">
-          <Input
-            value={fabricCode}
-            onChange={e => setFabricCode(e.target.value)}
-            placeholder="Fabric code"
-            className="h-11 bg-white"
+          <FabricCombobox
+            fabrics={fabrics}
+            value={fabricId}
+            onChange={fabric => {
+              setFabricId(fabric?.id || "");
+              setFabricCode(fabric?.code || "");
+            }}
+            placeholder={fabrics.length ? "Select fabric code" : "No fabrics available"}
           />
+          {fabricCode && (
+            <p className="mt-2 truncate text-xs font-medium text-[#123766]">{fabricCode}</p>
+          )}
         </GarmentInfo>
 
         <GarmentInfo title="Pattern / Design">
