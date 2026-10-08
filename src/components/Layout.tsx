@@ -254,6 +254,20 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
 
               {isAdmin && (
                 <Button
+                  variant={currentPage === "fabrics" ? "default" : "ghost"}
+                  className="w-full justify-start"
+                  onClick={() => {
+                    onPageChange("fabrics");
+                    setMobileMenuOpen(false);
+                  }}
+                >
+                  <Layers3 className="mr-3 h-4 w-4" />
+                  Fabrics
+                </Button>
+              )}
+
+              {isAdmin && (
+                <Button
                   variant={currentPage === "settings" ? "default" : "ghost"}
                   className="w-full justify-start"
                   onClick={() => {
