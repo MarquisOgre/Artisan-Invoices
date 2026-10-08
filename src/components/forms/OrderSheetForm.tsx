@@ -648,7 +648,7 @@ const GarmentSection = ({
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-[0.95fr_1.35fr_1.55fr_1.55fr]">
+      <div className="grid lg:grid-cols-[0.95fr_1.35fr_1.55fr_1.1fr_1.45fr]">
         <GarmentInfo title="Fabric Code">
           <FabricCombobox
             fabrics={fabrics}
@@ -722,18 +722,15 @@ const GarmentSection = ({
               compact
             />
           </div>
+        </GarmentInfo>
 
-          <div className="mt-5 border-t pt-4">
-            <Label className="mb-3 block text-sm font-bold text-[#123766]">
-              Notes
-            </Label>
-            <Textarea
-              value={notes}
-              onChange={e => setNotes(e.target.value)}
-              placeholder={blue ? "Shirt notes..." : "Pant notes..."}
-              className="min-h-[150px] resize-y bg-white"
-            />
-          </div>
+        <GarmentInfo title="Notes">
+          <Textarea
+            value={notes}
+            onChange={e => setNotes(e.target.value)}
+            placeholder={blue ? "Shirt notes..." : "Pant notes..."}
+            className="min-h-[190px] resize-y bg-white"
+          />
         </GarmentInfo>
       </div>
     </section>
