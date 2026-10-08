@@ -44,7 +44,9 @@ const Index = () => {
     path === "/order-forms/new" ? "new-order-sheet" :
     path === "/settings" ? "settings" :
     path.startsWith("/customers/") ? "customer-form" :
+    path.match(/^\/invoices\/[^/]+\/edit$/) ? "invoice-edit-form" :
     path.startsWith("/invoices/") ? "invoice-detail" :
+    path.match(/^\/quotations\/[^/]+\/edit$/) ? "quotation-edit-form" :
     path.startsWith("/quotations/") ? "quotation-detail" :
     "dashboard";
   const { toast } = useToast();
@@ -73,7 +75,9 @@ const Index = () => {
   useEffect(() => {
     const customerMatch = path.match(/^\/customers\/([^/]+)(?:\/edit)?$/);
     const invoiceMatch = path.match(/^\/invoices\/([^/]+)$/);
+    const invoiceEditMatch = path.match(/^\/invoices\/([^/]+)\/edit$/);
     const quotationMatch = path.match(/^\/quotations\/([^/]+)$/);
+    const quotationEditMatch = path.match(/^\/quotations\/([^/]+)\/edit$/);
 
     if (customerMatch && !path.endsWith("/edit")) {
       const customer = customers.find(c => c.id === customerMatch[1]);
@@ -83,9 +87,17 @@ const Index = () => {
       const customer = customers.find(c => c.id === customerMatch[1]);
       if (customer) setEditingCustomer(customer);
     }
+    if (invoiceEditMatch) {
+      const invoice = invoices.find(i => i.id === invoiceEditMatch[1] || i.invoice_number === invoiceEditMatch[1]);
+      if (invoice) setEditingInvoice(invoice);
+    }
     if (invoiceMatch) {
       const invoice = invoices.find(i => i.id === invoiceMatch[1] || i.invoice_number === invoiceMatch[1]);
       if (invoice) setViewingInvoice(invoice);
+    }
+    if (quotationEditMatch) {
+      const quotation = quotations.find(q => q.id === quotationEditMatch[1] || q.quotation_number === quotationEditMatch[1]);
+      if (quotation) setEditingQuotation(quotation);
     }
     if (quotationMatch) {
       const quotation = quotations.find(q => q.id === quotationMatch[1] || q.quotation_number === quotationMatch[1]);
@@ -168,7 +180,7 @@ const Index = () => {
 
   const handleEditInvoice = (invoice: any) => {
     setEditingInvoice(invoice);
-    setCurrentPage("invoice-edit-form");
+    navigate(`/invoices/${invoice.id}/edit`);
   };
 
   const handleViewCustomer = (id: string) => {
@@ -283,7 +295,7 @@ const Index = () => {
 
   const handleEditQuotation = (quotation: any) => {
     setEditingQuotation(quotation);
-    setCurrentPage("quotation-edit-form");
+    navigate(`/quotations/${quotation.id}/edit`);
   };
 
   const handleSubmitQuotation = async (quotationData: any) => {
@@ -350,8 +362,8 @@ const Index = () => {
             onCreateQuotation={handleCreateQuotation}
             onCreateInvoice={handleCreateInvoice}
             onCreateCustomer={handleCreateCustomer}
-            onViewQuotations={() => setCurrentPage("quotations")}
-            onViewInvoices={() => setCurrentPage("invoices")}
+            onViewQuotations={() => navigate("/quotations")}
+            onViewInvoices={() => navigate("/invoices")}
           />
         );
       case "invoices":
@@ -381,7 +393,7 @@ const Index = () => {
         return (
           <CustomerForm 
             onSubmit={handleSubmitCustomer}
-            onCancel={() => setCurrentPage("customers")}
+            onCancel={() => navigate("/customers")}
             initialData={editingCustomer}
             mode={editingCustomer ? 'edit' : 'create'}
           />
@@ -391,7 +403,7 @@ const Index = () => {
           <InvoiceForm 
             customers={customers}
             onSubmit={handleSubmitInvoice}
-            onCancel={() => setCurrentPage("invoices")}
+            onCancel={() => navigate("/invoices")}
           />
         );
       case "invoice-edit-form":
@@ -418,7 +430,7 @@ const Index = () => {
         );
       case "order-sheet":
         return (
-          <OrderSheetList onCreateNew={() => setCurrentPage("new-order-sheet")} />
+          <OrderSheetList onCreateNew={() => navigate("/order-forms/new")} />
         );
       case "new-order-sheet":
         return (
@@ -533,7 +545,7 @@ const Index = () => {
           <QuotationForm 
             customers={customers}
             onSubmit={handleSubmitQuotation}
-            onCancel={() => setCurrentPage("quotations")}
+            onCancel={() => navigate("/quotations")}
           />
         );
       case "quotation-edit-form":
@@ -570,7 +582,7 @@ const Index = () => {
         <InvoiceDetails
           invoice={viewingInvoice}
           isOpen={!!viewingInvoice}
-          onClose={() => setViewingInvoice(null)}
+          onClose={() => { setViewingInvoice(null); navigate("/invoices"); }}
         />
       )}
       
@@ -578,7 +590,7 @@ const Index = () => {
         <QuotationDetails
           quotation={viewingQuotation}
           isOpen={!!viewingQuotation}
-          onClose={() => setViewingQuotation(null)}
+          onClose={() => { setViewingQuotation(null); navigate("/quotations"); }}
         />
       )}
     </Layout>
