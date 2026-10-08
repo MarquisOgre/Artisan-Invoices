@@ -271,7 +271,7 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
       <Card>
         <CardContent className="p-4 sm:p-6">
           <div className="grid gap-4 md:grid-cols-4">
-            <Field label="Order No." required>
+            <Field label="Order Form ID" required>
               <Input value={orderNo} onChange={e => setOrderNo(e.target.value)} />
             </Field>
             <Field label="Date">
