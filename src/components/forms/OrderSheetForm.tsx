@@ -46,6 +46,9 @@ type Customer = {
   name: string;
   phone?: string | null;
   address?: string | null;
+  city?: string | null;
+  state?: string | null;
+  pincode?: string | null;
 };
 
 type OrderSheetFormProps = {
