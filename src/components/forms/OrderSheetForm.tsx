@@ -701,6 +701,17 @@ const GarmentSection = ({
           </div>
         </GarmentInfo>
 
+        <GarmentInfo title="Style / Fit">
+          <StyleChecklist
+            options={styles}
+            selected={selectedStyles}
+            setSelected={setSelectedStyles}
+            otherValue={otherStyle}
+            setOtherValue={setOtherStyle}
+            compact
+          />
+        </GarmentInfo>
+
         <GarmentInfo title="Standard Size">
           <Input
             value={standardSize}
@@ -711,26 +722,15 @@ const GarmentSection = ({
 
           <div className="mt-5 border-t pt-4">
             <Label className="mb-3 block text-xs font-bold uppercase tracking-wide text-slate-500">
-              Style / Fit
+              Notes
             </Label>
-            <StyleChecklist
-              options={styles}
-              selected={selectedStyles}
-              setSelected={setSelectedStyles}
-              otherValue={otherStyle}
-              setOtherValue={setOtherStyle}
-              compact
+            <Textarea
+              value={notes}
+              onChange={e => setNotes(e.target.value)}
+              placeholder={blue ? "Shirt notes..." : "Pant notes..."}
+              className="min-h-[190px] resize-y bg-white"
             />
           </div>
-        </GarmentInfo>
-
-        <GarmentInfo title="Notes">
-          <Textarea
-            value={notes}
-            onChange={e => setNotes(e.target.value)}
-            placeholder={blue ? "Shirt notes..." : "Pant notes..."}
-            className="min-h-[190px] resize-y bg-white"
-          />
         </GarmentInfo>
       </div>
     </section>
