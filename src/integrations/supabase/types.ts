@@ -14,9 +14,102 @@ export type Database = {
   }
   public: {
     Tables: {
+      order_sheets: {
+        Row: {
+          id: string
+          user_id: string
+          order_no: string
+          order_date: string
+          customer_id: string | null
+          customer_code: string | null
+          customer_name: string
+          contact_no: string | null
+          shirt_fabric_code: string | null
+          shirt_patterns: Json
+          shirt_standard_size: string | null
+          shirt_measurements: Json
+          shirt_style: Json
+          shirt_notes: string | null
+          pant_fabric_code: string | null
+          pant_patterns: Json
+          pant_standard_size: string | null
+          pant_measurements: Json
+          pant_style: Json
+          pant_notes: string | null
+          delivery_address: string | null
+          delivery_date: string | null
+          customer_signature: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          order_no: string
+          order_date?: string
+          customer_id?: string | null
+          customer_code?: string | null
+          customer_name: string
+          contact_no?: string | null
+          shirt_fabric_code?: string | null
+          shirt_patterns?: Json
+          shirt_standard_size?: string | null
+          shirt_measurements?: Json
+          shirt_style?: Json
+          shirt_notes?: string | null
+          pant_fabric_code?: string | null
+          pant_patterns?: Json
+          pant_standard_size?: string | null
+          pant_measurements?: Json
+          pant_style?: Json
+          pant_notes?: string | null
+          delivery_address?: string | null
+          delivery_date?: string | null
+          customer_signature?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          order_no?: string
+          order_date?: string
+          customer_id?: string | null
+          customer_code?: string | null
+          customer_name?: string
+          contact_no?: string | null
+          shirt_fabric_code?: string | null
+          shirt_patterns?: Json
+          shirt_standard_size?: string | null
+          shirt_measurements?: Json
+          shirt_style?: Json
+          shirt_notes?: string | null
+          pant_fabric_code?: string | null
+          pant_patterns?: Json
+          pant_standard_size?: string | null
+          pant_measurements?: Json
+          pant_style?: Json
+          pant_notes?: string | null
+          delivery_address?: string | null
+          delivery_date?: string | null
+          customer_signature?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_sheets_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customers: {
         Row: {
           address: string | null
+          customer_code: string | null
           city: string | null
           company: string | null
           created_at: string
@@ -33,6 +126,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          customer_code?: string | null
           city?: string | null
           company?: string | null
           created_at?: string
@@ -49,6 +143,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          customer_code?: string | null
           city?: string | null
           company?: string | null
           created_at?: string
