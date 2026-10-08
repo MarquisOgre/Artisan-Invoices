@@ -718,7 +718,7 @@ const GarmentSection = ({
               selected={selectedStyles}
               setSelected={setSelectedStyles}
               otherValue={otherStyle}
-              setOtherValue={setOtherValue}
+              setOtherValue={setOtherStyle}
               compact
             />
           </div>
