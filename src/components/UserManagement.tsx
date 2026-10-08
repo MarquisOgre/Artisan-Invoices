@@ -123,7 +123,7 @@ export const UserManagement = () => {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleCreateUser} className="space-y-4">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 lg:items-start">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_auto_auto] lg:items-start">
             <div className="min-w-0">
               <Label htmlFor="userUsername">Username</Label>
               <Input
@@ -182,7 +182,7 @@ export const UserManagement = () => {
               </div>
             </div>
 
-            <div className="min-w-0">
+            <div className="w-40">
               <Label htmlFor="userRole">Role</Label>
               <Select value={role} onValueChange={(value: 'admin' | 'user') => setRole(value)}>
                 <SelectTrigger id="userRole">
@@ -194,11 +194,12 @@ export const UserManagement = () => {
                 </SelectContent>
               </Select>
             </div>
-          </div>
 
-          <Button type="submit" disabled={loading}>
-            {loading ? "Creating..." : "Create User"}
-          </Button>
+            <div className="flex items-end pt-6">
+              <Button type="submit" disabled={loading} className="whitespace-nowrap">
+                {loading ? "Creating..." : "Create User"}
+              </Button>
+            </div>
         </form>
       </CardContent>
     </Card>
