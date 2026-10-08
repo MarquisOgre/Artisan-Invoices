@@ -27,13 +27,11 @@ export type Database = {
           customer_name: string
           contact_no: string | null
           shirt_fabric_code: string | null
-          shirt_patterns: Json
           shirt_standard_size: string | null
           shirt_measurements: Json
           shirt_style: Json
           shirt_notes: string | null
           pant_fabric_code: string | null
-          pant_patterns: Json
           pant_standard_size: string | null
           pant_measurements: Json
           pant_style: Json
@@ -56,13 +54,11 @@ export type Database = {
           customer_name: string
           contact_no?: string | null
           shirt_fabric_code?: string | null
-          shirt_patterns?: Json
           shirt_standard_size?: string | null
           shirt_measurements?: Json
           shirt_style?: Json
           shirt_notes?: string | null
           pant_fabric_code?: string | null
-          pant_patterns?: Json
           pant_standard_size?: string | null
           pant_measurements?: Json
           pant_style?: Json
@@ -85,13 +81,11 @@ export type Database = {
           customer_name?: string
           contact_no?: string | null
           shirt_fabric_code?: string | null
-          shirt_patterns?: Json
           shirt_standard_size?: string | null
           shirt_measurements?: Json
           shirt_style?: Json
           shirt_notes?: string | null
           pant_fabric_code?: string | null
-          pant_patterns?: Json
           pant_standard_size?: string | null
           pant_measurements?: Json
           pant_style?: Json
