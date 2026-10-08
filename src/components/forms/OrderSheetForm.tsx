@@ -59,7 +59,20 @@ type OrderSheetFormProps = {
   onSaved?: () => void;
 };
 
-const today = () => new Date().toISOString().slice(0, 10);
+const formatLocalDate = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const today = () => formatLocalDate(new Date());
+
+const addDays = (dateString: string, days: number) => {
+  const date = new Date(`${dateString}T00:00:00`);
+  date.setDate(date.getDate() + days);
+  return formatLocalDate(date);
+};
 
 const formatCustomerAddress = (customer: Customer) =>
   [customer.address, customer.city, customer.state, customer.pincode]
@@ -102,7 +115,7 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
   );
 
   const [deliveryAddress, setDeliveryAddress] = useState("");
-  const [deliveryDate, setDeliveryDate] = useState("");
+  const [deliveryDate, setDeliveryDate] = useState(() => addDays(today(), 7));
   const [customerSignature, setCustomerSignature] = useState("");
 
   const [shirtFabricCode, setShirtFabricCode] = useState("");
@@ -152,6 +165,7 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
 
   useEffect(() => {
     setOrderNo("");
+    setDeliveryDate(addDays(orderDate, 7));
   }, [orderDate]);
 
   useEffect(() => {
@@ -192,7 +206,7 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
     setSelectedCustomerId("");
     setIsNewCustomer(false);
     setDeliveryAddress("");
-    setDeliveryDate("");
+    setDeliveryDate(addDays(today(), 7));
     setCustomerSignature("");
     setShirtFabrics([]);
     setShirtFabricCode("");
@@ -506,6 +520,19 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
         </div>
 
         <div className="space-y-4 bg-slate-50/70 p-3 sm:p-5">
+          <div className="rounded-xl border border-[#e9cda7] bg-[#fff7ed] p-4">
+            <div className="mb-2 text-sm font-bold text-[#7a4d1f]">Delivery Date</div>
+            <Input
+              type="date"
+              value={deliveryDate}
+              onChange={e => setDeliveryDate(e.target.value)}
+              className="h-11 border-[#e5c49b] bg-white"
+            />
+            <p className="mt-2 text-xs text-[#9a6a36]">
+              Default delivery date is 7 days after the order date. You can edit it.
+            </p>
+          </div>
+
           <GarmentSection
             title="SHIRT"
             tone="blue"
