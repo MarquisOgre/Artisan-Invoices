@@ -65,12 +65,13 @@ Deno.serve(async (req) => {
     }
 
     // Build users list with email + role
-    const users: Array<{ id: string; email: string; role: string; created_at: string }> = []
+    const users: Array<{ id: string; username: string; email: string; role: string; created_at: string }> = []
     for (const r of roles ?? []) {
       const { data: userData, error: userError } = await supabaseAdmin.auth.admin.getUserById(r.user_id)
       if (!userError && userData?.user) {
         users.push({
           id: userData.user.id,
+          username: String((userData.user.user_metadata as Record<string, unknown> | null)?.username ?? ''),
           email: userData.user.email ?? 'Unknown',
           role: r.role as string,
           created_at: r.created_at as string,
