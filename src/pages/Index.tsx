@@ -13,6 +13,7 @@ import QuotationList from "@/components/QuotationList";
 import QuotationDetails from "@/components/QuotationDetails";
 import OrderSheetForm from "@/components/forms/OrderSheetForm";
 import OrderSheetList from "@/components/OrderSheetList";
+import FabricPage from "@/pages/FabricPage";
 import { useSupabaseData } from "@/hooks/useSupabaseData";
 import { useToast } from "@/hooks/use-toast";
 import { useSettings } from "@/hooks/useSettings";
@@ -43,6 +44,7 @@ const Index = () => {
     path === "/order-forms" ? "order-sheet" :
     path === "/order-forms/new" ? "new-order-sheet" :
     path === "/settings" ? "settings" :
+    path === "/fabrics" ? "fabrics" :
     path.startsWith("/customers/") ? "customer-form" :
     path.match(/^\/invoices\/[^/]+\/edit$/) ? "invoice-edit-form" :
     path.startsWith("/invoices/") ? "invoice-detail" :
@@ -122,6 +124,7 @@ const Index = () => {
       "order-sheet": "/order-forms",
       "new-order-sheet": "/order-forms/new",
       settings: "/settings",
+      fabrics: "/fabrics",
     };
 
     if (page === "new-invoice") {
@@ -446,6 +449,8 @@ const Index = () => {
             }}
           />
         );
+      case "fabrics":
+        return <FabricPage />;
       case "settings":
         return <Settings />;
       default:
