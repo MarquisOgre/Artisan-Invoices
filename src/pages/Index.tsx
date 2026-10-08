@@ -10,6 +10,7 @@ import InvoiceDetails from "@/components/InvoiceDetails";
 import QuotationForm from "@/components/forms/QuotationForm";
 import QuotationList from "@/components/QuotationList";
 import QuotationDetails from "@/components/QuotationDetails";
+import OrderSheetForm from "@/components/forms/OrderSheetForm";
 import { useSupabaseData } from "@/hooks/useSupabaseData";
 import { useToast } from "@/hooks/use-toast";
 import { useSettings } from "@/hooks/useSettings";
@@ -355,6 +356,14 @@ const Index = () => {
             onCancel={() => setCurrentPage("invoices")}
             initialData={editingInvoice}
             mode="edit"
+          />
+        );
+      case "order-sheet":
+        return (
+          <OrderSheetForm
+            onSaved={() => {
+              setCurrentPage("order-sheet");
+            }}
           />
         );
       case "settings":
