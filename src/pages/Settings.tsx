@@ -156,7 +156,7 @@ const Settings = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
             <div>
               <Label htmlFor="companyName">Company Name</Label>
               <Input
@@ -190,7 +190,8 @@ const Settings = () => {
                 onChange={(e) => handleCompanyChange("website", e.target.value)}
               />
             </div>
-            <div>
+
+            <div className="lg:col-span-1">
               <Label htmlFor="taxNumber">GST Number</Label>
               <Input
                 id="taxNumber"
@@ -198,16 +199,16 @@ const Settings = () => {
                 onChange={(e) => handleCompanyChange("taxNumber", e.target.value)}
               />
             </div>
-          </div>
-          
-          <div>
-            <Label htmlFor="companyAddress">Address</Label>
-            <Textarea
-              id="companyAddress"
-              value={companySettings.address}
-              onChange={(e) => handleCompanyChange("address", e.target.value)}
-              rows={3}
-            />
+
+            <div className="lg:col-span-3">
+              <Label htmlFor="companyAddress">Address</Label>
+              <Textarea
+                id="companyAddress"
+                value={companySettings.address}
+                onChange={(e) => handleCompanyChange("address", e.target.value)}
+                rows={3}
+              />
+            </div>
           </div>
 
           {/* Bank Details Section */}
