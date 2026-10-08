@@ -160,7 +160,7 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
     const loadFabrics = async () => {
       const { data, error } = await supabase
         .from("fabrics")
-        .select("id, code, brand, article, design, finish, count_spec, composition, swatch_url, is_active")
+        .select("id, code, brand, article, design, finish, count_spec, composition, swatch_url, category, is_active")
         .eq("is_active", true)
         .order("code", { ascending: true });
       if (error) {
@@ -646,7 +646,11 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
                   <CommandList className="max-h-[360px]">
                     <CommandEmpty>No fabric found.</CommandEmpty>
                     <CommandGroup>
-                      {fabrics.map(fabric => {
+                      {fabrics
+                        .filter(fabric =>
+                          fabric.category === (fabricPickerGarment === "shirt" ? "Shirting" : "Suiting")
+                        )
+                        .map(fabric => {
                         const selected = fabricPickerValues.includes(fabric.id);
                         return (
                           <CommandItem
