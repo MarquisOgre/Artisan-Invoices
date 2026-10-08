@@ -325,7 +325,7 @@ const OrderSheetList = ({ onCreateNew }: Props) => {
       </div>
 
       <Card>
-        <CardContent className="pt-0">
+        <CardContent className="pt-5">
           <div className="overflow-x-auto rounded-md border">
             <Table>
               <TableHeader><TableRow>
