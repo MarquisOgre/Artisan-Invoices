@@ -11,6 +11,7 @@ import {
   LogOut,
   ChevronDown,
   ClipboardList,
+  Layers3,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -129,6 +130,17 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
                 >
                   <ClipboardList className="h-4 w-4" />
                   Order Forms
+                </Button>
+              )}
+
+              {isAdmin && (
+                <Button
+                  variant={currentPage === "fabrics" ? "default" : "ghost"}
+                  className="flex items-center gap-2"
+                  onClick={() => onPageChange("fabrics")}
+                >
+                  <Layers3 className="h-4 w-4" />
+                  Fabrics
                 </Button>
               )}
 
