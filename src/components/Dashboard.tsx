@@ -8,7 +8,6 @@ import {
   FileText,
   ReceiptIndianRupee,
   Users,
-  IndianRupee,
   TrendingUp,
   Eye,
   BarChart3
@@ -20,7 +19,6 @@ interface DashboardProps {
   quotations: any[];
   invoices: any[];
   customers: any[];
-  expenses?: any[];
   onCreateQuotation: () => void;
   onCreateInvoice: () => void;
   onCreateCustomer: () => void;
@@ -77,7 +75,7 @@ const numericAmount = (...values: unknown[]) => {
 
 const monthKey = (year: number, month: number) => `${year}-${String(month).padStart(2, "0")}`;
 
-const Dashboard = ({ quotations, invoices, customers, expenses = [], onCreateQuotation, onCreateInvoice, onCreateCustomer, onViewQuotations, onViewInvoices }: DashboardProps) => {
+const Dashboard = ({ quotations, invoices, customers, onCreateQuotation, onCreateInvoice, onCreateCustomer, onViewQuotations, onViewInvoices }: DashboardProps) => {
   const { isAdmin } = useUserRole();
   const currentDate = new Date();
   const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth() + 1);
@@ -95,11 +93,6 @@ const Dashboard = ({ quotations, invoices, customers, expenses = [], onCreateQuo
     return !!qDate && qDate.getMonth() + 1 === selectedMonth && qDate.getFullYear() === selectedYear;
   });
 
-  const filteredExpenses = expenses.filter(e => {
-    if (selectedMonth === 0) return true;
-    return Number(e.month) === selectedMonth && Number(e.year) === selectedYear;
-  });
-
   const totalRevenue = filteredInvoices
     .filter(i => normalizedStatus(i.status) === "paid")
     .reduce((sum, i) => sum + numericAmount(i.total_amount, i.subtotal), 0);
@@ -113,7 +106,6 @@ const Dashboard = ({ quotations, invoices, customers, expenses = [], onCreateQuo
     return status !== "invoiced" && status !== "rejected";
   }).length;
 
-  const totalExpenses = filteredExpenses.reduce((sum, e) => sum + numericAmount(e.amount), 0);
 
   const getMonthlyData = () => {
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -127,14 +119,6 @@ const Dashboard = ({ quotations, invoices, customers, expenses = [], onCreateQuo
     quotations.forEach(q => {
       const date = parseDateValue(q.quotation_date || q.date || q.created_at);
       if (date) availableMonths.add(monthKey(date.getFullYear(), date.getMonth() + 1));
-    });
-
-    expenses.forEach(e => {
-      const month = Number(e.month);
-      const year = Number(e.year);
-      if (month >= 1 && month <= 12 && Number.isFinite(year)) {
-        availableMonths.add(monthKey(year, month));
-      }
     });
 
     const anchorMonth = selectedMonth === 0 ? currentDate.getMonth() : selectedMonth - 1;
@@ -176,10 +160,6 @@ const Dashboard = ({ quotations, invoices, customers, expenses = [], onCreateQuo
           return !!invDate && invDate.getMonth() + 1 === month && invDate.getFullYear() === year;
         }).length;
 
-      const monthExpenses = expenses
-        .filter(e => Number(e.month) === month && Number(e.year) === year)
-        .reduce((sum, e) => sum + numericAmount(e.amount), 0);
-
       return {
         month: monthNames[month - 1],
         revenue: Math.round(monthRevenue),
@@ -197,7 +177,6 @@ const Dashboard = ({ quotations, invoices, customers, expenses = [], onCreateQuo
     { title: "Active Quotation", value: activeQuotations.toString(), change: `${activeQuotations}`, icon: FileText, color: "text-primary" },
     { title: "Invoiced - Unpaid", value: `₹${totalInvoiced.toLocaleString()}`, change: "+8", icon: ReceiptIndianRupee, color: "text-primary" },
     { title: "Total Customers", value: customers.length.toString(), change: "+5", icon: Users, color: "text-muted-foreground" },
-    { title: "Monthly Expenses", value: `₹${totalExpenses.toLocaleString()}`, change: "This month", icon: IndianRupee, color: "text-warning" }
   ];
 
   const recentQuotations = quotations.slice(0, 3).map(q => ({
@@ -267,13 +246,12 @@ const Dashboard = ({ quotations, invoices, customers, expenses = [], onCreateQuo
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="animate-fade-in hover:shadow-lg transition-shadow">
-          <CardHeader><CardTitle className="flex items-center"><TrendingUp className="mr-2 h-5 w-5 text-success" />Revenue & Expenses Trend</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="flex items-center"><TrendingUp className="mr-2 h-5 w-5 text-success" />Revenue Trend</CardTitle></CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={250}>
               <AreaChart data={monthlyData}>
                 <defs>
                   <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="hsl(var(--success))" stopOpacity={0.8}/><stop offset="95%" stopColor="hsl(var(--success))" stopOpacity={0.1}/></linearGradient>
-                  <linearGradient id="colorExpenses" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="hsl(var(--warning))" stopOpacity={0.8}/><stop offset="95%" stopColor="hsl(var(--warning))" stopOpacity={0.1}/></linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
                 <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" />
@@ -281,7 +259,6 @@ const Dashboard = ({ quotations, invoices, customers, expenses = [], onCreateQuo
                 <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }} formatter={(value: number) => `₹${value.toLocaleString()}`} />
                 <Legend />
                 <Area type="monotone" dataKey="revenue" stroke="hsl(var(--success))" fillOpacity={1} fill="url(#colorRevenue)" strokeWidth={2} animationDuration={1500} />
-                <Area type="monotone" dataKey="expenses" stroke="hsl(var(--warning))" fillOpacity={1} fill="url(#colorExpenses)" strokeWidth={2} animationDuration={1500} />
               </AreaChart>
             </ResponsiveContainer>
           </CardContent>
