@@ -359,11 +359,23 @@ const CustomerList = ({ customers, onCreateNew, onViewCustomer, onEditCustomer, 
     setShowViewDialog(true);
   };
 
-  const filteredCustomers = displayCustomers.filter(customer =>
-    customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    customer.id.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredCustomers = displayCustomers
+    .filter(customer =>
+      customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customer.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (customer.customer_code || "").toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .sort((a, b) => {
+      const getCustomerNumber = (code?: string | null) => {
+        const match = code?.match(/^(?:CUS-)?(\d+)$/i);
+        return match ? Number(match[1]) : Number.MAX_SAFE_INTEGER;
+      };
+      const aNumber = getCustomerNumber(a.customer_code);
+      const bNumber = getCustomerNumber(b.customer_code);
+      if (aNumber !== bNumber) return aNumber - bNumber;
+      return a.name.localeCompare(b.name);
+    });
 
   return (
     <div className="space-y-6">
