@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { CalendarDays, Save, RotateCcw } from "lucide-react";
+import { CalendarDays, Save, RotateCcw, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -100,6 +100,9 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
     setContactNo(customer.phone || "");
     setDeliveryAddress(customer.address || "");
   };
+
+  const customerAddress = existingCustomer?.address?.trim() || "";
+  const hasCustomerAddress = Boolean(customerAddress);
 
   useEffect(() => {
     setOrderNo("");
@@ -436,7 +439,32 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
         <Card>
           <CardContent className="p-5">
             <Field label="Delivery Address">
-              <Textarea value={deliveryAddress} onChange={e => setDeliveryAddress(e.target.value)} className="min-h-[120px]" />
+              <Textarea
+                value={deliveryAddress}
+                onChange={e => setDeliveryAddress(e.target.value)}
+                placeholder={hasCustomerAddress ? "Customer address loaded automatically. You can edit it for this order." : "No saved customer address. Enter delivery address manually."}
+                className="min-h-[120px]"
+              />
+              <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+                <p className="text-xs text-muted-foreground">
+                  {hasCustomerAddress
+                    ? "Address loaded from Customer record."
+                    : selectedCustomerId
+                      ? "No address saved for this customer — enter the delivery address manually."
+                      : "For a new customer, enter the delivery address manually."}
+                </p>
+                {hasCustomerAddress && (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setDeliveryAddress(customerAddress)}
+                  >
+                    <MapPin className="mr-1 h-3.5 w-3.5" />
+                    Use Customer Address
+                  </Button>
+                )}
+              </div>
             </Field>
           </CardContent>
         </Card>
