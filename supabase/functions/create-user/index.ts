@@ -52,11 +52,32 @@ Deno.serve(async (req) => {
     }
 
     // Get request body
-    const { email, password, role } = await req.json()
+    const { username, email, password, role } = await req.json()
 
     if (!email || !password || !role) {
       return new Response(
-        JSON.stringify({ error: 'Email, password, and role are required' }),
+        JSON.stringify({ error: 'Username, email, password, and role are required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    const normalizedUsername = String(username || '').trim().toLowerCase()
+    if (!/^[a-z0-9._-]{3,30}$/.test(normalizedUsername)) {
+      return new Response(
+        JSON.stringify({ error: 'Username must be 3-30 characters and contain only letters, numbers, dot, dash or underscore.' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    const { data: existingUsername } = await supabaseAdmin
+      .from('user_login_names')
+      .select('user_id')
+      .eq('username', normalizedUsername)
+      .maybeSingle()
+
+    if (existingUsername) {
+      return new Response(
+        JSON.stringify({ error: 'That username is already in use. Please choose another username.' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
@@ -65,7 +86,8 @@ Deno.serve(async (req) => {
     const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
-      email_confirm: true
+      email_confirm: true,
+      user_metadata: { username: normalizedUsername }
     })
 
     if (createError) {
@@ -81,6 +103,18 @@ Deno.serve(async (req) => {
       
       return new Response(
         JSON.stringify({ error: createError.message }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    const { error: usernameInsertError } = await supabaseAdmin
+      .from('user_login_names')
+      .insert({ user_id: newUser.user.id, username: normalizedUsername })
+
+    if (usernameInsertError) {
+      await supabaseAdmin.auth.admin.deleteUser(newUser.user.id)
+      return new Response(
+        JSON.stringify({ error: usernameInsertError.message }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
@@ -105,6 +139,7 @@ Deno.serve(async (req) => {
         success: true,
         user: {
           id: newUser.user.id,
+          username: normalizedUsername,
           email: newUser.user.email,
           role: role
         }
