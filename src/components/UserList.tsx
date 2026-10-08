@@ -37,6 +37,7 @@ import { Label } from "@/components/ui/label";
 
 interface UserWithRole {
   id: string;
+  username: string;
   email: string;
   role: string;
   created_at: string;
@@ -221,6 +222,7 @@ export const UserList = () => {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>Username</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Role</TableHead>
                 <TableHead>Created</TableHead>
@@ -230,6 +232,7 @@ export const UserList = () => {
             <TableBody>
               {users.map((user) => (
                 <TableRow key={user.id}>
+                  <TableCell>{user.username || "-"}</TableCell>
                   <TableCell>{user.email}</TableCell>
                   <TableCell>
                     <span className={`capitalize px-2 py-1 rounded text-xs ${
