@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { CalendarDays, Save, RotateCcw, MapPin } from "lucide-react";
+import { CalendarDays, MapPin, RotateCcw, Save, Scissors, Shirt } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -63,6 +63,7 @@ const formatCustomerAddress = (customer: Customer) =>
     .map(value => String(value || "").trim())
     .filter(Boolean)
     .join(", ");
+
 const emptyMeasurements = (fields: readonly (readonly [string, string])[]) =>
   Object.fromEntries(fields.map(([key]) => [key, ""]));
 
@@ -90,6 +91,30 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
     [customers, selectedCustomerId]
   );
 
+  const [deliveryAddress, setDeliveryAddress] = useState("");
+  const [deliveryDate, setDeliveryDate] = useState("");
+  const [customerSignature, setCustomerSignature] = useState("");
+
+  const [shirtFabricCode, setShirtFabricCode] = useState("");
+  const [shirtPatterns, setShirtPatterns] = useState<string[]>(["", "", "", "", ""]);
+  const [shirtStandardSize, setShirtStandardSize] = useState("");
+  const [shirtMeasurements, setShirtMeasurements] = useState<Record<string, string>>(
+    emptyMeasurements(SHIRT_MEASUREMENTS)
+  );
+  const [shirtStyles, setShirtStyles] = useState<string[]>([]);
+  const [shirtOtherStyle, setShirtOtherStyle] = useState("");
+  const [shirtNotes, setShirtNotes] = useState("");
+
+  const [pantFabricCode, setPantFabricCode] = useState("");
+  const [pantPatterns, setPantPatterns] = useState<string[]>(["", "", "", "", ""]);
+  const [pantStandardSize, setPantStandardSize] = useState("");
+  const [pantMeasurements, setPantMeasurements] = useState<Record<string, string>>(
+    emptyMeasurements(PANT_MEASUREMENTS)
+  );
+  const [pantStyles, setPantStyles] = useState<string[]>([]);
+  const [pantOtherStyle, setPantOtherStyle] = useState("");
+  const [pantNotes, setPantNotes] = useState("");
+
   const handleCustomerChange = (value: string) => {
     if (value === "__new__") {
       setSelectedCustomerId("");
@@ -116,36 +141,17 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
   useEffect(() => {
     setOrderNo("");
   }, [orderDate]);
-  const [deliveryAddress, setDeliveryAddress] = useState("");
-  const [deliveryDate, setDeliveryDate] = useState("");
-  const [customerSignature, setCustomerSignature] = useState("");
-
-  const [shirtFabricCode, setShirtFabricCode] = useState("");
-  const [shirtPatterns, setShirtPatterns] = useState<string[]>(["", "", "", "", ""]);
-  const [shirtStandardSize, setShirtStandardSize] = useState("");
-  const [shirtMeasurements, setShirtMeasurements] = useState<Record<string, string>>(
-    emptyMeasurements(SHIRT_MEASUREMENTS)
-  );
-  const [shirtStyles, setShirtStyles] = useState<string[]>([]);
-  const [shirtOtherStyle, setShirtOtherStyle] = useState("");
-  const [shirtNotes, setShirtNotes] = useState("");
-
-  const [pantFabricCode, setPantFabricCode] = useState("");
-  const [pantPatterns, setPantPatterns] = useState<string[]>(["", "", "", "", ""]);
-  const [pantStandardSize, setPantStandardSize] = useState("");
-  const [pantMeasurements, setPantMeasurements] = useState<Record<string, string>>(
-    emptyMeasurements(PANT_MEASUREMENTS)
-  );
-  const [pantStyles, setPantStyles] = useState<string[]>([]);
-  const [pantOtherStyle, setPantOtherStyle] = useState("");
-  const [pantNotes, setPantNotes] = useState("");
 
   const toggleStyle = (
     value: string,
     selected: string[],
     setSelected: (value: string[]) => void
   ) => {
-    setSelected(selected.includes(value) ? selected.filter(item => item !== value) : [...selected, value]);
+    setSelected(
+      selected.includes(value)
+        ? selected.filter(item => item !== value)
+        : [...selected, value]
+    );
   };
 
   const updatePattern = (
@@ -230,6 +236,7 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
       if (!resolvedOrderNo) {
         throw new Error("Unable to generate the Order Form ID. Please try again.");
       }
+
       setCustomerCode(resolvedCustomerCode || "");
       setOrderNo(resolvedOrderNo);
 
@@ -279,38 +286,72 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
   };
 
   return (
-    <div className="mx-auto w-full max-w-[1500px] space-y-5 pb-8">
-      <div className="flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="text-sm text-muted-foreground">Artisan Apparels</p>
-          <h1 className="text-2xl font-bold text-primary">Shirt & Pant Order Sheet</h1>
-          <p className="text-sm text-muted-foreground">Enter measurements and order details, then save the completed sheet.</p>
-        </div>
-        <div className="flex gap-2">
-          <Button type="button" variant="outline" onClick={resetForm} disabled={saving}>
-            <RotateCcw className="mr-2 h-4 w-4" />
-            Clear
-          </Button>
-          <Button type="button" onClick={handleSave} disabled={saving}>
-            <Save className="mr-2 h-4 w-4" />
-            {saving ? "Saving..." : "Save Order"}
-          </Button>
-        </div>
-      </div>
+    <div className="mx-auto w-full max-w-[1500px] pb-10">
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="relative overflow-hidden bg-white px-5 py-5 sm:px-8 sm:py-6">
+          <div className="pointer-events-none absolute -right-16 -top-20 h-52 w-52 rounded-full bg-blue-50" />
+          <div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex items-center gap-4">
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[#0c315c] text-3xl font-black text-white shadow-sm">
+                A
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-2xl font-black tracking-tight text-[#123766] sm:text-3xl">
+                    ARTISAN
+                  </h1>
+                  <span className="hidden h-8 w-px bg-slate-300 sm:block" />
+                  <div className="hidden text-[10px] font-semibold uppercase leading-4 tracking-[0.28em] text-[#123766] sm:block">
+                    Premium Fabrics
+                    <br />
+                    Bespoke Solutions
+                  </div>
+                </div>
+                <p className="mt-1 text-xs font-medium uppercase tracking-[0.28em] text-slate-500">
+                  Apparel Measurement & Order Management
+                </p>
+              </div>
+            </div>
 
-      <Card>
-        <CardContent className="p-4 sm:p-6">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
-            <Field label="Customer Name" required>
-              <Select value={selectedCustomerId || (customerName ? "__new__" : "")} onValueChange={handleCustomerChange}>
-                <SelectTrigger className="w-full">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <div className="rounded-xl bg-[#eaf2fb] px-5 py-3 text-[#123766]">
+                <div className="text-2xl font-black uppercase leading-none sm:text-3xl">
+                  Order Sheet
+                </div>
+                <div className="mt-1 text-center text-xs font-bold uppercase tracking-[0.3em]">
+                  Shirt & Pant
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button type="button" variant="outline" onClick={resetForm} disabled={saving} className="h-11 px-4">
+                  <RotateCcw className="mr-2 h-4 w-4" />
+                  Clear
+                </Button>
+                <Button type="button" onClick={handleSave} disabled={saving} className="h-11 bg-[#2378dc] px-5 hover:bg-[#1c68c2]">
+                  <Save className="mr-2 h-4 w-4" />
+                  {saving ? "Saving..." : "Save Order"}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="border-y border-slate-200 bg-[#edf5fc] px-4 py-4 sm:px-6">
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-5">
+            <HeaderField label="Customer Name" required>
+              <Select
+                value={selectedCustomerId || (customerName ? "__new__" : "")}
+                onValueChange={handleCustomerChange}
+              >
+                <SelectTrigger className="h-11 border-[#c9dced] bg-white">
                   <SelectValue placeholder="Select customer" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__new__">+ Add New Customer</SelectItem>
                   {customers.map(customer => (
                     <SelectItem key={customer.id} value={customer.id}>
-                      {customer.name}{customer.customer_code ? ` — ${customer.customer_code}` : ""}
+                      {customer.name}
+                      {customer.customer_code ? ` — ${customer.customer_code}` : ""}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -320,150 +361,116 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
                   value={customerName}
                   onChange={e => setCustomerName(e.target.value)}
                   placeholder="Enter new customer name"
-                  className="mt-2"
+                  className="mt-2 h-10 bg-white"
                 />
               )}
-            </Field>
+            </HeaderField>
 
-            <Field label="Contact No.">
+            <HeaderField label="Contact No.">
               <Input
                 value={contactNo}
                 onChange={e => setContactNo(e.target.value)}
                 inputMode="tel"
                 placeholder={existingCustomer ? "Auto populated — editable" : "Enter manually"}
+                className="h-11 border-[#c9dced] bg-white"
               />
-              <p className="mt-1 text-xs text-muted-foreground">
-                {existingCustomer ? "Auto populated from customer; you can edit it." : "Enter manually for a new customer."}
-              </p>
-            </Field>
+            </HeaderField>
 
-            <Field label="Customer ID">
+            <HeaderField label="Customer ID">
               <Input
                 value={existingCustomer?.customer_code || customerCode}
                 readOnly
-                className="bg-muted/50 font-medium"
+                className="h-11 border-[#c9dced] bg-white font-semibold text-[#123766]"
                 placeholder="Generated automatically"
               />
-            </Field>
+            </HeaderField>
 
-            <Field label="Order Form ID">
+            <HeaderField label="Order Form ID">
               <Input
                 value={orderNo}
                 readOnly
-                className="bg-muted/50 font-medium"
+                className="h-11 border-[#c9dced] bg-white font-semibold text-[#123766]"
                 placeholder="Generated on save"
               />
-            </Field>
+            </HeaderField>
 
-            <Field label="Date">
-              <Input type="date" value={orderDate} onChange={e => setOrderDate(e.target.value)} />
-            </Field>
-          </div>
-        </CardContent>
-      </Card>
-
-      <OrderSection title="SHIRT" tone="blue">
-        <div className="grid gap-0 overflow-hidden rounded-lg border md:grid-cols-[1.1fr_1.5fr_1fr_2fr_1.3fr_1.6fr]">
-          <HeaderCell>Fabric Code</HeaderCell>
-          <HeaderCell>Pattern / Design</HeaderCell>
-          <HeaderCell>Standard Size</HeaderCell>
-          <HeaderCell>Measurements (inches)</HeaderCell>
-          <HeaderCell>Style</HeaderCell>
-          <HeaderCell>Notes</HeaderCell>
-
-          <div className="p-3">
-            <Input value={shirtFabricCode} onChange={e => setShirtFabricCode(e.target.value)} placeholder="Fabric code" />
-          </div>
-          <div className="space-y-3 border-l p-3">
-            {shirtPatterns.map((pattern, index) => (
+            <HeaderField label="Date">
               <Input
-                key={index}
-                value={pattern}
-                onChange={e => updatePattern(setShirtPatterns, index, e.target.value)}
-                placeholder={`Pattern / design ${index + 1}`}
+                type="date"
+                value={orderDate}
+                onChange={e => setOrderDate(e.target.value)}
+                className="h-11 border-[#c9dced] bg-white"
               />
-            ))}
-          </div>
-          <div className="border-l p-3">
-            <Input value={shirtStandardSize} onChange={e => setShirtStandardSize(e.target.value)} placeholder="e.g. 40 / L" />
-          </div>
-          <MeasurementGrid
-            fields={SHIRT_MEASUREMENTS}
-            values={shirtMeasurements}
-            setValues={setShirtMeasurements}
-          />
-          <StyleChecklist
-            options={SHIRT_STYLES}
-            selected={shirtStyles}
-            setSelected={setShirtStyles}
-            otherValue={shirtOtherStyle}
-            setOtherValue={setShirtOtherStyle}
-          />
-          <div className="border-l p-3">
-            <Textarea value={shirtNotes} onChange={e => setShirtNotes(e.target.value)} placeholder="Shirt notes..." className="min-h-[210px]" />
+            </HeaderField>
           </div>
         </div>
-      </OrderSection>
 
-      <OrderSection title="PANT" tone="brown">
-        <div className="grid gap-0 overflow-hidden rounded-lg border md:grid-cols-[1.1fr_1.5fr_1fr_2fr_1.3fr_1.6fr]">
-          <HeaderCell>Pant Fabric Code</HeaderCell>
-          <HeaderCell>Pattern / Design</HeaderCell>
-          <HeaderCell>Standard Size</HeaderCell>
-          <HeaderCell>Measurements (inches)</HeaderCell>
-          <HeaderCell>Style</HeaderCell>
-          <HeaderCell>Notes</HeaderCell>
-
-          <div className="p-3">
-            <Input value={pantFabricCode} onChange={e => setPantFabricCode(e.target.value)} placeholder="Fabric code" />
-          </div>
-          <div className="space-y-3 border-l p-3">
-            {pantPatterns.map((pattern, index) => (
-              <Input
-                key={index}
-                value={pattern}
-                onChange={e => updatePattern(setPantPatterns, index, e.target.value)}
-                placeholder={`Pattern / design ${index + 1}`}
-              />
-            ))}
-          </div>
-          <div className="border-l p-3">
-            <Input value={pantStandardSize} onChange={e => setPantStandardSize(e.target.value)} placeholder="e.g. 34 / M" />
-          </div>
-          <MeasurementGrid
-            fields={PANT_MEASUREMENTS}
-            values={pantMeasurements}
-            setValues={setPantMeasurements}
+        <div className="space-y-4 bg-slate-50/70 p-3 sm:p-5">
+          <GarmentSection
+            title="SHIRT"
+            tone="blue"
+            icon={<Shirt className="h-10 w-10" strokeWidth={1.6} />}
+            fabricCode={shirtFabricCode}
+            setFabricCode={setShirtFabricCode}
+            patterns={shirtPatterns}
+            setPatterns={setShirtPatterns}
+            standardSize={shirtStandardSize}
+            setStandardSize={setShirtStandardSize}
+            measurements={shirtMeasurements}
+            setMeasurements={setShirtMeasurements}
+            measurementFields={SHIRT_MEASUREMENTS}
+            styles={SHIRT_STYLES}
+            selectedStyles={shirtStyles}
+            setSelectedStyles={setShirtStyles}
+            otherStyle={shirtOtherStyle}
+            setOtherStyle={setShirtOtherStyle}
+            notes={shirtNotes}
+            setNotes={setShirtNotes}
+            updatePattern={updatePattern}
           />
-          <StyleChecklist
-            options={PANT_STYLES}
-            selected={pantStyles}
-            setSelected={setPantStyles}
-            otherValue={pantOtherStyle}
-            setOtherValue={setPantOtherStyle}
-          />
-          <div className="border-l p-3">
-            <Textarea value={pantNotes} onChange={e => setPantNotes(e.target.value)} placeholder="Pant notes..." className="min-h-[210px]" />
-          </div>
-        </div>
-      </OrderSection>
 
-      <div className="grid gap-4 lg:grid-cols-[2.2fr_1fr_1fr]">
-        <Card>
-          <CardContent className="p-5">
-            <Field label="Delivery Address">
+          <GarmentSection
+            title="PANT"
+            tone="brown"
+            icon={<Scissors className="h-10 w-10" strokeWidth={1.6} />}
+            fabricCode={pantFabricCode}
+            setFabricCode={setPantFabricCode}
+            patterns={pantPatterns}
+            setPatterns={setPantPatterns}
+            standardSize={pantStandardSize}
+            setStandardSize={setPantStandardSize}
+            measurements={pantMeasurements}
+            setMeasurements={setPantMeasurements}
+            measurementFields={PANT_MEASUREMENTS}
+            styles={PANT_STYLES}
+            selectedStyles={pantStyles}
+            setSelectedStyles={setPantStyles}
+            otherStyle={pantOtherStyle}
+            setOtherStyle={setPantOtherStyle}
+            notes={pantNotes}
+            setNotes={setPantNotes}
+            updatePattern={updatePattern}
+          />
+
+          <div className="grid gap-4 lg:grid-cols-[2.1fr_1fr_1fr]">
+            <div className="rounded-xl border border-[#c8dced] bg-[#eef6fd] p-4 sm:p-5">
+              <SectionLabel label="Delivery Address" />
               <Textarea
                 value={deliveryAddress}
                 onChange={e => setDeliveryAddress(e.target.value)}
-                placeholder={hasCustomerAddress ? "Customer address loaded automatically. You can edit it for this order." : "No saved customer address. Enter delivery address manually."}
-                className="min-h-[120px]"
+                placeholder={
+                  hasCustomerAddress
+                    ? "Customer address loaded automatically. You can edit it for this order."
+                    : "Enter delivery address..."
+                }
+                className="min-h-[108px] resize-y border-[#c8dced] bg-white"
               />
               <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-slate-500">
                   {hasCustomerAddress
                     ? "Address loaded from Customer record."
                     : selectedCustomerId
-                      ? "No address saved for this customer — enter the delivery address manually."
+                      ? "No address saved for this customer — enter it manually."
                       : "For a new customer, enter the delivery address manually."}
                 </p>
                 {hasCustomerAddress && (
@@ -472,92 +479,231 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
                     size="sm"
                     variant="outline"
                     onClick={() => setDeliveryAddress(customerAddress)}
+                    className="bg-white"
                   >
-                    <MapPin className="mr-1 h-3.5 w-3.5" />
+                    <MapPin className="mr-1.5 h-3.5 w-3.5" />
                     Use Customer Address
                   </Button>
                 )}
               </div>
-            </Field>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-5">
-            <Field label="Delivery Date">
-              <div className="relative">
-                <CalendarDays className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input type="date" value={deliveryDate} onChange={e => setDeliveryDate(e.target.value)} className="pl-9" />
-              </div>
-            </Field>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-5">
-            <Field label="Customer Signature">
-              <Input value={customerSignature} onChange={e => setCustomerSignature(e.target.value)} placeholder="Customer name / signature" />
-            </Field>
-          </CardContent>
-        </Card>
-      </div>
+            </div>
 
-      <div className="sticky bottom-2 z-20 flex justify-end rounded-xl border bg-card/95 p-3 shadow-lg backdrop-blur">
-        <Button type="button" size="lg" onClick={handleSave} disabled={saving}>
-          <Save className="mr-2 h-5 w-5" />
-          {saving ? "Saving Order..." : "Save Order Sheet"}
-        </Button>
+            <div className="rounded-xl border border-[#ead7bf] bg-[#fff6eb] p-4 sm:p-5">
+              <SectionLabel label="Delivery Date" />
+              <div className="relative">
+                <CalendarDays className="pointer-events-none absolute left-3 top-3 h-5 w-5 text-[#7b542c]" />
+                <Input
+                  type="date"
+                  value={deliveryDate}
+                  onChange={e => setDeliveryDate(e.target.value)}
+                  className="h-11 border-[#ead7bf] bg-white pl-10"
+                />
+              </div>
+              <p className="mt-3 text-xs text-slate-500">Expected customer delivery date.</p>
+            </div>
+
+            <div className="rounded-xl border border-[#c8dced] bg-white p-4 sm:p-5">
+              <SectionLabel label="Customer Signature" />
+              <Input
+                value={customerSignature}
+                onChange={e => setCustomerSignature(e.target.value)}
+                placeholder="Customer name / signature"
+                className="h-11 border-[#c8dced] bg-white"
+              />
+              <div className="mt-8 border-b border-[#123766]" />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
-const Field = ({
+const HeaderField = ({
   label,
   children,
   required,
-  className = "",
 }: {
   label: string;
   children: React.ReactNode;
   required?: boolean;
-  className?: string;
 }) => (
-  <div className={className}>
-    <Label className="mb-1.5 block">
-      {label} {required && <span className="text-destructive">*</span>}
+  <div>
+    <Label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-[#123766]">
+      {label} {required && <span className="text-red-500">*</span>}
     </Label>
     {children}
   </div>
 );
 
-const HeaderCell = ({ children }: { children: React.ReactNode }) => (
-  <div className="border-b bg-muted/60 p-3 text-sm font-semibold text-primary md:border-l first:md:border-l-0">
-    {children}
-  </div>
+const SectionLabel = ({ label }: { label: string }) => (
+  <Label className="mb-2 block text-base font-bold text-[#123766]">{label}</Label>
 );
 
-const MeasurementGrid = ({
-  fields,
-  values,
-  setValues,
-}: {
-  fields: readonly (readonly [string, string])[];
-  values: Record<string, string>;
-  setValues: React.Dispatch<React.SetStateAction<Record<string, string>>>;
-}) => (
-  <div className="border-l p-3">
-    <div className="space-y-2">
-      {fields.map(([key, label]) => (
-        <div key={key} className="grid grid-cols-[95px_12px_1fr] items-center gap-1 text-sm">
-          <span>{label}</span>
-          <span>:</span>
-          <Input
-            value={values[key] || ""}
-            onChange={e => setValues(current => ({ ...current, [key]: e.target.value }))}
-            className="h-8"
-          />
+type GarmentSectionProps = {
+  title: string;
+  tone: "blue" | "brown";
+  icon: React.ReactNode;
+  fabricCode: string;
+  setFabricCode: (value: string) => void;
+  patterns: string[];
+  setPatterns: React.Dispatch<React.SetStateAction<string[]>>;
+  standardSize: string;
+  setStandardSize: (value: string) => void;
+  measurements: Record<string, string>;
+  setMeasurements: React.Dispatch<React.SetStateAction<Record<string, string>>>;
+  measurementFields: readonly (readonly [string, string])[];
+  styles: string[];
+  selectedStyles: string[];
+  setSelectedStyles: (value: string[]) => void;
+  otherStyle: string;
+  setOtherStyle: (value: string) => void;
+  notes: string;
+  setNotes: (value: string) => void;
+  updatePattern: (
+    setter: React.Dispatch<React.SetStateAction<string[]>>,
+    index: number,
+    value: string
+  ) => void;
+};
+
+const GarmentSection = ({
+  title,
+  tone,
+  icon,
+  fabricCode,
+  setFabricCode,
+  patterns,
+  setPatterns,
+  standardSize,
+  setStandardSize,
+  measurements,
+  setMeasurements,
+  measurementFields,
+  styles,
+  selectedStyles,
+  setSelectedStyles,
+  otherStyle,
+  setOtherStyle,
+  notes,
+  setNotes,
+  updatePattern,
+}: GarmentSectionProps) => {
+  const blue = tone === "blue";
+
+  return (
+    <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div
+        className={
+          blue
+            ? "flex items-center gap-4 bg-gradient-to-r from-[#0c315c] via-[#164d80] to-[#0f4779] px-5 py-4 text-white"
+            : "flex items-center gap-4 bg-gradient-to-r from-[#6d4a27] via-[#8a6138] to-[#72502d] px-5 py-4 text-white"
+        }
+      >
+        <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-white/30 bg-white/10">
+          {icon}
         </div>
-      ))}
-    </div>
+        <div>
+          <h2 className="text-2xl font-black tracking-wide">{title}</h2>
+          <p className="text-xs font-medium uppercase tracking-[0.2em] text-white/75">
+            {blue ? "Shirt measurements & fitting" : "Trouser measurements & fitting"}
+          </p>
+        </div>
+      </div>
+
+      <div className="grid lg:grid-cols-[0.95fr_1.35fr_1.55fr_1.1fr_1.45fr]">
+        <GarmentInfo title="Fabric Code">
+          <Input
+            value={fabricCode}
+            onChange={e => setFabricCode(e.target.value)}
+            placeholder="Fabric code"
+            className="h-11 bg-white"
+          />
+        </GarmentInfo>
+
+        <GarmentInfo title="Pattern / Design">
+          <div className="space-y-2">
+            {patterns.map((pattern, index) => (
+              <Input
+                key={index}
+                value={pattern}
+                onChange={e => updatePattern(setPatterns, index, e.target.value)}
+                placeholder={`Pattern / design ${index + 1}`}
+                className="h-9 bg-white text-sm"
+              />
+            ))}
+          </div>
+        </GarmentInfo>
+
+        <GarmentInfo title="Measurements (inches)">
+          <div className="grid grid-cols-1 gap-x-5 gap-y-2 sm:grid-cols-2">
+            {measurementFields.map(([key, label]) => (
+              <div key={key} className="grid grid-cols-[1fr_10px_1fr] items-center gap-1">
+                <span className="text-sm font-medium text-slate-700">{label}</span>
+                <span className="text-sm text-slate-400">:</span>
+                <Input
+                  value={measurements[key] || ""}
+                  onChange={e =>
+                    setMeasurements(current => ({
+                      ...current,
+                      [key]: e.target.value,
+                    }))
+                  }
+                  inputMode="decimal"
+                  className="h-9 bg-white text-sm"
+                  aria-label={`${title} ${label}`}
+                />
+              </div>
+            ))}
+          </div>
+        </GarmentInfo>
+
+        <GarmentInfo title="Standard Size">
+          <Input
+            value={standardSize}
+            onChange={e => setStandardSize(e.target.value)}
+            placeholder={blue ? "e.g. 40 / L" : "e.g. 34 / M"}
+            className="h-11 bg-white"
+          />
+
+          <div className="mt-5 border-t pt-4">
+            <Label className="mb-3 block text-xs font-bold uppercase tracking-wide text-slate-500">
+              Style / Fit
+            </Label>
+            <StyleChecklist
+              options={styles}
+              selected={selectedStyles}
+              setSelected={setSelectedStyles}
+              otherValue={otherStyle}
+              setOtherValue={setOtherStyle}
+              compact
+            />
+          </div>
+        </GarmentInfo>
+
+        <GarmentInfo title="Notes">
+          <Textarea
+            value={notes}
+            onChange={e => setNotes(e.target.value)}
+            placeholder={blue ? "Shirt notes..." : "Pant notes..."}
+            className="min-h-[190px] resize-y bg-white"
+          />
+        </GarmentInfo>
+      </div>
+    </section>
+  );
+};
+
+const GarmentInfo = ({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) => (
+  <div className="border-b border-slate-200 p-4 last:border-b-0 lg:border-b-0 lg:border-r lg:last:border-r-0 sm:p-5">
+    <Label className="mb-3 block text-sm font-bold text-[#123766]">{title}</Label>
+    {children}
   </div>
 );
 
@@ -567,62 +713,48 @@ const StyleChecklist = ({
   setSelected,
   otherValue,
   setOtherValue,
+  compact = false,
 }: {
   options: string[];
   selected: string[];
   setSelected: (value: string[]) => void;
   otherValue: string;
   setOtherValue: (value: string) => void;
+  compact?: boolean;
 }) => (
-  <div className="border-l p-3">
-    <div className="space-y-3">
-      {options.map(option => (
-        <label key={option} className="flex cursor-pointer items-center gap-2 text-sm">
-          <Checkbox
-            checked={selected.includes(option)}
-            onCheckedChange={() => {
-              setSelected(selected.includes(option) ? selected.filter(item => item !== option) : [...selected, option]);
-            }}
-          />
-          <span>{option}</span>
-        </label>
-      ))}
-      <div className="flex items-center gap-2 text-sm">
+  <div className={compact ? "space-y-2.5" : "space-y-3"}>
+    {options.map(option => (
+      <label key={option} className="flex cursor-pointer items-center gap-2.5 text-sm font-medium text-slate-700">
         <Checkbox
-          checked={Boolean(otherValue)}
-          onCheckedChange={checked => {
-            if (!checked) setOtherValue("");
+          checked={selected.includes(option)}
+          onCheckedChange={() => {
+            setSelected(
+              selected.includes(option)
+                ? selected.filter(item => item !== option)
+                : [...selected, option]
+            );
           }}
         />
-        <span>Others:</span>
-        <Input value={otherValue} onChange={e => setOtherValue(e.target.value)} className="h-8" />
-      </div>
-      {selected.length > 0 && (
-        <div className="flex flex-wrap gap-1 pt-1 text-xs text-muted-foreground">
-          {selected.map(style => (
-            <span key={style} className="rounded-full bg-muted px-2 py-0.5">{style}</span>
-          ))}
-        </div>
-      )}
+        <span>{option}</span>
+      </label>
+    ))}
+
+    <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
+      <Checkbox
+        checked={Boolean(otherValue)}
+        onCheckedChange={checked => {
+          if (!checked) setOtherValue("");
+        }}
+      />
+      <span>Others:</span>
+      <Input
+        value={otherValue}
+        onChange={e => setOtherValue(e.target.value)}
+        className="h-8 min-w-0 flex-1 bg-white"
+        aria-label="Other style"
+      />
     </div>
   </div>
-);
-
-const OrderSection = ({
-  title,
-  tone,
-  children,
-}: {
-  title: string;
-  tone: "blue" | "brown";
-  children: React.ReactNode;
-}) => (
-  <Card className="overflow-hidden">
-    <CardHeader className={tone === "blue" ? "bg-primary text-primary-foreground" : "bg-amber-900 text-white"}>
-      <CardTitle className="text-xl tracking-wide">{title}</CardTitle>
-    </CardHeader>
-    <CardContent className="p-0">{children}</CardContent>
-  </Card>
 );
 
 export default OrderSheetForm;
