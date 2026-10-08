@@ -61,9 +61,8 @@ const requestOrderNo = async (orderDate: string) => {
 const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const initialOrderNo = "";
   const [saving, setSaving] = useState(false);
-  const [orderNo, setOrderNo] = useState(initialOrderNo);
+  const [orderNo, setOrderNo] = useState("");
   const [orderDate, setOrderDate] = useState(today());
   const [customerCode, setCustomerCode] = useState("");
   const [customerName, setCustomerName] = useState("");
