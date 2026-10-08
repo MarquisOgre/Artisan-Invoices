@@ -28,6 +28,9 @@ export type OrderSheet = {
   pant_style: { selected?: string[]; other?: string };
   pant_notes: string | null;
   delivery_address: string | null;
+  delivery_city: string | null;
+  delivery_state: string | null;
+  delivery_pincode: string | null;
   delivery_date: string | null;
   customer_signature: string | null;
   created_at: string;
@@ -45,6 +48,12 @@ const formatDate = (value: string | null | undefined) => {
   const d = new Date(value);
   return Number.isNaN(d.getTime()) ? value : d.toLocaleDateString("en-IN");
 };
+
+const formatDeliveryAddress = (order: Pick<OrderSheet, "delivery_address" | "delivery_city" | "delivery_state" | "delivery_pincode">) =>
+  [order.delivery_address, order.delivery_city, order.delivery_state, order.delivery_pincode]
+    .map(value => String(value || "").trim())
+    .filter(Boolean)
+    .join(", ") || "-";
 
 const escapeHtml = (value: unknown) =>
   String(value ?? "-").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -205,7 +214,7 @@ const printOrderSheet = (order: OrderSheet) => {
   </div>
 
   <div class="footer">
-    <div class="footer-box"><div class="footer-title">Delivery Address :</div><div class="footer-content">${esc(order.delivery_address)}</div></div>
+    <div class="footer-box"><div class="footer-title">Delivery Address :</div><div class="footer-content">${esc(formatDeliveryAddress(order))}</div></div>
     <div class="footer-box delivery-date"><div class="footer-title">Delivery Date :</div><div class="date-line">${esc(formatDate(order.delivery_date))}</div></div>
     <div class="footer-box signature"><div class="footer-title">Customer Signature :</div><div class="signature-line">${esc(order.customer_signature)}</div></div>
   </div>
@@ -398,7 +407,7 @@ const OrderSheetList = ({ onCreateNew }: Props) => {
                 <div className="mt-2"><b>Notes:</b> {selected.pant_notes || "-"}</div>
               </DetailSection>
               <div className="grid gap-4 md:grid-cols-3">
-                <Info label="Delivery Address" value={selected.delivery_address || "-"} />
+                <Info label="Delivery Address" value={formatDeliveryAddress(selected)} />
                 <Info label="Delivery Date" value={formatDate(selected.delivery_date)} />
                 <Info label="Customer Signature" value={selected.customer_signature || "-"} />
               </div>

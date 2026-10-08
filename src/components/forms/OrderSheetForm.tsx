@@ -115,6 +115,9 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
   );
 
   const [deliveryAddress, setDeliveryAddress] = useState("");
+  const [deliveryCity, setDeliveryCity] = useState("");
+  const [deliveryState, setDeliveryState] = useState("");
+  const [deliveryPincode, setDeliveryPincode] = useState("");
   const [deliveryDate, setDeliveryDate] = useState(() => addDays(today(), 7));
   const [customerSignature, setCustomerSignature] = useState("");
 
@@ -146,6 +149,9 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
       setCustomerCode("");
       setContactNo("");
       setDeliveryAddress("");
+      setDeliveryCity("");
+      setDeliveryState("");
+      setDeliveryPincode("");
       return;
     }
 
@@ -157,7 +163,10 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
     setCustomerName(customer.name);
     setCustomerCode(customer.customer_code || "");
     setContactNo(customer.phone || "");
-    setDeliveryAddress(formatCustomerAddress(customer));
+    setDeliveryAddress(customer.address || "");
+    setDeliveryCity(customer.city || "");
+    setDeliveryState(customer.state || "");
+    setDeliveryPincode(customer.pincode || "");
   };
 
   const customerAddress = existingCustomer?.address?.trim() || "";
@@ -206,6 +215,9 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
     setSelectedCustomerId("");
     setIsNewCustomer(false);
     setDeliveryAddress("");
+    setDeliveryCity("");
+    setDeliveryState("");
+    setDeliveryPincode("");
     setDeliveryDate(addDays(today(), 7));
     setCustomerSignature("");
     setShirtFabrics([]);
@@ -307,6 +319,9 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
             name: customerName.trim(),
             phone: contactNo.trim() || null,
             address: deliveryAddress.trim() || null,
+            city: deliveryCity.trim() || null,
+            state: deliveryState.trim() || null,
+            pincode: deliveryPincode.trim() || null,
           })
           .select("*")
           .single();
@@ -349,6 +364,9 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
         pant_style: { selected: pantStyles, other: pantOtherStyle.trim() },
         pant_notes: pantNotes.trim() || null,
         delivery_address: deliveryAddress.trim() || null,
+        delivery_city: deliveryCity.trim() || null,
+        delivery_state: deliveryState.trim() || null,
+        delivery_pincode: deliveryPincode.trim() || null,
         delivery_date: deliveryDate || null,
         customer_signature: customerSignature.trim() || null,
       };
@@ -567,36 +585,59 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
           <div className="grid gap-4 lg:grid-cols-[2.1fr_1fr_1fr]">
             <div className="rounded-xl border border-[#c8dced] bg-[#eef6fd] p-4 sm:p-5">
               <SectionLabel label="Delivery Address" />
-              <Textarea
-                value={deliveryAddress}
-                onChange={e => setDeliveryAddress(e.target.value)}
-                placeholder={
-                  hasCustomerAddress
-                    ? "Customer address loaded automatically. You can edit it for this order."
-                    : "Enter delivery address..."
-                }
-                className="min-h-[108px] resize-y border-[#c8dced] bg-white"
-              />
-              <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-                <p className="text-xs text-slate-500">
-                  {hasCustomerAddress
-                    ? "Address loaded from Customer record."
-                    : selectedCustomerId
-                      ? "No address saved for this customer — enter it manually."
-                      : "For a new customer, enter the delivery address manually."}
-                </p>
-                {hasCustomerAddress && (
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setDeliveryAddress(customerAddress)}
-                    className="bg-white"
-                  >
-                    <MapPin className="mr-1.5 h-3.5 w-3.5" />
-                    Use Customer Address
-                  </Button>
-                )}
+              <div className="space-y-3">
+                <Textarea
+                  value={deliveryAddress}
+                  onChange={e => setDeliveryAddress(e.target.value)}
+                  placeholder="Enter street address"
+                  rows={3}
+                  className="resize-y border-[#c8dced] bg-white"
+                />
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                  <Input
+                    value={deliveryCity}
+                    onChange={e => setDeliveryCity(e.target.value)}
+                    placeholder="Enter city"
+                    className="border-[#c8dced] bg-white"
+                  />
+                  <Input
+                    value={deliveryState}
+                    onChange={e => setDeliveryState(e.target.value)}
+                    placeholder="Enter state"
+                    className="border-[#c8dced] bg-white"
+                  />
+                  <Input
+                    value={deliveryPincode}
+                    onChange={e => setDeliveryPincode(e.target.value)}
+                    placeholder="Enter pincode"
+                    inputMode="numeric"
+                    className="border-[#c8dced] bg-white"
+                  />
+                </div>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-xs text-slate-500">
+                    {hasCustomerAddress
+                      ? "Address loaded from Customer record. You can edit it for this order."
+                      : "Enter the delivery address for this order."}
+                  </p>
+                  {hasCustomerAddress && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setDeliveryAddress(customerAddress);
+                        setDeliveryCity(existingCustomer?.city || "");
+                        setDeliveryState(existingCustomer?.state || "");
+                        setDeliveryPincode(existingCustomer?.pincode || "");
+                      }}
+                      className="bg-white"
+                    >
+                      <MapPin className="mr-1.5 h-3.5 w-3.5" />
+                      Use Customer Address
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
 
