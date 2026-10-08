@@ -18,13 +18,11 @@ export type OrderSheet = {
   customer_name: string;
   contact_no: string | null;
   shirt_fabric_code: string | null;
-  shirt_patterns: string[];
   shirt_standard_size: string | null;
   shirt_measurements: Record<string, string>;
   shirt_style: { selected?: string[]; other?: string };
   shirt_notes: string | null;
   pant_fabric_code: string | null;
-  pant_patterns: string[];
   pant_standard_size: string | null;
   pant_measurements: Record<string, string>;
   pant_style: { selected?: string[]; other?: string };
@@ -39,7 +37,6 @@ type Props = {
   onCreateNew: () => void;
 };
 
-const safeArray = (value: unknown): string[] => Array.isArray(value) ? value.filter(Boolean).map(String) : [];
 const safeObject = (value: unknown): Record<string, string> =>
   value && typeof value === "object" ? Object.fromEntries(Object.entries(value as Record<string, unknown>).map(([k, v]) => [k, String(v ?? "")])) : {};
 
@@ -78,8 +75,6 @@ const printOrderSheet = (order: OrderSheet) => {
   const measureRows = (rows: string[][]) => rows.map(([label, value]) =>
     `<div class="measure-row"><span>${esc(label)}</span><b>:</b><span class="line-value">${esc(value || "")}</span></div>`
   ).join("");
-  const patternRows = (patterns: string[]) =>
-    Array.from({ length: 5 }, (_, i) => `<div class="pattern-line">${esc(patterns[i] || "")}</div>`).join("");
   const shirtStyle = order.shirt_style?.selected || [];
   const pantStyle = order.pant_style?.selected || [];
 
@@ -127,14 +122,13 @@ const printOrderSheet = (order: OrderSheet) => {
   .garment-icon { position:absolute; left:6mm; top:-2mm; width:15mm; height:17mm; color:white; font-size:13mm; line-height:17mm; }
   .garment-icon.shirt-icon:before { content:"♧"; transform:rotate(180deg); display:block; font-size:15mm; }
   .garment-icon.pant-icon:before { content:"♜"; display:block; font-size:13mm; }
-  .section-grid { display:grid; grid-template-columns:9.5% 14.5% 14.5% 32% 13.5% 16%; background:#fff; min-height:39mm; max-height:39mm; }
+  .section-grid { display:grid; grid-template-columns:14.5% 14.5% 32% 13.5% 25.5%; background:#fff; min-height:39mm; max-height:39mm; }
   .cell { border-right:1px solid currentColor; }
   .cell:last-child { border-right:0; }
   .cell-head { height:7mm; background:linear-gradient(#e6f1fb,#d7e9f8); display:flex; align-items:center; justify-content:center; font-size:3.6mm; font-weight:800; text-align:center; color:#0b2d62; border-bottom:1px solid currentColor; }
   .pant .cell-head { background:linear-gradient(#fff2df,#f7e7d0); }
   .cell-body { padding:2mm 2.5mm 1.5mm; min-height:32mm; color:#08265b; }
   .fabric-body { display:flex; align-items:flex-start; justify-content:center; padding-top:7mm; font-weight:700; font-size:3.4mm; }
-  .pattern-line { height:6mm; border-bottom:1px solid #123e73; font-size:3.1mm; padding:2mm 1mm 0; white-space:nowrap; overflow:hidden; }
   .measurements { padding:2mm 3mm; }
   .measure-row { height:6mm; display:grid; grid-template-columns:24mm 4mm 1fr; align-items:end; font-size:3.4mm; }
   .line-value { border-bottom:1px solid #123e73; min-width:10mm; height:5mm; padding-left:1mm; }
@@ -180,7 +174,6 @@ const printOrderSheet = (order: OrderSheet) => {
     <div class="section-head"><div class="garment-title"><span class="garment-icon shirt-icon"></span>SHIRT</div><div></div></div>
     <div class="section-grid">
       <div class="cell"><div class="cell-head">Fabric Code</div><div class="cell-body fabric-body">${esc(order.shirt_fabric_code)}</div></div>
-      <div class="cell"><div class="cell-head">Pattern / Design</div><div class="cell-body">${patternRows(order.shirt_patterns)}</div></div>
       <div class="cell"><div class="cell-head">Standard Size</div><div class="cell-body fabric-body">${esc(order.shirt_standard_size)}</div></div>
       <div class="cell"><div class="cell-head">Measurements (inches)</div><div class="cell-body measurements">${measureRows(shirtMeasurements)}</div></div>
       <div class="cell"><div class="cell-head">Style</div><div class="cell-body style-list">
@@ -198,7 +191,6 @@ const printOrderSheet = (order: OrderSheet) => {
     <div class="section-head"><div class="garment-title"><span class="garment-icon pant-icon"></span>PANT</div><div></div></div>
     <div class="section-grid">
       <div class="cell"><div class="cell-head">Fabric Code</div><div class="cell-body fabric-body">${esc(order.pant_fabric_code)}</div></div>
-      <div class="cell"><div class="cell-head">Pattern / Design</div><div class="cell-body">${patternRows(order.pant_patterns)}</div></div>
       <div class="cell"><div class="cell-head">Standard Size</div><div class="cell-body fabric-body">${esc(order.pant_standard_size)}</div></div>
       <div class="cell"><div class="cell-head">Measurements (inches)</div><div class="cell-body measurements">${measureRows(pantMeasurements)}</div></div>
       <div class="cell"><div class="cell-head">Style</div><div class="cell-body style-list">
@@ -276,8 +268,6 @@ const OrderSheetList = ({ onCreateNew }: Props) => {
       if (error) throw error;
       setOrders((data || []).map((row: any) => ({
         ...row,
-        shirt_patterns: safeArray(row.shirt_patterns),
-        pant_patterns: safeArray(row.pant_patterns),
         shirt_measurements: safeObject(row.shirt_measurements),
         pant_measurements: safeObject(row.pant_measurements),
         shirt_style: row.shirt_style || {},
@@ -388,7 +378,6 @@ const OrderSheetList = ({ onCreateNew }: Props) => {
               </div>
               <DetailSection title="SHIRT" values={[
                 ["Fabric Code", selected.shirt_fabric_code || "-"],
-                ["Pattern / Design", selected.shirt_patterns.join(", ") || "-"],
                 ["Standard Size", selected.shirt_standard_size || "-"],
               ]}>
                 {measurementRows(selected.shirt_measurements)}
@@ -397,7 +386,6 @@ const OrderSheetList = ({ onCreateNew }: Props) => {
               </DetailSection>
               <DetailSection title="PANT" values={[
                 ["Fabric Code", selected.pant_fabric_code || "-"],
-                ["Pattern / Design", selected.pant_patterns.join(", ") || "-"],
                 ["Standard Size", selected.pant_standard_size || "-"],
               ]}>
                 {measurementRows(selected.pant_measurements)}

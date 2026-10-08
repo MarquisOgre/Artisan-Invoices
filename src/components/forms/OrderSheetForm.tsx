@@ -107,7 +107,6 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
 
   const [shirtFabricCode, setShirtFabricCode] = useState("");
   const [shirtFabricId, setShirtFabricId] = useState("");
-  const [shirtPatterns, setShirtPatterns] = useState<string[]>(["", "", "", "", ""]);
   const [shirtStandardSize, setShirtStandardSize] = useState("");
   const [shirtMeasurements, setShirtMeasurements] = useState<Record<string, string>>(
     emptyMeasurements(SHIRT_MEASUREMENTS)
@@ -118,7 +117,6 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
 
   const [pantFabricCode, setPantFabricCode] = useState("");
   const [pantFabricId, setPantFabricId] = useState("");
-  const [pantPatterns, setPantPatterns] = useState<string[]>(["", "", "", "", ""]);
   const [pantStandardSize, setPantStandardSize] = useState("");
   const [pantMeasurements, setPantMeasurements] = useState<Record<string, string>>(
     emptyMeasurements(PANT_MEASUREMENTS)
@@ -185,14 +183,6 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
     );
   };
 
-  const updatePattern = (
-    setter: React.Dispatch<React.SetStateAction<string[]>>,
-    index: number,
-    value: string
-  ) => {
-    setter(current => current.map((item, i) => (i === index ? value : item)));
-  };
-
   const resetForm = () => {
     setOrderNo("");
     setOrderDate(today());
@@ -207,7 +197,6 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
     setShirtFabrics([]);
     setShirtFabricCode("");
     setShirtFabricId("");
-    setShirtPatterns(["", "", "", "", ""]);
     setShirtStandardSize("");
     setShirtMeasurements(emptyMeasurements(SHIRT_MEASUREMENTS));
     setShirtStyles([]);
@@ -216,7 +205,6 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
     setPantFabrics([]);
     setPantFabricCode("");
     setPantFabricId("");
-    setPantPatterns(["", "", "", "", ""]);
     setPantStandardSize("");
     setPantMeasurements(emptyMeasurements(PANT_MEASUREMENTS));
     setPantStyles([]);
@@ -336,14 +324,12 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
         contact_no: contactNo.trim() || customer.phone || null,
         shirt_fabric_id: shirtFabricId || null,
         shirt_fabric_code: shirtFabricCode.trim() || null,
-        shirt_patterns: shirtPatterns.filter(Boolean),
         shirt_standard_size: shirtStandardSize.trim() || null,
         shirt_measurements: shirtMeasurements,
         shirt_style: { selected: shirtStyles, other: shirtOtherStyle.trim() },
         shirt_notes: shirtNotes.trim() || null,
         pant_fabric_id: pantFabricId || null,
         pant_fabric_code: pantFabricCode.trim() || null,
-        pant_patterns: pantPatterns.filter(Boolean),
         pant_standard_size: pantStandardSize.trim() || null,
         pant_measurements: pantMeasurements,
         pant_style: { selected: pantStyles, other: pantOtherStyle.trim() },
@@ -528,8 +514,6 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
             onAddFabric={() => openFabricPicker("shirt")}
             onRemoveFabric={fabricId => removeFabric("shirt", fabricId)}
             fabrics={fabrics}
-            patterns={shirtPatterns}
-            setPatterns={setShirtPatterns}
             standardSize={shirtStandardSize}
             setStandardSize={setShirtStandardSize}
             measurements={shirtMeasurements}
@@ -542,7 +526,6 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
             setOtherStyle={setShirtOtherStyle}
             notes={shirtNotes}
             setNotes={setShirtNotes}
-            updatePattern={updatePattern}
           />
 
           <GarmentSection
@@ -553,8 +536,6 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
             onAddFabric={() => openFabricPicker("pant")}
             onRemoveFabric={fabricId => removeFabric("pant", fabricId)}
             fabrics={fabrics}
-            patterns={pantPatterns}
-            setPatterns={setPantPatterns}
             standardSize={pantStandardSize}
             setStandardSize={setPantStandardSize}
             measurements={pantMeasurements}
@@ -567,7 +548,6 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
             setOtherStyle={setPantOtherStyle}
             notes={pantNotes}
             setNotes={setPantNotes}
-            updatePattern={updatePattern}
           />
 
           <div className="grid gap-4 lg:grid-cols-[2.1fr_1fr_1fr]">
@@ -742,8 +722,6 @@ type GarmentSectionProps = {
   onAddFabric: () => void;
   onRemoveFabric: (fabricId: string) => void;
   fabrics: FabricOption[];
-  patterns: string[];
-  setPatterns: React.Dispatch<React.SetStateAction<string[]>>;
   standardSize: string;
   setStandardSize: (value: string) => void;
   measurements: Record<string, string>;
@@ -756,11 +734,6 @@ type GarmentSectionProps = {
   setOtherStyle: (value: string) => void;
   notes: string;
   setNotes: (value: string) => void;
-  updatePattern: (
-    setter: React.Dispatch<React.SetStateAction<string[]>>,
-    index: number,
-    value: string
-  ) => void;
 };
 
 const GarmentSection = ({
@@ -771,8 +744,6 @@ const GarmentSection = ({
   onAddFabric,
   onRemoveFabric,
   fabrics,
-  patterns,
-  setPatterns,
   standardSize,
   setStandardSize,
   measurements,
@@ -785,7 +756,6 @@ const GarmentSection = ({
   setOtherStyle,
   notes,
   setNotes,
-  updatePattern,
 }: GarmentSectionProps) => {
   const blue = tone === "blue";
 
@@ -809,7 +779,7 @@ const GarmentSection = ({
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-[0.95fr_1.35fr_1.55fr_1.1fr_1.45fr]">
+      <div className="grid lg:grid-cols-[0.95fr_1.55fr_1.1fr_1.45fr]">
         <GarmentInfo title="Fabric Code — Multiple Options">
           <div className="space-y-2">
             {selectedFabrics.map((fabric, index) => (
@@ -850,20 +820,6 @@ const GarmentSection = ({
           {!selectedFabrics.length && (
             <p className="mt-2 text-xs text-slate-400">Choose one or more fabrics from the Fabric Master.</p>
           )}
-        </GarmentInfo>
-
-        <GarmentInfo title="Pattern / Design">
-          <div className="space-y-2">
-            {patterns.map((pattern, index) => (
-              <Input
-                key={index}
-                value={pattern}
-                onChange={e => updatePattern(setPatterns, index, e.target.value)}
-                placeholder={`Pattern / design ${index + 1}`}
-                className="h-9 bg-white text-sm"
-              />
-            ))}
-          </div>
         </GarmentInfo>
 
         <GarmentInfo title="Measurements (inches)">
