@@ -10,6 +10,7 @@ import { Users } from "lucide-react";
 
 export const UserManagement = () => {
   const { toast } = useToast();
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<'admin' | 'user'>('user');
@@ -18,10 +19,10 @@ export const UserManagement = () => {
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email || !password) {
+    if (!username || !email || !password) {
       toast({
         title: "Validation Error",
-        description: "Email and password are required.",
+        description: "Username, email and password are required.",
         variant: "destructive"
       });
       return;
@@ -38,17 +39,18 @@ export const UserManagement = () => {
 
       // Call edge function to create user
       const { data, error } = await supabase.functions.invoke('create-user', {
-        body: { email, password, role }
+        body: { username, email, password, role }
       });
 
       // Check for successful response
       if (data?.success) {
         toast({
           title: "User Created",
-          description: `User ${email} created successfully with ${role} role.`
+          description: `User ${username} created successfully with ${role} role.`
         });
 
         // Reset form
+        setUsername("");
         setEmail("");
         setPassword("");
         setRole('user');
@@ -100,6 +102,20 @@ export const UserManagement = () => {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleCreateUser} className="space-y-4">
+          <div>
+            <Label htmlFor="userUsername">Username</Label>
+            <Input
+              id="userUsername"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Enter username"
+              minLength={3}
+              maxLength={30}
+              required
+            />
+            <p className="mt-1 text-xs text-muted-foreground">3–30 characters: letters, numbers, dot, dash or underscore.</p>
+          </div>
           <div>
             <Label htmlFor="userEmail">Email</Label>
             <Input
