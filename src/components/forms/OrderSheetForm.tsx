@@ -845,17 +845,6 @@ const GarmentSection = ({
           </div>
         </GarmentInfo>
 
-        <GarmentInfo title="Style / Fit">
-          <StyleChecklist
-            options={styles}
-            selected={selectedStyles}
-            setSelected={setSelectedStyles}
-            otherValue={otherStyle}
-            setOtherValue={setOtherStyle}
-            compact
-          />
-        </GarmentInfo>
-
         <GarmentInfo title="Standard Size">
           <Input
             value={standardSize}
@@ -875,6 +864,17 @@ const GarmentSection = ({
               className="min-h-[190px] resize-y bg-white"
             />
           </div>
+        </GarmentInfo>
+
+        <GarmentInfo title="Style / Fit">
+          <StyleChecklist
+            options={styles}
+            selected={selectedStyles}
+            setSelected={setSelectedStyles}
+            otherValue={otherStyle}
+            setOtherValue={setOtherStyle}
+            compact
+          />
         </GarmentInfo>
       </div>
     </section>
@@ -910,21 +910,23 @@ const StyleChecklist = ({
   compact?: boolean;
 }) => (
   <div className={compact ? "space-y-2.5" : "space-y-3"}>
-    {options.map(option => (
-      <label key={option} className="flex cursor-pointer items-center gap-2.5 text-sm font-medium text-slate-700">
-        <Checkbox
-          checked={selected.includes(option)}
-          onCheckedChange={() => {
-            setSelected(
-              selected.includes(option)
-                ? selected.filter(item => item !== option)
-                : [...selected, option]
-            );
-          }}
-        />
-        <span>{option}</span>
-      </label>
-    ))}
+    <div className="grid grid-cols-2 gap-x-4 gap-y-2.5">
+      {options.map(option => (
+        <label key={option} className="flex min-w-0 cursor-pointer items-center gap-2 text-sm font-medium text-slate-700">
+          <Checkbox
+            checked={selected.includes(option)}
+            onCheckedChange={() => {
+              setSelected(
+                selected.includes(option)
+                  ? selected.filter(item => item !== option)
+                  : [...selected, option]
+              );
+            }}
+          />
+          <span className="truncate">{option}</span>
+        </label>
+      ))}
+    </div>
 
     <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
       <Checkbox
@@ -933,7 +935,7 @@ const StyleChecklist = ({
           if (!checked) setOtherValue("");
         }}
       />
-      <span>Others:</span>
+      <span className="shrink-0">Others:</span>
       <Input
         value={otherValue}
         onChange={e => setOtherValue(e.target.value)}
