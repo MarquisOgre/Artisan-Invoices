@@ -167,7 +167,7 @@ const printOrderSheet = (order: OrderSheet) => {
   </div>
 
   <div class="customer-bar">
-    <div class="customer-cell">Customer Code : <span class="fill-line">${esc(order.customer_code)}</span></div>
+    <div class="customer-cell">Customer ID : <span class="fill-line">${esc(order.customer_code)}</span></div>
     <div class="customer-cell">Customer Name : <span class="fill-line">${esc(order.customer_name)}</span></div>
     <div class="customer-cell">Contact No. : <span class="fill-line">${esc(order.contact_no)}</span></div>
   </div>
