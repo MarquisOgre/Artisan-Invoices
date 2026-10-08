@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { FunctionsHttpError } from "@supabase/supabase-js";
 import { Users } from "lucide-react";
 
 export const UserManagement = () => {
@@ -57,8 +58,27 @@ export const UserManagement = () => {
         return;
       }
 
-      // Handle edge function errors
+      // Supabase wraps 4xx/5xx Edge Function responses in FunctionsHttpError.
+      // Read the function response body so the UI shows the real server error
+      // instead of the generic "Edge Function returned a non-2xx status code".
       if (error) {
+        if (error instanceof FunctionsHttpError) {
+          try {
+            const body = await error.context.json();
+            throw new Error(
+              body?.error ||
+              body?.message ||
+              error.message ||
+              'Failed to create user'
+            );
+          } catch (parseError) {
+            if (parseError instanceof Error && parseError.message !== error.message) {
+              throw parseError;
+            }
+            throw new Error(error.message || 'Failed to create user');
+          }
+        }
+
         throw new Error(error.message || 'Failed to create user');
       }
 
