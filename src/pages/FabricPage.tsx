@@ -212,8 +212,8 @@ const FabricPage = (_props: FabricPageProps) => {
             <table className="w-full min-w-[1200px] text-sm">
               <thead>
                 <tr className="border-y bg-[#edf5fc] text-left text-[#123766]">
-                  <th className="px-4 py-3 font-bold">Fabric Code</th>
                   <th className="px-4 py-3 font-bold">Category</th>
+                  <th className="px-4 py-3 font-bold">Fabric Code</th>
                   <th className="px-4 py-3 font-bold">Brand</th>
                   <th className="px-4 py-3 font-bold">Article</th>
                   <th className="px-4 py-3 font-bold">Design</th>
@@ -231,8 +231,8 @@ const FabricPage = (_props: FabricPageProps) => {
                 ) : (
                   filtered.map(fabric => (
                     <tr key={fabric.id} className="border-b last:border-0 hover:bg-slate-50">
-                      <td className="px-4 py-3 font-semibold text-[#123766]">{fabric.code}</td>
                       <td className="px-4 py-3 font-medium text-[#123766]">{fabric.category}</td>
+                      <td className="px-4 py-3 font-semibold text-[#123766]">{fabric.code}</td>
                       <td className="px-4 py-3">{fabric.brand}</td>
                       <td className="px-4 py-3">{fabric.article}</td>
                       <td className="px-4 py-3">{fabric.design}</td>
@@ -273,7 +273,6 @@ const FabricPage = (_props: FabricPageProps) => {
           </DialogHeader>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <FormField label="Fabric Code *" value={form.code} onChange={value => setForm(prev => ({ ...prev, code: value }))} placeholder="e.g. CIR-CAI-E03" />
             <div className="space-y-1.5">
               <Label>Category *</Label>
               <select
@@ -285,6 +284,7 @@ const FabricPage = (_props: FabricPageProps) => {
                 <option value="Suiting">Suiting</option>
               </select>
             </div>
+            <FormField label="Fabric Code *" value={form.code} onChange={value => setForm(prev => ({ ...prev, code: value }))} placeholder="e.g. CIR-CAI-E03" />
             <FormField label="Brand *" value={form.brand} onChange={value => setForm(prev => ({ ...prev, brand: value }))} placeholder="CIROCCO" />
             <FormField label="Article *" value={form.article} onChange={value => setForm(prev => ({ ...prev, article: value }))} placeholder="CAIRO" />
             <FormField label="Design *" value={form.design} onChange={value => setForm(prev => ({ ...prev, design: value }))} placeholder="E03" />
