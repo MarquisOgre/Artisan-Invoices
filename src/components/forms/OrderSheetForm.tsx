@@ -498,6 +498,7 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
             fabricCode={shirtFabricCode}
             fabricId={shirtFabricId}
             setFabricId={setShirtFabricId}
+            onAddFabric={() => setFabricDialogOpen(true)}
             fabrics={fabrics}
             setFabricCode={setShirtFabricCode}
             patterns={shirtPatterns}
@@ -524,6 +525,7 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
             fabricCode={pantFabricCode}
             fabricId={pantFabricId}
             setFabricId={setPantFabricId}
+            onAddFabric={() => setFabricDialogOpen(true)}
             fabrics={fabrics}
             setFabricCode={setPantFabricCode}
             patterns={pantPatterns}
@@ -671,6 +673,7 @@ type GarmentSectionProps = {
   fabricCode: string;
   fabricId: string;
   setFabricId: (value: string) => void;
+  onAddFabric: () => void;
   fabrics: FabricOption[];
   setFabricCode: (value: string) => void;
   patterns: string[];
@@ -701,6 +704,7 @@ const GarmentSection = ({
   fabricCode,
   fabricId,
   setFabricId,
+  onAddFabric,
   fabrics,
   setFabricCode,
   patterns,
@@ -752,7 +756,7 @@ const GarmentSection = ({
             }}
             placeholder={fabrics.length ? "Select fabric code" : "No fabrics available"}
           />
-          <Button type="button" variant="outline" size="sm" onClick={() => setFabricDialogOpen(true)} className="mt-2 h-9 w-full">
+          <Button type="button" variant="outline" size="sm" onClick={onAddFabric} className="mt-2 h-9 w-full">
             <Plus className="mr-1.5 h-4 w-4" /> Add Fabric
           </Button>
           {fabricCode && (
