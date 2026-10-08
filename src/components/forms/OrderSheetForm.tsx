@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import FabricCombobox, { type FabricOption } from "@/components/forms/FabricCombobox";
+import { type FabricOption } from "@/components/forms/FabricCombobox";
 import {
   Select,
   SelectContent,
@@ -528,8 +528,6 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
             onAddFabric={() => openFabricPicker("shirt")}
             onRemoveFabric={fabricId => removeFabric("shirt", fabricId)}
             fabrics={fabrics}
-            setFabricCode={setShirtFabricCode}
-            setFabricId={setShirtFabricId}
             patterns={shirtPatterns}
             setPatterns={setShirtPatterns}
             standardSize={shirtStandardSize}
@@ -555,8 +553,6 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
             onAddFabric={() => openFabricPicker("pant")}
             onRemoveFabric={fabricId => removeFabric("pant", fabricId)}
             fabrics={fabrics}
-            setFabricCode={setPantFabricCode}
-            setFabricId={setPantFabricId}
             patterns={pantPatterns}
             setPatterns={setPantPatterns}
             standardSize={pantStandardSize}
@@ -742,8 +738,6 @@ type GarmentSectionProps = {
   onAddFabric: () => void;
   onRemoveFabric: (fabricId: string) => void;
   fabrics: FabricOption[];
-  setFabricCode: (value: string) => void;
-  setFabricId: (value: string) => void;
   patterns: string[];
   setPatterns: React.Dispatch<React.SetStateAction<string[]>>;
   standardSize: string;
@@ -773,8 +767,6 @@ const GarmentSection = ({
   onAddFabric,
   onRemoveFabric,
   fabrics,
-  setFabricCode,
-  setFabricId,
   patterns,
   setPatterns,
   standardSize,
