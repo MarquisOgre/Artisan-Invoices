@@ -47,20 +47,6 @@ type OrderSheetFormProps = {
 };
 
 const today = () => new Date().toISOString().slice(0, 10);
-const createTimestampCode = (prefix: string) => {
-  const now = new Date();
-  const stamp = [
-    now.getFullYear(),
-    String(now.getMonth() + 1).padStart(2, "0"),
-    String(now.getDate()).padStart(2, "0"),
-    String(now.getHours()).padStart(2, "0"),
-    String(now.getMinutes()).padStart(2, "0"),
-    String(now.getSeconds()).padStart(2, "0"),
-    String(now.getMilliseconds()).padStart(3, "0"),
-  ].join("");
-  return `${prefix}-${stamp}`;
-};
-
 const createOrderNoFallback = () => {
   const now = new Date();
   const date = [
@@ -74,6 +60,12 @@ const createOrderNoFallback = () => {
 const emptyMeasurements = (fields: readonly (readonly [string, string])[]) =>
   Object.fromEntries(fields.map(([key]) => [key, ""]));
 
+const requestOrderNo = async () => {
+  const { data, error } = await (supabase as any).rpc("next_order_form_id");
+  if (error || !data) return createOrderNoFallback();
+  return String(data);
+};
+
 const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -83,6 +75,7 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
   const [orderDate, setOrderDate] = useState(today());
   const [customerCode, setCustomerCode] = useState("");
   const [customerName, setCustomerName] = useState("");
+  const [contactNo, setContactNo] = useState("");
 
   const existingCustomer = useMemo(() => {
     const name = customerName.trim().toLowerCase();
@@ -96,14 +89,11 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
 
   useEffect(() => {
     let cancelled = false;
-    const loadOrderNo = async () => {
-      const { data, error } = await (supabase as any).rpc("next_order_form_id");
-      if (!cancelled && !error && data) setOrderNo(String(data));
-    };
-    loadOrderNo();
+    requestOrderNo().then(value => {
+      if (!cancelled) setOrderNo(value);
+    });
     return () => { cancelled = true; };
   }, []);
-  const [contactNo, setContactNo] = useState("");
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [deliveryDate, setDeliveryDate] = useState("");
   const [customerSignature, setCustomerSignature] = useState("");
@@ -145,7 +135,7 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
   };
 
   const resetForm = () => {
-    setOrderNo(createOrderNoFallback());
+    requestOrderNo().then(setOrderNo);
     setOrderDate(today());
     setCustomerCode("");
     setCustomerName("");
