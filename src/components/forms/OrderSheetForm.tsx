@@ -520,19 +520,6 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
         </div>
 
         <div className="space-y-4 bg-slate-50/70 p-3 sm:p-5">
-          <div className="rounded-xl border border-[#e9cda7] bg-[#fff7ed] p-4">
-            <div className="mb-2 text-sm font-bold text-[#7a4d1f]">Delivery Date</div>
-            <Input
-              type="date"
-              value={deliveryDate}
-              onChange={e => setDeliveryDate(e.target.value)}
-              className="h-11 border-[#e5c49b] bg-white"
-            />
-            <p className="mt-2 text-xs text-[#9a6a36]">
-              Default delivery date is 7 days after the order date. You can edit it.
-            </p>
-          </div>
-
           <GarmentSection
             title="SHIRT"
             tone="blue"
@@ -624,7 +611,9 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
                   className="h-11 border-[#ead7bf] bg-white pl-10"
                 />
               </div>
-              <p className="mt-3 text-xs text-slate-500">Expected customer delivery date.</p>
+              <p className="mt-3 text-xs text-slate-500">
+                Default is 7 days after the Order Date. You can edit it.
+              </p>
             </div>
 
             <div className="rounded-xl border border-[#c8dced] bg-white p-4 sm:p-5">
