@@ -38,7 +38,7 @@ type OrderSheetFormProps = {
 };
 
 const today = () => new Date().toISOString().slice(0, 10);
-const createOrderNo = () => {
+const createTimestampCode = (prefix: string) => {
   const now = new Date();
   const stamp = [
     now.getFullYear(),
@@ -47,9 +47,13 @@ const createOrderNo = () => {
     String(now.getHours()).padStart(2, "0"),
     String(now.getMinutes()).padStart(2, "0"),
     String(now.getSeconds()).padStart(2, "0"),
+    String(now.getMilliseconds()).padStart(3, "0"),
   ].join("");
-  return `ORD-${stamp}`;
+  return `${prefix}-${stamp}`;
 };
+
+const createOrderNo = () => createTimestampCode("ORD");
+const createCustomerCode = () => createTimestampCode("CUS");
 
 const emptyMeasurements = (fields: readonly (readonly [string, string])[]) =>
   Object.fromEntries(fields.map(([key]) => [key, ""]));
@@ -58,11 +62,12 @@ const OrderSheetForm = ({ onSaved }: OrderSheetFormProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const initialOrderNo = useMemo(createOrderNo, []);
+  const initialCustomerCode = useMemo(createCustomerCode, []);
 
   const [saving, setSaving] = useState(false);
   const [orderNo, setOrderNo] = useState(initialOrderNo);
   const [orderDate, setOrderDate] = useState(today());
-  const [customerCode, setCustomerCode] = useState("");
+  const [customerCode, setCustomerCode] = useState(initialCustomerCode);
   const [customerName, setCustomerName] = useState("");
   const [contactNo, setContactNo] = useState("");
   const [deliveryAddress, setDeliveryAddress] = useState("");
@@ -108,7 +113,7 @@ const OrderSheetForm = ({ onSaved }: OrderSheetFormProps) => {
   const resetForm = () => {
     setOrderNo(createOrderNo());
     setOrderDate(today());
-    setCustomerCode("");
+    setCustomerCode(createCustomerCode());
     setCustomerName("");
     setContactNo("");
     setDeliveryAddress("");
@@ -225,7 +230,7 @@ const OrderSheetForm = ({ onSaved }: OrderSheetFormProps) => {
               <Input type="date" value={orderDate} onChange={e => setOrderDate(e.target.value)} />
             </Field>
             <Field label="Customer Code">
-              <Input value={customerCode} onChange={e => setCustomerCode(e.target.value)} />
+              <Input value={customerCode} readOnly className="bg-muted/50 font-medium" />
             </Field>
             <Field label="Contact No.">
               <Input value={contactNo} onChange={e => setContactNo(e.target.value)} inputMode="tel" />
