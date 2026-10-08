@@ -17,6 +17,7 @@ type Fabric = {
   finish: string | null;
   count_spec: string | null;
   composition: string | null;
+  category: "Suiting" | "Shirting";
   swatch_url: string | null;
   is_active: boolean;
   created_at: string;
@@ -35,6 +36,7 @@ const emptyForm = {
   finish: "",
   count_spec: "",
   composition: "",
+  category: "Shirting",
   swatch_url: "",
 };
 
@@ -100,6 +102,7 @@ const FabricPage = (_props: FabricPageProps) => {
       count_spec: fabric.count_spec || "",
       composition: fabric.composition || "",
       swatch_url: fabric.swatch_url || "",
+      category: fabric.category || "Shirting",
     });
     setDialogOpen(true);
   };
@@ -124,6 +127,7 @@ const FabricPage = (_props: FabricPageProps) => {
         finish: form.finish.trim() || null,
         count_spec: form.count_spec.trim() || null,
         composition: form.composition.trim() || null,
+        category: form.category,
         swatch_url: form.swatch_url.trim() || null,
         is_active: true,
       };
@@ -205,10 +209,11 @@ const FabricPage = (_props: FabricPageProps) => {
       <Card>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[1100px] text-sm">
+            <table className="w-full min-w-[1200px] text-sm">
               <thead>
                 <tr className="border-y bg-[#edf5fc] text-left text-[#123766]">
                   <th className="px-4 py-3 font-bold">Fabric Code</th>
+                  <th className="px-4 py-3 font-bold">Category</th>
                   <th className="px-4 py-3 font-bold">Brand</th>
                   <th className="px-4 py-3 font-bold">Article</th>
                   <th className="px-4 py-3 font-bold">Design</th>
@@ -220,13 +225,14 @@ const FabricPage = (_props: FabricPageProps) => {
               </thead>
               <tbody>
                 {loading ? (
-                  <tr><td colSpan={8} className="px-4 py-10 text-center text-muted-foreground">Loading fabrics...</td></tr>
+                  <tr><td colSpan={9} className="px-4 py-10 text-center text-muted-foreground">Loading fabrics...</td></tr>
                 ) : filtered.length === 0 ? (
-                  <tr><td colSpan={8} className="px-4 py-10 text-center text-muted-foreground">No fabrics found.</td></tr>
+                  <tr><td colSpan={9} className="px-4 py-10 text-center text-muted-foreground">No fabrics found.</td></tr>
                 ) : (
                   filtered.map(fabric => (
                     <tr key={fabric.id} className="border-b last:border-0 hover:bg-slate-50">
                       <td className="px-4 py-3 font-semibold text-[#123766]">{fabric.code}</td>
+                      <td className="px-4 py-3 font-medium text-[#123766]">{fabric.category}</td>
                       <td className="px-4 py-3">{fabric.brand}</td>
                       <td className="px-4 py-3">{fabric.article}</td>
                       <td className="px-4 py-3">{fabric.design}</td>
@@ -268,6 +274,17 @@ const FabricPage = (_props: FabricPageProps) => {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <FormField label="Fabric Code *" value={form.code} onChange={value => setForm(prev => ({ ...prev, code: value }))} placeholder="e.g. CIR-CAI-E03" />
+            <div className="space-y-1.5">
+              <Label>Category *</Label>
+              <select
+                value={form.category}
+                onChange={e => setForm(prev => ({ ...prev, category: e.target.value as "Suiting" | "Shirting" }))}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                <option value="Shirting">Shirting</option>
+                <option value="Suiting">Suiting</option>
+              </select>
+            </div>
             <FormField label="Brand *" value={form.brand} onChange={value => setForm(prev => ({ ...prev, brand: value }))} placeholder="CIROCCO" />
             <FormField label="Article *" value={form.article} onChange={value => setForm(prev => ({ ...prev, article: value }))} placeholder="CAIRO" />
             <FormField label="Design *" value={form.design} onChange={value => setForm(prev => ({ ...prev, design: value }))} placeholder="E03" />
