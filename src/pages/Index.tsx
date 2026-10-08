@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Layout from "@/components/Layout";
 import Dashboard from "@/components/Dashboard";
 import InvoiceList from "@/components/InvoiceList";
@@ -20,12 +21,34 @@ import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
   const { isAdmin, loading: roleLoading } = useUserRole();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState("");
   const [editingCustomer, setEditingCustomer] = useState(null);
   const [editingInvoice, setEditingInvoice] = useState(null);
   const [editingQuotation, setEditingQuotation] = useState(null);
   const [viewingInvoice, setViewingInvoice] = useState(null);
   const [viewingQuotation, setViewingQuotation] = useState(null);
+
+  const path = location.pathname;
+  const routePage =
+    path === "/" ? "dashboard" :
+    path === "/dashboard" ? "dashboard" :
+    path === "/customers" ? "customers" :
+    path === "/customers/new" ? "customer-form" :
+    path === "/invoices" ? "invoices" :
+    path === "/invoices/new" ? "invoice-form" :
+    path === "/quotations" ? "quotations" :
+    path === "/quotations/new" ? "quotation-form" :
+    path === "/order-forms" ? "order-sheet" :
+    path === "/order-forms/new" ? "new-order-sheet" :
+    path === "/settings" ? "settings" :
+    path.startsWith("/customers/") ? "customer-form" :
+    path.match(/^\/invoices\/[^/]+\/edit$/) ? "invoice-edit-form" :
+    path.startsWith("/invoices/") ? "invoice-detail" :
+    path.match(/^\/quotations\/[^/]+\/edit$/) ? "quotation-edit-form" :
+    path.startsWith("/quotations/") ? "quotation-detail" :
+    "dashboard";
   const { toast } = useToast();
   const { companySettings, invoiceSettings } = useSettings();
   const {
@@ -43,15 +66,64 @@ const Index = () => {
     deleteQuotation
   } = useSupabaseData();
 
-  // Set default page based on role
+  // The URL is the source of truth for navigation so every page has a
+  // bookmarkable, refresh-safe address.
   useEffect(() => {
-    if (!roleLoading && !currentPage) {
-      setCurrentPage("dashboard");
+    if (roleLoading) return;
+    if (path === "/") {
+      navigate("/dashboard", { replace: true });
+      return;
     }
-  }, [roleLoading, currentPage]);
+    setCurrentPage(routePage);
+  }, [roleLoading, routePage, path]);
+
+  useEffect(() => {
+    const customerMatch = path.match(/^\/customers\/([^/]+)(?:\/edit)?$/);
+    const invoiceMatch = path.match(/^\/invoices\/([^/]+)$/);
+    const invoiceEditMatch = path.match(/^\/invoices\/([^/]+)\/edit$/);
+    const quotationMatch = path.match(/^\/quotations\/([^/]+)$/);
+    const quotationEditMatch = path.match(/^\/quotations\/([^/]+)\/edit$/);
+
+    if (customerMatch && !path.endsWith("/edit")) {
+      const customer = customers.find(c => c.id === customerMatch[1]);
+      if (customer) handleViewCustomer(customer.id);
+    }
+    if (customerMatch && path.endsWith("/edit")) {
+      const customer = customers.find(c => c.id === customerMatch[1]);
+      if (customer) setEditingCustomer(customer);
+    }
+    if (invoiceEditMatch) {
+      const invoice = invoices.find(i => i.id === invoiceEditMatch[1] || i.invoice_number === invoiceEditMatch[1]);
+      if (invoice) setEditingInvoice(invoice);
+    }
+    if (invoiceMatch) {
+      const invoice = invoices.find(i => i.id === invoiceMatch[1] || i.invoice_number === invoiceMatch[1]);
+      if (invoice) setViewingInvoice(invoice);
+    }
+    if (quotationEditMatch) {
+      const quotation = quotations.find(q => q.id === quotationEditMatch[1] || q.quotation_number === quotationEditMatch[1]);
+      if (quotation) setEditingQuotation(quotation);
+    }
+    if (quotationMatch) {
+      const quotation = quotations.find(q => q.id === quotationMatch[1] || q.quotation_number === quotationMatch[1]);
+      if (quotation) setViewingQuotation(quotation);
+    }
+  }, [path, customers, invoices, quotations]);
 
   const handlePageChange = (page: string) => {
-    // Handle direct action pages
+    const routes: Record<string, string> = {
+      dashboard: "/dashboard",
+      customers: "/customers",
+      "customer-form": editingCustomer ? `/customers/${editingCustomer.id}/edit` : "/customers/new",
+      invoices: "/invoices",
+      "invoice-form": "/invoices/new",
+      quotations: "/quotations",
+      "quotation-form": "/quotations/new",
+      "order-sheet": "/order-forms",
+      "new-order-sheet": "/order-forms/new",
+      settings: "/settings",
+    };
+
     if (page === "new-invoice") {
       handleCreateInvoice();
       return;
@@ -64,8 +136,10 @@ const Index = () => {
       handleCreateCustomer();
       return;
     }
-    
-    setCurrentPage(page);
+
+    const nextPath = routes[page];
+    if (nextPath) navigate(nextPath);
+    else setCurrentPage(page);
   };
 
   const handleCreateQuotation = () => {
@@ -77,7 +151,7 @@ const Index = () => {
       });
       return;
     }
-    setCurrentPage("quotation-form");
+    navigate("/quotations/new");
   };
 
   const handleCreateInvoice = () => {
@@ -89,17 +163,17 @@ const Index = () => {
       });
       return;
     }
-    setCurrentPage("invoice-form");
+    navigate("/invoices/new");
   };
 
   const handleCreateCustomer = () => {
     setEditingCustomer(null);
-    setCurrentPage("customer-form");
+    navigate(editingCustomer ? `/customers/${editingCustomer.id}/edit` : "/customers/new");
   };
 
   const handleEditCustomer = (customer: any) => {
     setEditingCustomer(customer);
-    setCurrentPage("customer-form");
+    navigate(`/customers/${customer.id}/edit`);
   };
 
   const handleViewInvoice = (id: string) => {
@@ -111,7 +185,7 @@ const Index = () => {
 
   const handleEditInvoice = (invoice: any) => {
     setEditingInvoice(invoice);
-    setCurrentPage("invoice-edit-form");
+    navigate(`/invoices/${invoice.id}/edit`);
   };
 
   const handleViewCustomer = (id: string) => {
@@ -133,7 +207,7 @@ const Index = () => {
           title: "Customer updated",
           description: `${updatedCustomer.name} has been updated.`
         });
-        setCurrentPage("customers");
+        navigate("/customers");
       }
     } else {
       // Create new customer
@@ -143,7 +217,7 @@ const Index = () => {
           title: "Customer added",
           description: `${newCustomer.name} has been added to your customer list.`
         });
-        setCurrentPage("customers");
+        navigate("/customers");
       }
     }
   };
@@ -156,7 +230,7 @@ const Index = () => {
           title: "Invoice created",
           description: `Invoice ${newInvoice.invoice_number} has been created.`
         });
-        setCurrentPage("invoices");
+        navigate("/invoices");
       } else {
         throw new Error("Failed to create invoice");
       }
@@ -226,7 +300,7 @@ const Index = () => {
 
   const handleEditQuotation = (quotation: any) => {
     setEditingQuotation(quotation);
-    setCurrentPage("quotation-edit-form");
+    navigate(`/quotations/${quotation.id}/edit`);
   };
 
   const handleSubmitQuotation = async (quotationData: any) => {
@@ -237,7 +311,7 @@ const Index = () => {
           title: "Quotation created",
           description: `Quotation ${newQuotation.quotation_number} has been created.`
         });
-        setCurrentPage("quotations");
+        navigate("/quotations");
       } else {
         throw new Error("Failed to create quotation");
       }
@@ -293,8 +367,8 @@ const Index = () => {
             onCreateQuotation={handleCreateQuotation}
             onCreateInvoice={handleCreateInvoice}
             onCreateCustomer={handleCreateCustomer}
-            onViewQuotations={() => setCurrentPage("quotations")}
-            onViewInvoices={() => setCurrentPage("invoices")}
+            onViewQuotations={() => navigate("/quotations")}
+            onViewInvoices={() => navigate("/invoices")}
           />
         );
       case "invoices":
@@ -324,7 +398,7 @@ const Index = () => {
         return (
           <CustomerForm 
             onSubmit={handleSubmitCustomer}
-            onCancel={() => setCurrentPage("customers")}
+            onCancel={() => navigate("/customers")}
             initialData={editingCustomer}
             mode={editingCustomer ? 'edit' : 'create'}
           />
@@ -334,7 +408,7 @@ const Index = () => {
           <InvoiceForm 
             customers={customers}
             onSubmit={handleSubmitInvoice}
-            onCancel={() => setCurrentPage("invoices")}
+            onCancel={() => navigate("/invoices")}
           />
         );
       case "invoice-edit-form":
@@ -350,25 +424,25 @@ const Index = () => {
                     description: "Invoice has been updated successfully."
                   });
                   setEditingInvoice(null);
-                  setCurrentPage("invoices");
+                  navigate("/invoices");
                 }
               }
             }}
-            onCancel={() => setCurrentPage("invoices")}
+            onCancel={() => navigate("/invoices")}
             initialData={editingInvoice}
             mode="edit"
           />
         );
       case "order-sheet":
         return (
-          <OrderSheetList onCreateNew={() => setCurrentPage("new-order-sheet")} />
+          <OrderSheetList onCreateNew={() => navigate("/order-forms/new")} />
         );
       case "new-order-sheet":
         return (
           <OrderSheetForm
             customers={customers}
             onSaved={() => {
-              setCurrentPage("order-sheet");
+              navigate("/order-forms");
             }}
           />
         );
@@ -383,8 +457,8 @@ const Index = () => {
             onCreateQuotation={handleCreateQuotation}
             onCreateInvoice={handleCreateInvoice}
             onCreateCustomer={handleCreateCustomer}
-            onViewQuotations={() => setCurrentPage("quotations")}
-            onViewInvoices={() => setCurrentPage("invoices")}
+            onViewQuotations={() => navigate("/quotations")}
+            onViewInvoices={() => navigate("/invoices")}
           />
         );
       case "quotations":
@@ -456,7 +530,7 @@ const Index = () => {
                   title: "Invoice created",
                   description: `Invoice ${newInvoice.invoice_number} has been created from quotation ${quotation.quotation_number}.`
                 });
-                setCurrentPage("invoices");
+                navigate("/invoices");
               }
             }}
             onUpdateStatus={async (quotationId, status) => {
@@ -476,7 +550,7 @@ const Index = () => {
           <QuotationForm 
             customers={customers}
             onSubmit={handleSubmitQuotation}
-            onCancel={() => setCurrentPage("quotations")}
+            onCancel={() => navigate("/quotations")}
           />
         );
       case "quotation-edit-form":
@@ -492,11 +566,11 @@ const Index = () => {
                     description: "Quotation has been updated successfully."
                   });
                   setEditingQuotation(null);
-                  setCurrentPage("quotations");
+                  navigate("/quotations");
                 }
               }
             }}
-            onCancel={() => setCurrentPage("quotations")}
+            onCancel={() => navigate("/quotations")}
             initialData={editingQuotation}
             mode="edit"
           />
@@ -513,7 +587,7 @@ const Index = () => {
         <InvoiceDetails
           invoice={viewingInvoice}
           isOpen={!!viewingInvoice}
-          onClose={() => setViewingInvoice(null)}
+          onClose={() => { setViewingInvoice(null); navigate("/invoices"); }}
         />
       )}
       
@@ -521,7 +595,7 @@ const Index = () => {
         <QuotationDetails
           quotation={viewingQuotation}
           isOpen={!!viewingQuotation}
-          onClose={() => setViewingQuotation(null)}
+          onClose={() => { setViewingQuotation(null); navigate("/quotations"); }}
         />
       )}
     </Layout>
