@@ -114,12 +114,22 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
     [customers, selectedCustomerId]
   );
 
+  const orderBookedBy = useMemo(() => {
+    const metadata = user?.user_metadata as Record<string, unknown> | undefined;
+    const name = String(
+      metadata?.full_name ||
+      metadata?.name ||
+      metadata?.display_name ||
+      ""
+    ).trim();
+    return name || user?.email || "Unknown user";
+  }, [user]);
+
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [deliveryCity, setDeliveryCity] = useState("");
   const [deliveryState, setDeliveryState] = useState("");
   const [deliveryPincode, setDeliveryPincode] = useState("");
   const [deliveryDate, setDeliveryDate] = useState(() => addDays(today(), 7));
-  const [customerSignature, setCustomerSignature] = useState("");
 
   const [shirtFabricCode, setShirtFabricCode] = useState("");
   const [shirtFabricId, setShirtFabricId] = useState("");
@@ -219,7 +229,6 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
     setDeliveryState("");
     setDeliveryPincode("");
     setDeliveryDate(addDays(today(), 7));
-    setCustomerSignature("");
     setShirtFabrics([]);
     setShirtFabricCode("");
     setShirtFabricId("");
@@ -368,7 +377,7 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
         delivery_state: deliveryState.trim() || null,
         delivery_pincode: deliveryPincode.trim() || null,
         delivery_date: deliveryDate || null,
-        customer_signature: customerSignature.trim() || null,
+        order_booked_by: orderBookedBy,
       };
 
       const { data: savedOrder, error } = await (supabase as any)
@@ -658,14 +667,16 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
             </div>
 
             <div className="rounded-xl border border-[#c8dced] bg-white p-4 sm:p-5">
-              <SectionLabel label="Customer Signature" />
+              <SectionLabel label="Order Booked By" />
               <Input
-                value={customerSignature}
-                onChange={e => setCustomerSignature(e.target.value)}
-                placeholder="Customer name / signature"
-                className="h-11 border-[#c8dced] bg-white"
+                value={orderBookedBy}
+                readOnly
+                className="h-11 border-[#c8dced] bg-slate-50 text-slate-700"
               />
-              <div className="mt-8 border-b border-[#123766]" />
+              <p className="mt-2 text-xs text-slate-500">
+                Automatically recorded from the currently logged-in user for future reference.
+              </p>
+              <div className="mt-6 border-b border-[#123766]" />
             </div>
           </div>
         </div>
