@@ -32,7 +32,7 @@ export type OrderSheet = {
   delivery_state: string | null;
   delivery_pincode: string | null;
   delivery_date: string | null;
-  customer_signature: string | null;
+  order_booked_by: string | null;
   created_at: string;
 };
 
@@ -216,7 +216,7 @@ const printOrderSheet = (order: OrderSheet) => {
   <div class="footer">
     <div class="footer-box"><div class="footer-title">Delivery Address :</div><div class="footer-content">${esc(formatDeliveryAddress(order))}</div></div>
     <div class="footer-box delivery-date"><div class="footer-title">Delivery Date :</div><div class="date-line">${esc(formatDate(order.delivery_date))}</div></div>
-    <div class="footer-box signature"><div class="footer-title">Customer Signature :</div><div class="signature-line">${esc(order.customer_signature)}</div></div>
+    <div class="footer-box signature"><div class="footer-title">Order Booked By :</div><div class="signature-line">${esc(order.order_booked_by)}</div></div>
   </div>
 </div>
 <script>window.onload=()=>setTimeout(()=>window.print(),250);</script>
@@ -409,7 +409,7 @@ const OrderSheetList = ({ onCreateNew }: Props) => {
               <div className="grid gap-4 md:grid-cols-3">
                 <Info label="Delivery Address" value={formatDeliveryAddress(selected)} />
                 <Info label="Delivery Date" value={formatDate(selected.delivery_date)} />
-                <Info label="Customer Signature" value={selected.customer_signature || "-"} />
+                <Info label="Order Booked By" value={selected.order_booked_by || "-"} />
               </div>
             </div>
           )}
