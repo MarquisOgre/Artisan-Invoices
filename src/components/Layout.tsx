@@ -123,12 +123,12 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
 
               {isAdmin && (
                 <Button
-                  variant={currentPage === "order-sheet" ? "default" : "ghost"}
+                  variant={currentPage === "order-sheet" || currentPage === "new-order-sheet" ? "default" : "ghost"}
                   className="flex items-center gap-2"
                   onClick={() => onPageChange("order-sheet")}
                 >
                   <ClipboardList className="h-4 w-4" />
-                  Order Sheet
+                  Order Forms
                 </Button>
               )}
 
@@ -228,7 +228,7 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
 
               {isAdmin && (
                 <Button
-                  variant={currentPage === "order-sheet" ? "default" : "ghost"}
+                  variant={currentPage === "order-sheet" || currentPage === "new-order-sheet" ? "default" : "ghost"}
                   className="w-full justify-start"
                   onClick={() => {
                     onPageChange("order-sheet");
@@ -236,7 +236,7 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
                   }}
                 >
                   <ClipboardList className="mr-3 h-4 w-4" />
-                  Order Sheet
+                  Order Forms
                 </Button>
               )}
 
