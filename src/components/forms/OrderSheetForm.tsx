@@ -548,7 +548,6 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
             setOtherStyle={setPantOtherStyle}
             notes={pantNotes}
             setNotes={setPantNotes}
-            updatePattern={updatePattern}
           />
 
           <div className="grid gap-4 lg:grid-cols-[2.1fr_1fr_1fr]">
@@ -757,7 +756,6 @@ const GarmentSection = ({
   setOtherStyle,
   notes,
   setNotes,
-  updatePattern,
 }: GarmentSectionProps) => {
   const blue = tone === "blue";
 
