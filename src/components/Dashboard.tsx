@@ -8,6 +8,7 @@ import {
   FileText,
   ReceiptIndianRupee,
   Users,
+  IndianRupee,
   TrendingUp,
   Eye,
   BarChart3
@@ -165,7 +166,6 @@ const Dashboard = ({ quotations, invoices, customers, onCreateQuotation, onCreat
         revenue: Math.round(monthRevenue),
         quotations: monthQuotations,
         invoices: monthInvoices,
-        expenses: Math.round(monthExpenses)
       };
     });
   };
