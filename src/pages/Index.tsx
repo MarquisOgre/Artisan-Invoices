@@ -212,7 +212,7 @@ const Index = () => {
           title: "Customer added",
           description: `${newCustomer.name} has been added to your customer list.`
         });
-        setCurrentPage("customers");
+        navigate("/customers");
       }
     }
   };
@@ -423,7 +423,7 @@ const Index = () => {
                 }
               }
             }}
-            onCancel={() => setCurrentPage("invoices")}
+            onCancel={() => navigate("/invoices")}
             initialData={editingInvoice}
             mode="edit"
           />
@@ -452,8 +452,8 @@ const Index = () => {
             onCreateQuotation={handleCreateQuotation}
             onCreateInvoice={handleCreateInvoice}
             onCreateCustomer={handleCreateCustomer}
-            onViewQuotations={() => setCurrentPage("quotations")}
-            onViewInvoices={() => setCurrentPage("invoices")}
+            onViewQuotations={() => navigate("/quotations")}
+            onViewInvoices={() => navigate("/invoices")}
           />
         );
       case "quotations":
@@ -565,7 +565,7 @@ const Index = () => {
                 }
               }
             }}
-            onCancel={() => setCurrentPage("quotations")}
+            onCancel={() => navigate("/quotations")}
             initialData={editingQuotation}
             mode="edit"
           />
