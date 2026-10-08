@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
-import { CalendarDays, MapPin, RotateCcw, Save, Scissors, Shirt } from "lucide-react";
+import { CalendarDays, MapPin, Plus, RotateCcw, Save, Scissors, Shirt } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import FabricCombobox, { type FabricOption } from "@/components/forms/FabricCombobox";
 import {
   Select,
@@ -86,7 +87,11 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
   const [customerName, setCustomerName] = useState("");
   const [contactNo, setContactNo] = useState("");
   const [selectedCustomerId, setSelectedCustomerId] = useState("");
+  const [isNewCustomer, setIsNewCustomer] = useState(false);
   const [fabrics, setFabrics] = useState<FabricOption[]>([]);
+  const [fabricDialogOpen, setFabricDialogOpen] = useState(false);
+  const [newFabric, setNewFabric] = useState({ code: "", brand: "", article: "", design: "", finish: "", count_spec: "", composition: "" });
+  const [addingFabric, setAddingFabric] = useState(false);
 
   const existingCustomer = useMemo(
     () => customers.find(customer => customer.id === selectedCustomerId) || null,
@@ -120,8 +125,9 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
   const [pantNotes, setPantNotes] = useState("");
 
   const handleCustomerChange = (value: string) => {
-    if (value === "__new__") {
+    if (value === "new-customer") {
       setSelectedCustomerId("");
+      setIsNewCustomer(true);
       setCustomerName("");
       setCustomerCode("");
       setContactNo("");
@@ -132,6 +138,7 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
     const customer = customers.find(item => item.id === value);
     if (!customer) return;
 
+    setIsNewCustomer(false);
     setSelectedCustomerId(customer.id);
     setCustomerName(customer.name);
     setCustomerCode(customer.customer_code || "");
@@ -190,6 +197,7 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
     setCustomerName("");
     setContactNo("");
     setSelectedCustomerId("");
+    setIsNewCustomer(false);
     setDeliveryAddress("");
     setDeliveryDate("");
     setCustomerSignature("");
@@ -209,6 +217,58 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
     setPantStyles([]);
     setPantOtherStyle("");
     setPantNotes("");
+  };
+
+  const handleAddFabric = async () => {
+    const code = newFabric.code.trim();
+    const brand = newFabric.brand.trim();
+    const article = newFabric.article.trim();
+    const design = newFabric.design.trim();
+
+    if (!code || !brand || !article || !design) {
+      toast({
+        title: "Required fabric fields missing",
+        description: "Please enter Fabric Code, Brand, Article and Design.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setAddingFabric(true);
+    try {
+      const { data, error } = await supabase
+        .from("fabrics")
+        .insert({
+          code,
+          brand,
+          article,
+          design,
+          finish: newFabric.finish.trim() || null,
+          count_spec: newFabric.count_spec.trim() || null,
+          composition: newFabric.composition.trim() || null,
+          is_active: true,
+        })
+        .select("id, code, brand, article, design, finish, count_spec, composition, swatch_url, is_active")
+        .single();
+
+      if (error) throw error;
+
+      const added = data as FabricOption;
+      setFabrics(current => [...current, added].sort((a, b) => a.code.localeCompare(b.code)));
+      setFabricDialogOpen(false);
+      setNewFabric({ code: "", brand: "", article: "", design: "", finish: "", count_spec: "", composition: "" });
+      toast({ title: "Fabric added", description: `${added.code} has been added to the Fabric Master and is ready to select.` });
+      return added;
+    } catch (error: any) {
+      console.error("Error adding fabric:", error);
+      toast({
+        title: "Unable to add fabric",
+        description: error?.message || "Please check your permissions and try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setAddingFabric(false);
+    }
   };
 
   const handleSave = async () => {
@@ -365,14 +425,14 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
           <div className="grid grid-cols-1 gap-3 lg:grid-cols-5">
             <HeaderField label="Customer Name" required>
               <Select
-                value={selectedCustomerId || (customerName ? "__new__" : "")}
+                value={selectedCustomerId || (isNewCustomer ? "new-customer" : "")}
                 onValueChange={handleCustomerChange}
               >
                 <SelectTrigger className="h-11 border-[#c9dced] bg-white">
                   <SelectValue placeholder="Select customer" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="__new__">+ Add New Customer</SelectItem>
+                  <SelectItem value="new-customer">+ Add New Customer</SelectItem>
                   {customers.map(customer => (
                     <SelectItem key={customer.id} value={customer.id}>
                       {customer.name}
@@ -381,7 +441,7 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
                   ))}
                 </SelectContent>
               </Select>
-              {!selectedCustomerId && customerName && (
+              {isNewCustomer && (
                 <Input
                   value={customerName}
                   onChange={e => setCustomerName(e.target.value)}
@@ -438,6 +498,7 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
             fabricCode={shirtFabricCode}
             fabricId={shirtFabricId}
             setFabricId={setShirtFabricId}
+            onAddFabric={() => setFabricDialogOpen(true)}
             fabrics={fabrics}
             setFabricCode={setShirtFabricCode}
             patterns={shirtPatterns}
@@ -464,6 +525,7 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
             fabricCode={pantFabricCode}
             fabricId={pantFabricId}
             setFabricId={setPantFabricId}
+            onAddFabric={() => setFabricDialogOpen(true)}
             fabrics={fabrics}
             setFabricCode={setPantFabricCode}
             patterns={pantPatterns}
@@ -545,6 +607,39 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
             </div>
           </div>
         </div>
+          <Dialog open={fabricDialogOpen} onOpenChange={setFabricDialogOpen}>
+            <DialogContent className="sm:max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Add Fabric</DialogTitle>
+              </DialogHeader>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {([
+                  ["code", "Fabric Code", "e.g. CIR-CAI-E03"],
+                  ["brand", "Brand", "e.g. CIROCCO"],
+                  ["article", "Article", "e.g. CAIRO"],
+                  ["design", "Design", "e.g. E03"],
+                  ["finish", "Finish", "Optional"],
+                  ["count_spec", "Count", "Optional"],
+                  ["composition", "Composition", "Optional"],
+                ] as const).map(([key, label, placeholder]) => (
+                  <div key={key} className={key === "composition" ? "sm:col-span-2" : ""}>
+                    <Label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-[#123766]">{label}</Label>
+                    <Input
+                      value={newFabric[key]}
+                      onChange={e => setNewFabric(current => ({ ...current, [key]: e.target.value }))}
+                      placeholder={placeholder}
+                    />
+                  </div>
+                ))}
+              </div>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setFabricDialogOpen(false)} disabled={addingFabric}>Cancel</Button>
+                <Button type="button" onClick={handleAddFabric} disabled={addingFabric}>
+                  {addingFabric ? "Adding..." : "Add Fabric"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
       </div>
     </div>
   );
@@ -578,6 +673,7 @@ type GarmentSectionProps = {
   fabricCode: string;
   fabricId: string;
   setFabricId: (value: string) => void;
+  onAddFabric: () => void;
   fabrics: FabricOption[];
   setFabricCode: (value: string) => void;
   patterns: string[];
@@ -608,6 +704,7 @@ const GarmentSection = ({
   fabricCode,
   fabricId,
   setFabricId,
+  onAddFabric,
   fabrics,
   setFabricCode,
   patterns,
@@ -659,6 +756,9 @@ const GarmentSection = ({
             }}
             placeholder={fabrics.length ? "Select fabric code" : "No fabrics available"}
           />
+          <Button type="button" variant="outline" size="sm" onClick={onAddFabric} className="mt-2 h-9 w-full">
+            <Plus className="mr-1.5 h-4 w-4" /> Add Fabric
+          </Button>
           {fabricCode && (
             <p className="mt-2 truncate text-xs font-medium text-[#123766]">{fabricCode}</p>
           )}
