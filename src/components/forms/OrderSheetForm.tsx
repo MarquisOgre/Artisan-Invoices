@@ -67,7 +67,7 @@ const OrderSheetForm = ({ onSaved }: OrderSheetFormProps) => {
   const [saving, setSaving] = useState(false);
   const [orderNo, setOrderNo] = useState(initialOrderNo);
   const [orderDate, setOrderDate] = useState(today());
-  const [customerCode] = useState(initialCustomerCode);
+  const [customerCode, setCustomerCode] = useState(initialCustomerCode);
   const [customerName, setCustomerName] = useState("");
   const [contactNo, setContactNo] = useState("");
   const [deliveryAddress, setDeliveryAddress] = useState("");
