@@ -779,7 +779,7 @@ const GarmentSection = ({
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-[0.95fr_1.55fr_1.1fr_1.45fr]">
+      <div className="grid lg:grid-cols-[0.95fr_1.55fr_1.35fr_1.45fr]">
         <GarmentInfo title="Fabric Code — Multiple Options">
           <div className="space-y-2">
             {selectedFabrics.map((fabric, index) => (
@@ -854,26 +854,26 @@ const GarmentSection = ({
           />
 
           <div className="mt-5 border-t pt-4">
-            <Label className="mb-3 block text-xs font-bold uppercase tracking-wide text-slate-500">
-              Notes
+            <Label className="mb-3 block text-sm font-bold text-[#123766]">
+              Style / Fit
             </Label>
-            <Textarea
-              value={notes}
-              onChange={e => setNotes(e.target.value)}
-              placeholder={blue ? "Shirt notes..." : "Pant notes..."}
-              className="min-h-[190px] resize-y bg-white"
+            <StyleChecklist
+              options={styles}
+              selected={selectedStyles}
+              setSelected={setSelectedStyles}
+              otherValue={otherStyle}
+              setOtherValue={setOtherStyle}
+              compact
             />
           </div>
         </GarmentInfo>
 
-        <GarmentInfo title="Style / Fit">
-          <StyleChecklist
-            options={styles}
-            selected={selectedStyles}
-            setSelected={setSelectedStyles}
-            otherValue={otherStyle}
-            setOtherValue={setOtherStyle}
-            compact
+        <GarmentInfo title="Notes">
+          <Textarea
+            value={notes}
+            onChange={e => setNotes(e.target.value)}
+            placeholder={blue ? "Shirt notes..." : "Pant notes..."}
+            className="min-h-[190px] resize-y bg-white"
           />
         </GarmentInfo>
       </div>
