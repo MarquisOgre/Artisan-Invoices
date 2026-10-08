@@ -303,24 +303,29 @@ const OrderSheetList = ({ onCreateNew }: Props) => {
 
   return (
     <div className="mx-auto w-full max-w-[1500px] space-y-5">
-      <div className="flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="text-sm text-muted-foreground">Artisan Apparels</p>
-          <h1 className="text-2xl font-bold text-primary">Existing Order Forms</h1>
-          <p className="text-sm text-muted-foreground">View and print saved Shirt &amp; Pant order forms.</p>
+      <div className="flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-sm lg:flex-row lg:items-center lg:justify-between">
+        <h1 className="text-2xl font-bold text-primary">
+          Existing Order Forms <span className="text-muted-foreground">({filtered.length})</span>
+        </h1>
+
+        <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center lg:w-auto">
+          <div className="relative w-full sm:w-[430px]">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              className="h-11 pl-9"
+              placeholder="Search Order ID, Customer ID or name..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
+          </div>
+          <Button onClick={onCreateNew} className="h-11 shrink-0">
+            <Plus className="mr-2 h-4 w-4" />New Order Sheet
+          </Button>
         </div>
-        <Button onClick={onCreateNew}><Plus className="mr-2 h-4 w-4" />New Order Sheet</Button>
       </div>
 
       <Card>
-        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <CardTitle>Order Forms ({filtered.length})</CardTitle>
-          <div className="relative w-full sm:max-w-sm">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input className="pl-9" placeholder="Search Order ID, Customer ID or name..." value={search} onChange={e => setSearch(e.target.value)} />
-          </div>
-        </CardHeader>
-        <CardContent>
+        <CardContent className="pt-0">
           <div className="overflow-x-auto rounded-md border">
             <Table>
               <TableHeader><TableRow>
