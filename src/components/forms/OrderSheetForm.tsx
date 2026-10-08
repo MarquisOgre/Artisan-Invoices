@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { CalendarDays, MapPin, Plus, RotateCcw, Save, Scissors, Shirt } from "lucide-react";
+import { CalendarDays, Check, MapPin, Plus, RotateCcw, Save, Scissors, Shirt, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import FabricCombobox, { type FabricOption } from "@/components/forms/FabricCombobox";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { type FabricOption } from "@/components/forms/FabricCombobox";
 import {
   Select,
   SelectContent,
@@ -89,9 +90,11 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
   const [selectedCustomerId, setSelectedCustomerId] = useState("");
   const [isNewCustomer, setIsNewCustomer] = useState(false);
   const [fabrics, setFabrics] = useState<FabricOption[]>([]);
-  const [fabricDialogOpen, setFabricDialogOpen] = useState(false);
-  const [newFabric, setNewFabric] = useState({ code: "", brand: "", article: "", design: "", finish: "", count_spec: "", composition: "" });
-  const [addingFabric, setAddingFabric] = useState(false);
+  const [shirtFabrics, setShirtFabrics] = useState<FabricOption[]>([]);
+  const [pantFabrics, setPantFabrics] = useState<FabricOption[]>([]);
+  const [fabricPickerOpen, setFabricPickerOpen] = useState(false);
+  const [fabricPickerGarment, setFabricPickerGarment] = useState<"shirt" | "pant">("shirt");
+  const [fabricPickerValues, setFabricPickerValues] = useState<string[]>([]);
 
   const existingCustomer = useMemo(
     () => customers.find(customer => customer.id === selectedCustomerId) || null,
@@ -201,6 +204,7 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
     setDeliveryAddress("");
     setDeliveryDate("");
     setCustomerSignature("");
+    setShirtFabrics([]);
     setShirtFabricCode("");
     setShirtFabricId("");
     setShirtPatterns(["", "", "", "", ""]);
@@ -209,6 +213,7 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
     setShirtStyles([]);
     setShirtOtherStyle("");
     setShirtNotes("");
+    setPantFabrics([]);
     setPantFabricCode("");
     setPantFabricId("");
     setPantPatterns(["", "", "", "", ""]);
@@ -219,55 +224,53 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
     setPantNotes("");
   };
 
-  const handleAddFabric = async () => {
-    const code = newFabric.code.trim();
-    const brand = newFabric.brand.trim();
-    const article = newFabric.article.trim();
-    const design = newFabric.design.trim();
+  const syncPrimaryFabric = (
+    selected: FabricOption[],
+    setSelected: React.Dispatch<React.SetStateAction<FabricOption[]>>,
+    setId: (value: string) => void,
+    setCode: (value: string) => void
+  ) => {
+    setSelected(selected);
+    setId(selected[0]?.id || "");
+    setCode(selected[0]?.code || "");
+  };
 
-    if (!code || !brand || !article || !design) {
-      toast({
-        title: "Required fabric fields missing",
-        description: "Please enter Fabric Code, Brand, Article and Design.",
-        variant: "destructive",
-      });
-      return;
+  const openFabricPicker = (garment: "shirt" | "pant") => {
+    const selected = garment === "shirt" ? shirtFabrics : pantFabrics;
+    setFabricPickerGarment(garment);
+    setFabricPickerValues(selected.map(fabric => fabric.id));
+    setFabricPickerOpen(true);
+  };
+
+  const toggleFabricPicker = (fabricId: string) => {
+    setFabricPickerValues(current =>
+      current.includes(fabricId)
+        ? current.filter(id => id !== fabricId)
+        : [...current, fabricId]
+    );
+  };
+
+  const applyFabricPicker = () => {
+    const selected = fabricPickerValues
+      .map(id => fabrics.find(fabric => fabric.id === id))
+      .filter((fabric): fabric is FabricOption => Boolean(fabric));
+
+    if (fabricPickerGarment === "shirt") {
+      syncPrimaryFabric(selected, setShirtFabrics, setShirtFabricId, setShirtFabricCode);
+    } else {
+      syncPrimaryFabric(selected, setPantFabrics, setPantFabricId, setPantFabricCode);
     }
 
-    setAddingFabric(true);
-    try {
-      const { data, error } = await supabase
-        .from("fabrics")
-        .insert({
-          code,
-          brand,
-          article,
-          design,
-          finish: newFabric.finish.trim() || null,
-          count_spec: newFabric.count_spec.trim() || null,
-          composition: newFabric.composition.trim() || null,
-          is_active: true,
-        })
-        .select("id, code, brand, article, design, finish, count_spec, composition, swatch_url, is_active")
-        .single();
+    setFabricPickerOpen(false);
+  };
 
-      if (error) throw error;
-
-      const added = data as FabricOption;
-      setFabrics(current => [...current, added].sort((a, b) => a.code.localeCompare(b.code)));
-      setFabricDialogOpen(false);
-      setNewFabric({ code: "", brand: "", article: "", design: "", finish: "", count_spec: "", composition: "" });
-      toast({ title: "Fabric added", description: `${added.code} has been added to the Fabric Master and is ready to select.` });
-      return added;
-    } catch (error: any) {
-      console.error("Error adding fabric:", error);
-      toast({
-        title: "Unable to add fabric",
-        description: error?.message || "Please check your permissions and try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setAddingFabric(false);
+  const removeFabric = (garment: "shirt" | "pant", fabricId: string) => {
+    if (garment === "shirt") {
+      const next = shirtFabrics.filter(fabric => fabric.id !== fabricId);
+      syncPrimaryFabric(next, setShirtFabrics, setShirtFabricId, setShirtFabricCode);
+    } else {
+      const next = pantFabrics.filter(fabric => fabric.id !== fabricId);
+      syncPrimaryFabric(next, setPantFabrics, setPantFabricId, setPantFabricCode);
     }
   };
 
@@ -350,8 +353,34 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
         customer_signature: customerSignature.trim() || null,
       };
 
-      const { error } = await (supabase as any).from("order_sheets").insert(payload);
+      const { data: savedOrder, error } = await (supabase as any)
+        .from("order_sheets")
+        .insert(payload)
+        .select("id")
+        .single();
       if (error) throw error;
+
+      const fabricRows = [
+        ...shirtFabrics.map((fabric, index) => ({
+          order_sheet_id: savedOrder.id,
+          garment_type: "shirt",
+          fabric_id: fabric.id,
+          sort_order: index,
+        })),
+        ...pantFabrics.map((fabric, index) => ({
+          order_sheet_id: savedOrder.id,
+          garment_type: "pant",
+          fabric_id: fabric.id,
+          sort_order: index,
+        })),
+      ];
+
+      if (fabricRows.length) {
+        const { error: fabricError } = await (supabase as any)
+          .from("order_sheet_fabrics")
+          .insert(fabricRows);
+        if (fabricError) throw fabricError;
+      }
 
       toast({
         title: "Order sheet saved",
@@ -495,12 +524,10 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
             title="SHIRT"
             tone="blue"
             icon={<Shirt className="h-10 w-10" strokeWidth={1.6} />}
-            fabricCode={shirtFabricCode}
-            fabricId={shirtFabricId}
-            setFabricId={setShirtFabricId}
-            onAddFabric={() => setFabricDialogOpen(true)}
+            selectedFabrics={shirtFabrics}
+            onAddFabric={() => openFabricPicker("shirt")}
+            onRemoveFabric={fabricId => removeFabric("shirt", fabricId)}
             fabrics={fabrics}
-            setFabricCode={setShirtFabricCode}
             patterns={shirtPatterns}
             setPatterns={setShirtPatterns}
             standardSize={shirtStandardSize}
@@ -522,12 +549,10 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
             title="PANT"
             tone="brown"
             icon={<Scissors className="h-10 w-10" strokeWidth={1.6} />}
-            fabricCode={pantFabricCode}
-            fabricId={pantFabricId}
-            setFabricId={setPantFabricId}
-            onAddFabric={() => setFabricDialogOpen(true)}
+            selectedFabrics={pantFabrics}
+            onAddFabric={() => openFabricPicker("pant")}
+            onRemoveFabric={fabricId => removeFabric("pant", fabricId)}
             fabrics={fabrics}
-            setFabricCode={setPantFabricCode}
             patterns={pantPatterns}
             setPatterns={setPantPatterns}
             standardSize={pantStandardSize}
@@ -607,35 +632,74 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
             </div>
           </div>
         </div>
-          <Dialog open={fabricDialogOpen} onOpenChange={setFabricDialogOpen}>
+          <Dialog open={fabricPickerOpen} onOpenChange={setFabricPickerOpen}>
             <DialogContent className="sm:max-w-2xl">
               <DialogHeader>
-                <DialogTitle>Add Fabric</DialogTitle>
+                <DialogTitle>
+                  Choose {fabricPickerGarment === "shirt" ? "Shirt" : "Pant"} Fabrics
+                </DialogTitle>
               </DialogHeader>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                {([
-                  ["code", "Fabric Code", "e.g. CIR-CAI-E03"],
-                  ["brand", "Brand", "e.g. CIROCCO"],
-                  ["article", "Article", "e.g. CAIRO"],
-                  ["design", "Design", "e.g. E03"],
-                  ["finish", "Finish", "Optional"],
-                  ["count_spec", "Count", "Optional"],
-                  ["composition", "Composition", "Optional"],
-                ] as const).map(([key, label, placeholder]) => (
-                  <div key={key} className={key === "composition" ? "sm:col-span-2" : ""}>
-                    <Label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-[#123766]">{label}</Label>
-                    <Input
-                      value={newFabric[key]}
-                      onChange={e => setNewFabric(current => ({ ...current, [key]: e.target.value }))}
-                      placeholder={placeholder}
-                    />
-                  </div>
-                ))}
+
+              <div className="rounded-lg border border-slate-200">
+                <Command>
+                  <CommandInput placeholder="Search fabric code, article, design..." />
+                  <CommandList className="max-h-[360px]">
+                    <CommandEmpty>No fabric found.</CommandEmpty>
+                    <CommandGroup>
+                      {fabrics.map(fabric => {
+                        const selected = fabricPickerValues.includes(fabric.id);
+                        return (
+                          <CommandItem
+                            key={fabric.id}
+                            value={`${fabric.code} ${fabric.brand} ${fabric.article} ${fabric.design} ${fabric.finish || ""} ${fabric.composition || ""}`}
+                            onSelect={() => toggleFabricPicker(fabric.id)}
+                            className="items-start gap-3 px-3 py-2.5"
+                          >
+                            <Check className={`mt-0.5 h-4 w-4 shrink-0 ${selected ? "opacity-100" : "opacity-0"}`} />
+                            <div className="min-w-0 flex-1">
+                              <div className="font-semibold text-[#123766]">{fabric.code}</div>
+                              <div className="truncate text-xs text-muted-foreground">
+                                {fabric.article} · {fabric.design}
+                                {fabric.composition ? ` · ${fabric.composition}` : ""}
+                              </div>
+                            </div>
+                          </CommandItem>
+                        );
+                      })}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
               </div>
+
+              <div className="flex flex-wrap gap-2">
+                {fabricPickerValues.map(id => {
+                  const fabric = fabrics.find(item => item.id === id);
+                  if (!fabric) return null;
+                  return (
+                    <div
+                      key={fabric.id}
+                      className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-[#c8dced] bg-[#eef6fd] px-3 py-1.5 text-xs font-semibold text-[#123766]"
+                    >
+                      <span className="truncate">{fabric.code}</span>
+                      <button
+                        type="button"
+                        className="shrink-0 rounded-full p-0.5 hover:bg-white"
+                        onClick={() => toggleFabricPicker(fabric.id)}
+                        aria-label={`Remove ${fabric.code}`}
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+
               <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setFabricDialogOpen(false)} disabled={addingFabric}>Cancel</Button>
-                <Button type="button" onClick={handleAddFabric} disabled={addingFabric}>
-                  {addingFabric ? "Adding..." : "Add Fabric"}
+                <Button type="button" variant="outline" onClick={() => setFabricPickerOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="button" onClick={applyFabricPicker}>
+                  Done
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -670,12 +734,10 @@ type GarmentSectionProps = {
   title: string;
   tone: "blue" | "brown";
   icon: React.ReactNode;
-  fabricCode: string;
-  fabricId: string;
-  setFabricId: (value: string) => void;
+  selectedFabrics: FabricOption[];
   onAddFabric: () => void;
+  onRemoveFabric: (fabricId: string) => void;
   fabrics: FabricOption[];
-  setFabricCode: (value: string) => void;
   patterns: string[];
   setPatterns: React.Dispatch<React.SetStateAction<string[]>>;
   standardSize: string;
@@ -701,12 +763,10 @@ const GarmentSection = ({
   title,
   tone,
   icon,
-  fabricCode,
-  fabricId,
-  setFabricId,
+  selectedFabrics,
   onAddFabric,
+  onRemoveFabric,
   fabrics,
-  setFabricCode,
   patterns,
   setPatterns,
   standardSize,
@@ -746,21 +806,45 @@ const GarmentSection = ({
       </div>
 
       <div className="grid lg:grid-cols-[0.95fr_1.35fr_1.55fr_1.1fr_1.45fr]">
-        <GarmentInfo title="Fabric Code">
-          <FabricCombobox
-            fabrics={fabrics}
-            value={fabricId}
-            onChange={fabric => {
-              setFabricId(fabric?.id || "");
-              setFabricCode(fabric?.code || "");
-            }}
-            placeholder={fabrics.length ? "Select fabric code" : "No fabrics available"}
-          />
-          <Button type="button" variant="outline" size="sm" onClick={onAddFabric} className="mt-2 h-9 w-full">
-            <Plus className="mr-1.5 h-4 w-4" /> Add Fabric
-          </Button>
-          {fabricCode && (
-            <p className="mt-2 truncate text-xs font-medium text-[#123766]">{fabricCode}</p>
+        <GarmentInfo title="Fabric Code — Multiple Options">
+          <div className="space-y-2">
+            {selectedFabrics.map((fabric, index) => (
+              <div
+                key={fabric.id}
+                className="flex items-center gap-2 rounded-lg border border-[#c8dced] bg-[#f7fbff] px-2.5 py-2"
+              >
+                <span className="min-w-0 flex-1 truncate text-xs font-semibold text-[#123766]">
+                  {fabric.code}
+                </span>
+                {index === 0 && (
+                  <span className="shrink-0 rounded-full bg-[#123766] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white">
+                    Primary
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={() => onRemoveFabric(fabric.id)}
+                  className="shrink-0 rounded-full p-1 text-slate-400 hover:bg-white hover:text-red-600"
+                  aria-label={`Remove ${fabric.code}`}
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={onAddFabric}
+              disabled={!fabrics.length}
+              className="h-9 w-full border-dashed"
+            >
+              <Plus className="mr-1.5 h-4 w-4" />
+              {selectedFabrics.length ? "Add Another Fabric" : "Choose Fabric"}
+            </Button>
+          </div>
+          {!selectedFabrics.length && (
+            <p className="mt-2 text-xs text-slate-400">Choose one or more fabrics from the Fabric Master.</p>
           )}
         </GarmentInfo>
 
