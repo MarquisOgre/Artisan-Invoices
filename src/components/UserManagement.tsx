@@ -7,13 +7,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { FunctionsHttpError } from "@supabase/supabase-js";
-import { Users } from "lucide-react";
+import { Eye, EyeOff, Users } from "lucide-react";
 
 export const UserManagement = () => {
   const { toast } = useToast();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState<'admin' | 'user'>('user');
   const [loading, setLoading] = useState(false);
 
@@ -122,55 +123,79 @@ export const UserManagement = () => {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleCreateUser} className="space-y-4">
-          <div>
-            <Label htmlFor="userUsername">Username</Label>
-            <Input
-              id="userUsername"
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Enter username"
-              minLength={3}
-              maxLength={30}
-              required
-            />
-            <p className="mt-1 text-xs text-muted-foreground">3–30 characters: letters, numbers, dot, dash or underscore.</p>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 lg:items-start">
+            <div className="min-w-0">
+              <Label htmlFor="userUsername">Username</Label>
+              <Input
+                id="userUsername"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Enter username"
+                minLength={3}
+                maxLength={30}
+                required
+              />
+              <p className="mt-1 text-xs text-muted-foreground">
+                3–30 characters: letters, numbers, dot, dash or underscore.
+              </p>
+            </div>
+
+            <div className="min-w-0">
+              <Label htmlFor="userEmail">Email</Label>
+              <Input
+                id="userEmail"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="user@example.com"
+                required
+              />
+            </div>
+
+            <div className="min-w-0">
+              <Label htmlFor="userPassword">Password</Label>
+              <div className="relative">
+                <Input
+                  id="userPassword"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter password"
+                  required
+                  minLength={6}
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((visible) => !visible)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-1 text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  title={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            <div className="min-w-0">
+              <Label htmlFor="userRole">Role</Label>
+              <Select value={role} onValueChange={(value: 'admin' | 'user') => setRole(value)}>
+                <SelectTrigger id="userRole">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="user">User</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-          <div>
-            <Label htmlFor="userEmail">Email</Label>
-            <Input
-              id="userEmail"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="user@example.com"
-              required
-            />
-          </div>
-          <div>
-            <Label htmlFor="userPassword">Password</Label>
-            <Input
-              id="userPassword"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter password"
-              required
-              minLength={6}
-            />
-          </div>
-          <div>
-            <Label htmlFor="userRole">Role</Label>
-            <Select value={role} onValueChange={(value: 'admin' | 'user') => setRole(value)}>
-              <SelectTrigger id="userRole">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="admin">Admin</SelectItem>
-                <SelectItem value="user">User</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+
           <Button type="submit" disabled={loading}>
             {loading ? "Creating..." : "Create User"}
           </Button>
