@@ -69,8 +69,13 @@ const Index = () => {
   // The URL is the source of truth for navigation so every page has a
   // bookmarkable, refresh-safe address.
   useEffect(() => {
-    if (!roleLoading) setCurrentPage(routePage);
-  }, [roleLoading, routePage]);
+    if (roleLoading) return;
+    if (path === "/") {
+      navigate("/dashboard", { replace: true });
+      return;
+    }
+    setCurrentPage(routePage);
+  }, [roleLoading, routePage, path]);
 
   useEffect(() => {
     const customerMatch = path.match(/^\/customers\/([^/]+)(?:\/edit)?$/);
