@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 
 const authSchema = z.object({
-  email: z.string().trim().email("Invalid email address").max(255),
+  identifier: z.string().trim().min(3, "Enter your email or username").max(255),
   password: z.string().min(6, "Password must be at least 6 characters").max(100)
 });
 
@@ -17,7 +17,7 @@ export default function Auth() {
   const { user, loading } = useAuth();
   const { toast } = useToast();
   const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -60,7 +60,7 @@ export default function Auth() {
     e.preventDefault();
 
     // Validate inputs
-    const validation = authSchema.safeParse({ email, password });
+    const validation = authSchema.safeParse({ identifier, password });
     if (!validation.success) {
       toast({
         title: "Validation Error",
@@ -74,10 +74,29 @@ export default function Auth() {
 
     try {
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
+        let error: { message?: string } | null = null;
+
+        if (identifier.includes("@")) {
+          const result = await supabase.auth.signInWithPassword({
+            email: identifier.trim(),
+            password,
+          });
+          error = result.error;
+        } else {
+          const result = await supabase.functions.invoke("username-login", {
+            body: { username: identifier.trim(), password },
+          });
+
+          if (!result.error && result.data?.session) {
+            const sessionResult = await supabase.auth.setSession({
+              access_token: result.data.session.access_token,
+              refresh_token: result.data.session.refresh_token,
+            });
+            error = sessionResult.error;
+          } else {
+            error = result.error || { message: result.data?.error || "Invalid login credentials" };
+          }
+        }
 
         if (error) {
           toast({
@@ -151,13 +170,13 @@ export default function Auth() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="email" className="text-sm text-white mb-1 block">Email</Label>
+            <Label htmlFor="identifier" className="text-sm text-white mb-1 block">Email or Username</Label>
             <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
+              id="identifier"
+              type="text"
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
+              placeholder="Email or username"
               className="bg-yellow-100 text-black placeholder-gray-700 border border-gray-300 px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-300"
               required
             />
