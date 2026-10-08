@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Eye, Printer, Plus, Search, ArrowLeft } from "lucide-react";
+import { Eye, Printer, Plus, Search, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -230,6 +230,36 @@ const OrderSheetList = ({ onCreateNew }: Props) => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<OrderSheet | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const handleDelete = async (order: OrderSheet) => {
+    const confirmed = window.confirm(
+      `Delete Order Form ${order.order_no} for ${order.customer_name}? This cannot be undone.`
+    );
+    if (!confirmed) return;
+
+    setDeletingId(order.id);
+    try {
+      const { error } = await (supabase as any)
+        .from("order_sheets")
+        .delete()
+        .eq("id", order.id);
+      if (error) throw error;
+
+      setOrders(current => current.filter(item => item.id !== order.id));
+      if (selected?.id === order.id) setSelected(null);
+      toast({ title: "Order form deleted", description: `${order.order_no} was deleted successfully.` });
+    } catch (error: any) {
+      console.error("Error deleting order sheet:", error);
+      toast({
+        title: "Unable to delete order form",
+        description: error?.message || "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const loadOrders = async () => {
     if (!user) return;
@@ -316,6 +346,15 @@ const OrderSheetList = ({ onCreateNew }: Props) => {
                       <div className="flex justify-end gap-1">
                         <Button size="sm" variant="ghost" onClick={() => setSelected(order)}><Eye className="mr-1 h-4 w-4" />View</Button>
                         <Button size="sm" variant="outline" onClick={() => printOrderSheet(order)}><Printer className="mr-1 h-4 w-4" />Print</Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleDelete(order)}
+                          disabled={deletingId === order.id}
+                          title="Delete Order Form"
+                        >
+                          <Trash2 className="mr-1 h-4 w-4" />{deletingId === order.id ? "Deleting..." : "Delete"}
+                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
