@@ -8,10 +8,7 @@ import {
   Settings,
   Menu,
   X,
-  Package,
   LogOut,
-  ArrowDownToLine,
-  ArrowUpFromLine,
   ChevronDown,
 } from "lucide-react";
 import {
@@ -40,7 +37,6 @@ const FOOTER_HEIGHT = 48;
 
 const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [stockOpen, setStockOpen] = useState(false);
   const [quoInvoicesOpen, setQuoInvoicesOpen] = useState(false);
   const { signOut } = useAuth();
   const { isAdmin } = useUserRole();
@@ -48,13 +44,6 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
   const standaloneNavigation = [
     { name: "Dashboard", icon: BarChart3, key: "dashboard" },
     { name: "Customers", icon: Users, key: "customers", adminOnly: true },
-    { name: "Expenses", icon: Receipt, key: "expense-register" },
-  ];
-
-  const stockItems = [
-    { name: "Stock Reg", icon: Package, key: "stock-register" },
-    { name: "Inward", icon: ArrowDownToLine, key: "inward-register" },
-    { name: "Outward", icon: ArrowUpFromLine, key: "outward-register" },
   ];
 
   const quoInvoicesItems = [
@@ -63,7 +52,6 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
   ];
 
   const filteredStandaloneNav = standaloneNavigation.filter(item => !item.adminOnly || isAdmin);
-  const isStockActive = stockItems.some(item => item.key === currentPage);
   const isQuoInvoicesActive = quoInvoicesItems.some(item => item.key === currentPage);
 
   const handleLogout = async () => {
@@ -131,40 +119,6 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
                   Customers
                 </Button>
               )}
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant={isStockActive ? "default" : "ghost"}
-                    className="flex items-center gap-2"
-                  >
-                    <Package className="h-4 w-4" />
-                    Stock
-                    <ChevronDown className="h-3 w-3" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start">
-                  {stockItems.map((item) => (
-                    <DropdownMenuItem
-                      key={item.key}
-                      onClick={() => onPageChange(item.key)}
-                      className={currentPage === item.key ? "bg-muted" : ""}
-                    >
-                      <item.icon className="h-4 w-4 mr-2" />
-                      {item.name}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              <Button
-                variant={currentPage === "expense-register" ? "default" : "ghost"}
-                className="flex items-center gap-2"
-                onClick={() => onPageChange("expense-register")}
-              >
-                <Receipt className="h-4 w-4" />
-                Expenses
-              </Button>
 
               {isAdmin && (
                 <Button
@@ -259,49 +213,6 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
                   Customers
                 </Button>
               )}
-
-              <Collapsible open={stockOpen} onOpenChange={setStockOpen}>
-                <CollapsibleTrigger asChild>
-                  <Button
-                    variant={isStockActive ? "default" : "ghost"}
-                    className="w-full justify-between"
-                  >
-                    <span className="flex items-center">
-                      <Package className="mr-3 h-4 w-4" />
-                      Stock
-                    </span>
-                    <ChevronDown className={`h-4 w-4 transition-transform ${stockOpen ? 'rotate-180' : ''}`} />
-                  </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="pl-6 space-y-1">
-                  {stockItems.map((item) => (
-                    <Button
-                      key={item.key}
-                      variant={currentPage === item.key ? "default" : "ghost"}
-                      className="w-full justify-start"
-                      onClick={() => {
-                        onPageChange(item.key);
-                        setMobileMenuOpen(false);
-                      }}
-                    >
-                      <item.icon className="mr-3 h-4 w-4" />
-                      {item.name}
-                    </Button>
-                  ))}
-                </CollapsibleContent>
-              </Collapsible>
-
-              <Button
-                variant={currentPage === "expense-register" ? "default" : "ghost"}
-                className="w-full justify-start"
-                onClick={() => {
-                  onPageChange("expense-register");
-                  setMobileMenuOpen(false);
-                }}
-              >
-                <Receipt className="mr-3 h-4 w-4" />
-                Expenses
-              </Button>
 
               {isAdmin && (
                 <Button

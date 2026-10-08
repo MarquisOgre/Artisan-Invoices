@@ -11,7 +11,6 @@ import { Upload, Settings as SettingsIcon, Building, Bell, Trash2, Folder } from
 import { useSupabaseData } from "@/hooks/useSupabaseData";
 import { UserManagement } from "@/components/UserManagement";
 import { UserList } from "@/components/UserList";
-import { ExpenseCategoryManager } from "@/components/ExpenseCategoryManager";
 
 const Settings = () => {
   const { toast } = useToast();
@@ -147,9 +146,6 @@ const Settings = () => {
 
       {/* User List - Admin Only */}
       <UserList />
-
-      {/* Expense Categories Management */}
-      <ExpenseCategoryManager />
 
       {/* Company Information */}
       <Card>

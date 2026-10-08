@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Users, FileText, Calculator, Download, Settings } from "lucide-react";
+import { PlusCircle, Users, FileText, Download, Settings } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 
 const QuickActions = () => {
@@ -24,12 +24,6 @@ const QuickActions = () => {
       description: "Manage invoice templates",  
       icon: FileText,
       color: "bg-secondary hover:bg-secondary/80 text-secondary-foreground",
-    },
-    {
-      title: "Expense Tracker",
-      description: "Log business expenses",
-      icon: Calculator,
-      color: "bg-warning hover:bg-warning/80 text-warning-foreground",
     },
     {
       title: "Export Data",
