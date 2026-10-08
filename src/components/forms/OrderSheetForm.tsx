@@ -116,13 +116,8 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
 
   const orderBookedBy = useMemo(() => {
     const metadata = user?.user_metadata as Record<string, unknown> | undefined;
-    const name = String(
-      metadata?.full_name ||
-      metadata?.name ||
-      metadata?.display_name ||
-      ""
-    ).trim();
-    return name || user?.email || "Unknown user";
+    const username = String(metadata?.username || "").trim();
+    return username || "Username not set";
   }, [user]);
 
   const [deliveryAddress, setDeliveryAddress] = useState("");
