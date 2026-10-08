@@ -33,6 +33,7 @@ export interface Quotation {
 
 export interface Customer {
   id: string;
+  customer_code?: string | null;
   name: string;
   email?: string | null;
   phone?: string | null;

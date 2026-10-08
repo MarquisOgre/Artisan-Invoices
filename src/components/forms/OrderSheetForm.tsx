@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CalendarDays, Save, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,43 +33,67 @@ const PANT_MEASUREMENTS = [
 const SHIRT_STYLES = ["Half", "Full", "Slim Fit", "Regular Fit"];
 const PANT_STYLES = ["Regular Fit", "Slim Fit", "Straight Fit", "Tapered Fit"];
 
+type Customer = {
+  id: string;
+  customer_code?: string | null;
+  name: string;
+  phone?: string | null;
+  address?: string | null;
+};
+
 type OrderSheetFormProps = {
+  customers: Customer[];
   onSaved?: () => void;
 };
 
 const today = () => new Date().toISOString().slice(0, 10);
-const createTimestampCode = (prefix: string) => {
+const createOrderNoFallback = () => {
   const now = new Date();
-  const stamp = [
+  const date = [
     now.getFullYear(),
     String(now.getMonth() + 1).padStart(2, "0"),
     String(now.getDate()).padStart(2, "0"),
-    String(now.getHours()).padStart(2, "0"),
-    String(now.getMinutes()).padStart(2, "0"),
-    String(now.getSeconds()).padStart(2, "0"),
-    String(now.getMilliseconds()).padStart(3, "0"),
   ].join("");
-  return `${prefix}-${stamp}`;
+  return `ORD-${date}-TEMP`;
 };
-
-const createOrderNo = () => createTimestampCode("ORD");
-const createCustomerCode = () => createTimestampCode("CUS");
 
 const emptyMeasurements = (fields: readonly (readonly [string, string])[]) =>
   Object.fromEntries(fields.map(([key]) => [key, ""]));
 
-const OrderSheetForm = ({ onSaved }: OrderSheetFormProps) => {
+const requestOrderNo = async () => {
+  const { data, error } = await (supabase as any).rpc("next_order_form_id");
+  if (error || !data) return createOrderNoFallback();
+  return String(data);
+};
+
+const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const initialOrderNo = useMemo(createOrderNo, []);
-  const initialCustomerCode = useMemo(createCustomerCode, []);
-
+  const initialOrderNo = useMemo(createOrderNoFallback, []);
   const [saving, setSaving] = useState(false);
   const [orderNo, setOrderNo] = useState(initialOrderNo);
   const [orderDate, setOrderDate] = useState(today());
-  const [customerCode, setCustomerCode] = useState(initialCustomerCode);
+  const [customerCode, setCustomerCode] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [contactNo, setContactNo] = useState("");
+
+  const existingCustomer = useMemo(() => {
+    const name = customerName.trim().toLowerCase();
+    if (!name) return null;
+    const phone = contactNo.trim();
+    return customers.find(customer =>
+      customer.name.trim().toLowerCase() === name &&
+      (!phone || (customer.phone || "").trim() === phone)
+    ) || null;
+  }, [customers, customerName, contactNo]);
+
+  useEffect(() => {
+    let cancelled = false;
+    requestOrderNo().then(value => {
+      if (!cancelled) setOrderNo(value);
+    });
+    return () => { cancelled = true; };
+  }, []);
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [deliveryDate, setDeliveryDate] = useState("");
   const [customerSignature, setCustomerSignature] = useState("");
@@ -111,9 +135,9 @@ const OrderSheetForm = ({ onSaved }: OrderSheetFormProps) => {
   };
 
   const resetForm = () => {
-    setOrderNo(createOrderNo());
+    requestOrderNo().then(setOrderNo);
     setOrderDate(today());
-    setCustomerCode(createCustomerCode());
+    setCustomerCode("");
     setCustomerName("");
     setContactNo("");
     setDeliveryAddress("");
@@ -156,13 +180,37 @@ const OrderSheetForm = ({ onSaved }: OrderSheetFormProps) => {
 
     setSaving(true);
     try {
+      let customer = existingCustomer;
+
+      if (!customer) {
+        const { data: newCustomer, error: customerError } = await supabase
+          .from("customers")
+          .insert({
+            user_id: user.id,
+            name: customerName.trim(),
+            phone: contactNo.trim() || null,
+            address: deliveryAddress.trim() || null,
+          })
+          .select("*")
+          .single();
+
+        if (customerError) throw customerError;
+        customer = newCustomer as Customer;
+      }
+
+      const resolvedCustomerCode = customer.customer_code || null;
+      const resolvedOrderNo = orderNo.endsWith("-TEMP") ? await requestOrderNo() : orderNo.trim();
+      setCustomerCode(resolvedCustomerCode || "");
+      setOrderNo(resolvedOrderNo);
+
       const payload = {
         user_id: user.id,
-        order_no: orderNo.trim(),
+        order_no: resolvedOrderNo,
         order_date: orderDate,
-        customer_code: customerCode.trim() || null,
-        customer_name: customerName.trim(),
-        contact_no: contactNo.trim() || null,
+        customer_id: customer.id,
+        customer_code: resolvedCustomerCode,
+        customer_name: customer.name,
+        contact_no: contactNo.trim() || customer.phone || null,
         shirt_fabric_code: shirtFabricCode.trim() || null,
         shirt_patterns: shirtPatterns.filter(Boolean),
         shirt_standard_size: shirtStandardSize.trim() || null,
@@ -185,7 +233,7 @@ const OrderSheetForm = ({ onSaved }: OrderSheetFormProps) => {
 
       toast({
         title: "Order sheet saved",
-        description: `Order ${orderNo} has been saved successfully.`,
+        description: `Order ${resolvedOrderNo} for customer ${resolvedCustomerCode || customer.name} has been saved successfully.`,
       });
       onSaved?.();
     } catch (error: any) {
@@ -223,20 +271,26 @@ const OrderSheetForm = ({ onSaved }: OrderSheetFormProps) => {
       <Card>
         <CardContent className="p-4 sm:p-6">
           <div className="grid gap-4 md:grid-cols-4">
-            <Field label="Order No." required>
+            <Field label="Order Form ID" required>
               <Input value={orderNo} onChange={e => setOrderNo(e.target.value)} />
             </Field>
             <Field label="Date">
               <Input type="date" value={orderDate} onChange={e => setOrderDate(e.target.value)} />
             </Field>
-            <Field label="Customer Code">
-              <Input value={customerCode} readOnly className="bg-muted/50 font-medium" />
+            <Field label="Customer ID">
+              <Input value={existingCustomer?.customer_code || customerCode} readOnly className="bg-muted/50 font-medium" placeholder="Generated automatically when saved" />
+              <p className="mt-1 text-xs text-muted-foreground">
+                {existingCustomer ? "Permanent customer ID" : "New customer ID will be generated automatically on save."}
+              </p>
             </Field>
             <Field label="Contact No.">
               <Input value={contactNo} onChange={e => setContactNo(e.target.value)} inputMode="tel" />
             </Field>
             <Field label="Customer Name" required className="md:col-span-2">
-              <Input value={customerName} onChange={e => setCustomerName(e.target.value)} />
+              <Input list="order-sheet-customers" value={customerName} onChange={e => setCustomerName(e.target.value)} placeholder="Enter existing or new customer name" />
+              <datalist id="order-sheet-customers">
+                {customers.map(customer => <option key={customer.id} value={customer.name}>{customer.customer_code || ""}</option>)}
+              </datalist>
             </Field>
           </div>
         </CardContent>

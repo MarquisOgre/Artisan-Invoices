@@ -11,6 +11,7 @@ import QuotationForm from "@/components/forms/QuotationForm";
 import QuotationList from "@/components/QuotationList";
 import QuotationDetails from "@/components/QuotationDetails";
 import OrderSheetForm from "@/components/forms/OrderSheetForm";
+import OrderSheetList from "@/components/OrderSheetList";
 import { useSupabaseData } from "@/hooks/useSupabaseData";
 import { useToast } from "@/hooks/use-toast";
 import { useSettings } from "@/hooks/useSettings";
@@ -360,7 +361,12 @@ const Index = () => {
         );
       case "order-sheet":
         return (
+          <OrderSheetList onCreateNew={() => setCurrentPage("new-order-sheet")} />
+        );
+      case "new-order-sheet":
+        return (
           <OrderSheetForm
+            customers={customers}
             onSaved={() => {
               setCurrentPage("order-sheet");
             }}
