@@ -46,6 +46,9 @@ type Customer = {
   name: string;
   phone?: string | null;
   address?: string | null;
+  city?: string | null;
+  state?: string | null;
+  pincode?: string | null;
 };
 
 type OrderSheetFormProps = {
@@ -54,6 +57,12 @@ type OrderSheetFormProps = {
 };
 
 const today = () => new Date().toISOString().slice(0, 10);
+
+const formatCustomerAddress = (customer: Customer) =>
+  [customer.address, customer.city, customer.state, customer.pincode]
+    .map(value => String(value || "").trim())
+    .filter(Boolean)
+    .join(", ");
 const emptyMeasurements = (fields: readonly (readonly [string, string])[]) =>
   Object.fromEntries(fields.map(([key]) => [key, ""]));
 
@@ -98,7 +107,7 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
     setCustomerName(customer.name);
     setCustomerCode(customer.customer_code || "");
     setContactNo(customer.phone || "");
-    setDeliveryAddress(customer.address || "");
+    setDeliveryAddress(formatCustomerAddress(customer));
   };
 
   const customerAddress = existingCustomer?.address?.trim() || "";
@@ -210,6 +219,10 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
 
         if (customerError) throw customerError;
         customer = newCustomer as Customer;
+      }
+
+      if (!customer) {
+        throw new Error("Unable to create or load the customer record.");
       }
 
       const resolvedCustomerCode = customer.customer_code || null;
