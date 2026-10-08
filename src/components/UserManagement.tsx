@@ -200,6 +200,7 @@ export const UserManagement = () => {
                 {loading ? "Creating..." : "Create User"}
               </Button>
             </div>
+          </div>
         </form>
       </CardContent>
     </Card>
