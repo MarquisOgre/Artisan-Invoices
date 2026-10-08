@@ -9,16 +9,8 @@ create sequence if not exists public.customer_code_seq
 
 -- Normalize existing customer IDs to the new minimum-4-digit numeric format.
 update public.customers
-set customer_code = 'CUS-' || case
-  when customer_code ~ '^CUS-[0-9]+$'
-    then ltrim(regexp_replace(customer_code, '^CUS-', ''), '0')
-  else ''
-end
-where customer_code is not null;
-
-update public.customers
 set customer_code = 'CUS-' || lpad(
-  nullif(regexp_replace(customer_code, '^CUS-', ''), '')::bigint::text,
+  regexp_replace(customer_code, '^CUS-', '')::bigint::text,
   4,
   '0'
 )
@@ -102,19 +94,24 @@ $$;
 revoke all on function public.next_order_form_id(date) from public;
 grant execute on function public.next_order_form_id(date) to authenticated;
 
--- Convert existing saved order IDs to the new format using their existing date and
--- preserve their numeric suffix where possible.
-update public.order_sheets
-set order_no = to_char(order_date, 'YYYYMMDD') || '-' ||
-  lpad(
+-- Convert existing saved order IDs to the new format.
+with converted as (
+  select
+    id,
+    order_date,
+    created_at,
     case
       when order_no ~ '^ORD-[0-9]{8}-[0-9]+$' then split_part(order_no, '-', 3)::bigint
       when order_no ~ '^[0-9]{8}-[0-9]+$' then split_part(order_no, '-', 2)::bigint
-      else row_number() over (order by created_at, id)::bigint
-    end::text,
-    3,
-    '0'
-  );
+      else row_number() over (partition by order_date order by created_at, id)::bigint
+    end as number_part
+  from public.order_sheets
+)
+update public.order_sheets o
+set order_no = to_char(converted.order_date, 'YYYYMMDD') || '-' ||
+               lpad(converted.number_part::text, 3, '0')
+from converted
+where o.id = converted.id;
 
 -- Keep the per-date counters ahead of all converted order IDs.
 insert into public.order_form_counters(order_date, last_number)
