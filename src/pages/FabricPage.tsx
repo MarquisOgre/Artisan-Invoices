@@ -227,7 +227,7 @@ const FabricPage = (_props: FabricPageProps) => {
                 {loading ? (
                   <tr><td colSpan={9} className="px-4 py-10 text-center text-muted-foreground">Loading fabrics...</td></tr>
                 ) : filtered.length === 0 ? (
-                  <tr><td colSpan={8} className="px-4 py-10 text-center text-muted-foreground">No fabrics found.</td></tr>
+                  <tr><td colSpan={9} className="px-4 py-10 text-center text-muted-foreground">No fabrics found.</td></tr>
                 ) : (
                   filtered.map(fabric => (
                     <tr key={fabric.id} className="border-b last:border-0 hover:bg-slate-50">
