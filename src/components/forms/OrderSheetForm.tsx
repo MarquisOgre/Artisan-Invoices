@@ -47,29 +47,21 @@ type OrderSheetFormProps = {
 };
 
 const today = () => new Date().toISOString().slice(0, 10);
-const createOrderNoFallback = () => {
-  const now = new Date();
-  const date = [
-    now.getFullYear(),
-    String(now.getMonth() + 1).padStart(2, "0"),
-    String(now.getDate()).padStart(2, "0"),
-  ].join("");
-  return `ORD-${date}-TEMP`;
-};
-
 const emptyMeasurements = (fields: readonly (readonly [string, string])[]) =>
   Object.fromEntries(fields.map(([key]) => [key, ""]));
 
-const requestOrderNo = async () => {
-  const { data, error } = await (supabase as any).rpc("next_order_form_id");
-  if (error || !data) return createOrderNoFallback();
+const requestOrderNo = async (orderDate: string) => {
+  const { data, error } = await (supabase as any).rpc("next_order_form_id", {
+    p_order_date: orderDate,
+  });
+  if (error || !data) return "";
   return String(data);
 };
 
 const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const initialOrderNo = useMemo(createOrderNoFallback, []);
+  const initialOrderNo = "";
   const [saving, setSaving] = useState(false);
   const [orderNo, setOrderNo] = useState(initialOrderNo);
   const [orderDate, setOrderDate] = useState(today());
@@ -88,12 +80,8 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
   }, [customers, customerName, contactNo]);
 
   useEffect(() => {
-    let cancelled = false;
-    requestOrderNo().then(value => {
-      if (!cancelled) setOrderNo(value);
-    });
-    return () => { cancelled = true; };
-  }, []);
+    setOrderNo("");
+  }, [orderDate]);
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [deliveryDate, setDeliveryDate] = useState("");
   const [customerSignature, setCustomerSignature] = useState("");
@@ -135,7 +123,7 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
   };
 
   const resetForm = () => {
-    requestOrderNo().then(setOrderNo);
+    setOrderNo("");
     setOrderDate(today());
     setCustomerCode("");
     setCustomerName("");
@@ -169,10 +157,10 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
       return;
     }
 
-    if (!orderNo.trim() || !customerName.trim()) {
+    if (!customerName.trim()) {
       toast({
         title: "Required fields missing",
-        description: "Please enter the Order No. and Customer Name.",
+        description: "Please enter the Customer Name.",
         variant: "destructive",
       });
       return;
@@ -199,7 +187,10 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
       }
 
       const resolvedCustomerCode = customer.customer_code || null;
-      const resolvedOrderNo = orderNo.endsWith("-TEMP") ? await requestOrderNo() : orderNo.trim();
+      const resolvedOrderNo = await requestOrderNo(orderDate);
+      if (!resolvedOrderNo) {
+        throw new Error("Unable to generate the Order Form ID. Please try again.");
+      }
       setCustomerCode(resolvedCustomerCode || "");
       setOrderNo(resolvedOrderNo);
 
@@ -271,8 +262,8 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
       <Card>
         <CardContent className="p-4 sm:p-6">
           <div className="grid gap-4 md:grid-cols-4">
-            <Field label="Order Form ID" required>
-              <Input value={orderNo} onChange={e => setOrderNo(e.target.value)} />
+            <Field label="Order Form ID">
+              <Input value={orderNo} readOnly placeholder="Generated automatically when saved" className="bg-muted/50 font-medium" />
             </Field>
             <Field label="Date">
               <Input type="date" value={orderDate} onChange={e => setOrderDate(e.target.value)} />
