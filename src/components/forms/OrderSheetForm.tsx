@@ -6,6 +6,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -67,16 +74,32 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
   const [customerCode, setCustomerCode] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [contactNo, setContactNo] = useState("");
+  const [selectedCustomerId, setSelectedCustomerId] = useState("");
 
-  const existingCustomer = useMemo(() => {
-    const name = customerName.trim().toLowerCase();
-    if (!name) return null;
-    const phone = contactNo.trim();
-    return customers.find(customer =>
-      customer.name.trim().toLowerCase() === name &&
-      (!phone || (customer.phone || "").trim() === phone)
-    ) || null;
-  }, [customers, customerName, contactNo]);
+  const existingCustomer = useMemo(
+    () => customers.find(customer => customer.id === selectedCustomerId) || null,
+    [customers, selectedCustomerId]
+  );
+
+  const handleCustomerChange = (value: string) => {
+    if (value === "__new__") {
+      setSelectedCustomerId("");
+      setCustomerName("");
+      setCustomerCode("");
+      setContactNo("");
+      setDeliveryAddress("");
+      return;
+    }
+
+    const customer = customers.find(item => item.id === value);
+    if (!customer) return;
+
+    setSelectedCustomerId(customer.id);
+    setCustomerName(customer.name);
+    setCustomerCode(customer.customer_code || "");
+    setContactNo(customer.phone || "");
+    setDeliveryAddress(customer.address || "");
+  };
 
   useEffect(() => {
     setOrderNo("");
@@ -127,6 +150,7 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
     setCustomerCode("");
     setCustomerName("");
     setContactNo("");
+    setSelectedCustomerId("");
     setDeliveryAddress("");
     setDeliveryDate("");
     setCustomerSignature("");
@@ -260,27 +284,63 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
 
       <Card>
         <CardContent className="p-4 sm:p-6">
-          <div className="grid gap-4 md:grid-cols-4">
-            <Field label="Order Form ID">
-              <Input value={orderNo} readOnly placeholder="Generated automatically when saved" className="bg-muted/50 font-medium" />
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
+            <Field label="Customer Name" required>
+              <Select value={selectedCustomerId || (customerName ? "__new__" : "")} onValueChange={handleCustomerChange}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select customer" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__new__">+ Add New Customer</SelectItem>
+                  {customers.map(customer => (
+                    <SelectItem key={customer.id} value={customer.id}>
+                      {customer.name}{customer.customer_code ? ` — ${customer.customer_code}` : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {!selectedCustomerId && customerName && (
+                <Input
+                  value={customerName}
+                  onChange={e => setCustomerName(e.target.value)}
+                  placeholder="Enter new customer name"
+                  className="mt-2"
+                />
+              )}
             </Field>
-            <Field label="Date">
-              <Input type="date" value={orderDate} onChange={e => setOrderDate(e.target.value)} />
-            </Field>
-            <Field label="Customer ID">
-              <Input value={existingCustomer?.customer_code || customerCode} readOnly className="bg-muted/50 font-medium" placeholder="Generated automatically when saved" />
+
+            <Field label="Contact No.">
+              <Input
+                value={contactNo}
+                onChange={e => setContactNo(e.target.value)}
+                inputMode="tel"
+                placeholder={existingCustomer ? "Auto populated — editable" : "Enter manually"}
+              />
               <p className="mt-1 text-xs text-muted-foreground">
-                {existingCustomer ? "Permanent customer ID" : "New customer ID will be generated automatically on save."}
+                {existingCustomer ? "Auto populated from customer; you can edit it." : "Enter manually for a new customer."}
               </p>
             </Field>
-            <Field label="Contact No.">
-              <Input value={contactNo} onChange={e => setContactNo(e.target.value)} inputMode="tel" />
+
+            <Field label="Customer ID">
+              <Input
+                value={existingCustomer?.customer_code || customerCode}
+                readOnly
+                className="bg-muted/50 font-medium"
+                placeholder="Generated automatically"
+              />
             </Field>
-            <Field label="Customer Name" required className="md:col-span-2">
-              <Input list="order-sheet-customers" value={customerName} onChange={e => setCustomerName(e.target.value)} placeholder="Enter existing or new customer name" />
-              <datalist id="order-sheet-customers">
-                {customers.map(customer => <option key={customer.id} value={customer.name}>{customer.customer_code || ""}</option>)}
-              </datalist>
+
+            <Field label="Order Form ID">
+              <Input
+                value={orderNo}
+                readOnly
+                className="bg-muted/50 font-medium"
+                placeholder="Generated on save"
+              />
+            </Field>
+
+            <Field label="Date">
+              <Input type="date" value={orderDate} onChange={e => setOrderDate(e.target.value)} />
             </Field>
           </div>
         </CardContent>
