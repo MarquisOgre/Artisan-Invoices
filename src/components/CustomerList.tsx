@@ -42,6 +42,7 @@ import {
 
 interface Customer {
   id: string;
+  customer_code?: string | null;
   name: string;
   email?: string;
   phone?: string;
@@ -408,6 +409,7 @@ const CustomerList = ({ customers, onCreateNew, onViewCustomer, onEditCustomer, 
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-16">Sl.No</TableHead>
+                  <TableHead>Customer ID</TableHead>
                   <TableHead>Customer</TableHead>
                   <TableHead>Size</TableHead>
                   <TableHead>Contact</TableHead>
@@ -419,7 +421,7 @@ const CustomerList = ({ customers, onCreateNew, onViewCustomer, onEditCustomer, 
               <TableBody>
                 {filteredCustomers.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center text-muted-foreground py-6">
+                    <TableCell colSpan={8} className="text-center text-muted-foreground py-6">
                       No customers found.
                     </TableCell>
                   </TableRow>
@@ -429,6 +431,7 @@ const CustomerList = ({ customers, onCreateNew, onViewCustomer, onEditCustomer, 
                       <TableCell className="text-muted-foreground">
                         {index + 1}
                       </TableCell>
+                      <TableCell className="font-medium">{customer.customer_code || "-"}</TableCell>
                       <TableCell>
                         <div className="font-medium">{customer.name}</div>
                       </TableCell>
