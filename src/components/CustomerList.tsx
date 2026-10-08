@@ -409,7 +409,7 @@ const CustomerList = ({ customers, onCreateNew, onViewCustomer, onEditCustomer, 
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-16">Sl.No</TableHead>
-                  <TableHead>Customer Code</TableHead>
+                  <TableHead>Customer ID</TableHead>
                   <TableHead>Customer</TableHead>
                   <TableHead>Size</TableHead>
                   <TableHead>Contact</TableHead>
