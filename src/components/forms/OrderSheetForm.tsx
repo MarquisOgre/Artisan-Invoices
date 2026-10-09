@@ -57,6 +57,7 @@ type Customer = {
 type OrderSheetFormProps = {
   customers: Customer[];
   onSaved?: () => void;
+  initialOrder?: any | null;
 };
 
 const formatLocalDate = (date: Date) => {
@@ -91,10 +92,11 @@ const requestOrderNo = async (orderDate: string) => {
   return String(data);
 };
 
-const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
+const OrderSheetForm = ({ customers, onSaved, initialOrder = null }: OrderSheetFormProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
+  const [loadedOrderId, setLoadedOrderId] = useState<string | null>(null);
   const [orderNo, setOrderNo] = useState("");
   const [orderDate, setOrderDate] = useState(today());
   const [customerCode, setCustomerCode] = useState("");
@@ -178,9 +180,11 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
   const hasCustomerAddress = Boolean(customerAddress);
 
   useEffect(() => {
-    setOrderNo("");
-    setDeliveryDate(addDays(orderDate, 7));
-  }, [orderDate]);
+    if (!initialOrder) {
+      setOrderNo("");
+      setDeliveryDate(addDays(orderDate, 7));
+    }
+  }, [orderDate, initialOrder]);
 
   useEffect(() => {
     const loadFabrics = async () => {
@@ -198,6 +202,62 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
     };
     loadFabrics();
   }, [toast]);
+
+  useEffect(() => {
+    if (!initialOrder || !fabrics.length || loadedOrderId === initialOrder.id) return;
+
+    const hydrateOrder = async () => {
+      setOrderNo(initialOrder.order_no || "");
+      setOrderDate(initialOrder.order_date || today());
+      setCustomerCode(initialOrder.customer_code || "");
+      setCustomerName(initialOrder.customer_name || "");
+      setContactNo(initialOrder.contact_no || "");
+      setSelectedCustomerId(initialOrder.customer_id || "");
+      setIsNewCustomer(false);
+      setDeliveryAddress(initialOrder.delivery_address || "");
+      setDeliveryCity(initialOrder.delivery_city || "");
+      setDeliveryState(initialOrder.delivery_state || "");
+      setDeliveryPincode(initialOrder.delivery_pincode || "");
+      setDeliveryDate(initialOrder.delivery_date || addDays(initialOrder.order_date || today(), 7));
+      setShirtStandardSize(initialOrder.shirt_standard_size || "");
+      setShirtMeasurements({ ...emptyMeasurements(SHIRT_MEASUREMENTS), ...(initialOrder.shirt_measurements || {}) });
+      setShirtStyles(initialOrder.shirt_style?.selected || []);
+      setShirtOtherStyle(initialOrder.shirt_style?.other || "");
+      setShirtNotes(initialOrder.shirt_notes || "");
+      setPantStandardSize(initialOrder.pant_standard_size || "");
+      setPantMeasurements({ ...emptyMeasurements(PANT_MEASUREMENTS), ...(initialOrder.pant_measurements || {}) });
+      setPantStyles(initialOrder.pant_style?.selected || []);
+      setPantOtherStyle(initialOrder.pant_style?.other || "");
+      setPantNotes(initialOrder.pant_notes || "");
+
+      const { data: rows, error } = await (supabase as any)
+        .from("order_sheet_fabrics")
+        .select("garment_type, fabric_id, sort_order")
+        .eq("order_sheet_id", initialOrder.id)
+        .order("sort_order", { ascending: true });
+      if (error) throw error;
+
+      const shirt = (rows || [])
+        .filter((row: any) => row.garment_type === "shirt")
+        .map((row: any) => fabrics.find(fabric => fabric.id === row.fabric_id))
+        .filter((fabric: FabricOption | undefined): fabric is FabricOption => Boolean(fabric));
+      const pant = (rows || [])
+        .filter((row: any) => row.garment_type === "pant")
+        .map((row: any) => fabrics.find(fabric => fabric.id === row.fabric_id))
+        .filter((fabric: FabricOption | undefined): fabric is FabricOption => Boolean(fabric));
+
+      const shirtSelection = shirt.length ? shirt : fabrics.filter(fabric => fabric.id === initialOrder.shirt_fabric_id);
+      const pantSelection = pant.length ? pant : fabrics.filter(fabric => fabric.id === initialOrder.pant_fabric_id);
+      syncPrimaryFabric(shirtSelection, setShirtFabrics, setShirtFabricId, setShirtFabricCode);
+      syncPrimaryFabric(pantSelection, setPantFabrics, setPantFabricId, setPantFabricCode);
+      setLoadedOrderId(initialOrder.id);
+    };
+
+    hydrateOrder().catch((error: any) => {
+      console.error("Unable to load order for editing:", error);
+      toast({ title: "Unable to load order for editing", description: error?.message || "Please try again.", variant: "destructive" });
+    });
+  }, [initialOrder, fabrics, loadedOrderId, toast]);
 
   const toggleStyle = (
     value: string,
@@ -339,7 +399,7 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
       }
 
       const resolvedCustomerCode = customer.customer_code || null;
-      const resolvedOrderNo = await requestOrderNo(orderDate);
+      const resolvedOrderNo = initialOrder?.order_no || await requestOrderNo(orderDate);
       if (!resolvedOrderNo) {
         throw new Error("Unable to generate the Order Form ID. Please try again.");
       }
@@ -375,22 +435,38 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
         order_booked_by: orderBookedBy,
       };
 
-      const { data: savedOrder, error } = await (supabase as any)
-        .from("order_sheets")
-        .insert(payload)
-        .select("id")
-        .single();
-      if (error) throw error;
+      let savedOrderId = initialOrder?.id as string | undefined;
+      if (initialOrder) {
+        const { error: updateError } = await (supabase as any)
+          .from("order_sheets")
+          .update(payload)
+          .eq("id", initialOrder.id);
+        if (updateError) throw updateError;
+
+        const { error: deleteFabricError } = await (supabase as any)
+          .from("order_sheet_fabrics")
+          .delete()
+          .eq("order_sheet_id", initialOrder.id);
+        if (deleteFabricError) throw deleteFabricError;
+      } else {
+        const { data: savedOrder, error } = await (supabase as any)
+          .from("order_sheets")
+          .insert(payload)
+          .select("id")
+          .single();
+        if (error) throw error;
+        savedOrderId = savedOrder.id;
+      }
 
       const fabricRows = [
         ...shirtFabrics.map((fabric, index) => ({
-          order_sheet_id: savedOrder.id,
+          order_sheet_id: savedOrderId,
           garment_type: "shirt",
           fabric_id: fabric.id,
           sort_order: index,
         })),
         ...pantFabrics.map((fabric, index) => ({
-          order_sheet_id: savedOrder.id,
+          order_sheet_id: savedOrderId,
           garment_type: "pant",
           fabric_id: fabric.id,
           sort_order: index,
@@ -405,8 +481,8 @@ const OrderSheetForm = ({ customers, onSaved }: OrderSheetFormProps) => {
       }
 
       toast({
-        title: "Order sheet saved",
-        description: `Order ${resolvedOrderNo} for customer ${resolvedCustomerCode || customer.name} has been saved successfully.`,
+        title: initialOrder ? "Order sheet updated" : "Order sheet saved",
+        description: `Order ${resolvedOrderNo} for customer ${resolvedCustomerCode || customer.name} has been ${initialOrder ? "updated" : "saved"} successfully.`,
       });
       onSaved?.();
     } catch (error: any) {
