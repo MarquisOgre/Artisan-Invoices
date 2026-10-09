@@ -5,7 +5,7 @@ export type OrderFabricCodes = { shirt: string[]; pant: string[] };
 type CompanyLogoSettings = { printLogo?: string | null; logo?: string | null };
 
 const getCompanyLogoUrl = (settings?: CompanyLogoSettings) =>
-  settings?.printLogo || settings?.logo || `${window.location.origin}/Logo - IAM Ratan.png`;
+  settings?.printLogo || settings?.logo || `${window.location.origin}/logo.png`;
 
 const formatDate = (value: string | null | undefined) => {
   if (!value) return "-";
