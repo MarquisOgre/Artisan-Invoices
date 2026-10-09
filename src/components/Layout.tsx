@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/collapsible";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useSettings } from "@/hooks/useSettings";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -42,6 +43,7 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
   const [quoInvoicesOpen, setQuoInvoicesOpen] = useState(false);
   const { signOut } = useAuth();
   const { isAdmin, canManage } = useUserRole();
+  const { companySettings } = useSettings();
 
   const standaloneNavigation = [
     { name: "Dashboard", icon: BarChart3, key: "dashboard" },
@@ -70,7 +72,7 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
         <div className="w-full h-full px-2.5">
           <div className="flex items-center h-full">
             <div className="flex items-center gap-2 sm:gap-3">
-              <img src="/logo.png" alt="Company Logo" className="w-8 h-8 sm:w-10 sm:h-10" />
+              <img src={companySettings.logo || "/logo.png"} alt="Header Logo" className="w-8 h-8 sm:w-10 sm:h-10 object-contain" />
               <h1 className="text-lg sm:text-xl font-bold text-primary">ARTISAN</h1>
             </div>
 
