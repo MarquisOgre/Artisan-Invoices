@@ -375,6 +375,20 @@ const OrderSheetForm = ({ customers, onSaved, initialOrder = null }: OrderSheetF
     try {
       let customer = existingCustomer;
 
+      if (!customer && initialOrder) {
+        // Keep the existing customer association if the customer list has not loaded it.
+        customer = {
+          id: initialOrder.customer_id,
+          customer_code: initialOrder.customer_code,
+          name: initialOrder.customer_name,
+          phone: initialOrder.contact_no,
+          address: initialOrder.delivery_address,
+          city: initialOrder.delivery_city,
+          state: initialOrder.delivery_state,
+          pincode: initialOrder.delivery_pincode,
+        } as Customer;
+      }
+
       if (!customer) {
         const { data: newCustomer, error: customerError } = await supabase
           .from("customers")
