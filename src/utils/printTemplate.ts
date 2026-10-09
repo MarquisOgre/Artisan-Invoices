@@ -29,7 +29,7 @@ const getTaxRate = (taxType: string) => {
 
 const generateCommonHeader = (title: string, companySettings: CompanySettings) => {
   // Use printLogo if available, otherwise fall back to logo
-  const logoUrl = companySettings.printLogo || companySettings.logo || `${window.location.origin}/Logo - IAM Ratan.png`;
+  const logoUrl = companySettings.printLogo || companySettings.logo || `${window.location.origin}/logo.png`;
   
   return `
   <div class="header">
