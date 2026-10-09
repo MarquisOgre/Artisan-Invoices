@@ -292,19 +292,35 @@ const OrderSheetList = ({ onCreateNew }: Props) => {
         pant_style: row.pant_style || {},
       }));
       setOrders(normalizedOrders);
-      const { data: fabricRows, error: fabricError } = await (supabase as any)
-        .from("order_sheet_fabrics")
-        .select("order_sheet_id, garment_type, sort_order, fabrics(code)")
-        .in("order_sheet_id", normalizedOrders.map((row: any) => row.id))
-        .order("sort_order", { ascending: true });
-      if (fabricError) throw fabricError;
       const grouped: Record<string, OrderFabricCodes> = {};
-      for (const row of fabricRows || []) {
-        const orderId = String(row.order_sheet_id);
-        if (!grouped[orderId]) grouped[orderId] = { shirt: [], pant: [] };
-        const code = String(row.fabrics?.code || "").trim();
-        const garment = row.garment_type === "shirt" ? "shirt" : row.garment_type === "pant" ? "pant" : null;
-        if (garment && code && !grouped[orderId][garment].includes(code)) grouped[orderId][garment].push(code);
+      const orderIds = normalizedOrders.map((row: any) => row.id);
+
+      if (orderIds.length) {
+        // Fetch the junction rows and fabric records separately. This avoids
+        // depending on PostgREST nested-relationship response shape.
+        const { data: fabricRows, error: fabricError } = await (supabase as any)
+          .from("order_sheet_fabrics")
+          .select("order_sheet_id, garment_type, sort_order, fabric_id")
+          .in("order_sheet_id", orderIds)
+          .order("sort_order", { ascending: true });
+
+        if (fabricError) throw fabricError;
+
+        const fabricIds = [...new Set((fabricRows || []).map((row: any) => row.fabric_id).filter(Boolean))];
+        const { data: fabricRecords, error: fabricsError } = fabricIds.length
+          ? await (supabase as any).from("fabrics").select("id, code").in("id", fabricIds)
+          : { data: [], error: null };
+
+        if (fabricsError) throw fabricsError;
+
+        const codeByFabricId = new Map((fabricRecords || []).map((fabric: any) => [String(fabric.id), String(fabric.code || "").trim()]));
+        for (const row of fabricRows || []) {
+          const orderId = String(row.order_sheet_id);
+          if (!grouped[orderId]) grouped[orderId] = { shirt: [], pant: [] };
+          const code = codeByFabricId.get(String(row.fabric_id)) || "";
+          const garment = row.garment_type === "shirt" ? "shirt" : row.garment_type === "pant" ? "pant" : null;
+          if (garment && code && !grouped[orderId][garment].includes(code)) grouped[orderId][garment].push(code);
+        }
       }
       for (const order of normalizedOrders) {
         if (!grouped[order.id]) grouped[order.id] = { shirt: [], pant: [] };
