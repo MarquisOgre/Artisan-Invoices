@@ -77,10 +77,13 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
                 alt="Header Logo"
                 className="object-contain"
                 style={{
-                  width: `${Math.min(Number(companySettings.headerLogoWidth ?? 40), Number(companySettings.headerLogoHeight ?? 40))}px`,
-                  height: `${Math.min(Number(companySettings.headerLogoWidth ?? 40), Number(companySettings.headerLogoHeight ?? 40))}px`,
+                  // Use a single square sizing box; object-contain preserves the image's
+                  // original aspect ratio and prevents stretching or cropping.
+                  width: `${Math.min(Number(companySettings.headerLogoWidth ?? 40), 240, Math.max(16, window.innerWidth * 0.35))}px`,
+                  height: `${Math.min(Number(companySettings.headerLogoWidth ?? 40), 64)}px`,
                   maxWidth: "min(240px, 35vw)",
                   maxHeight: "64px",
+                  flexShrink: 0,
                 }}
               />
             </div>
