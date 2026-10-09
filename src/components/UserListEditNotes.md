@@ -1,0 +1,3 @@
+# Existing User Editing
+
+The User List currently reads usernames from `auth.users.user_metadata.username`, while username login uses `public.user_login_names`. An edit action should update both values through an admin-only Edge Function, with unique username validation. The edit form should allow username, email, and role to be modified; password reset remains a separate action. Never use a client-side service-role key.
