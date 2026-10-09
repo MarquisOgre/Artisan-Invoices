@@ -15,7 +15,7 @@ export const UserManagement = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [role, setRole] = useState<'admin' | 'user'>('user');
+  const [role, setRole] = useState<'admin' | 'manager' | 'user'>('user');
   const [loading, setLoading] = useState(false);
 
   const handleCreateUser = async (e: React.FormEvent) => {
@@ -184,12 +184,13 @@ export const UserManagement = () => {
 
             <div className="w-40">
               <Label htmlFor="userRole">Role</Label>
-              <Select value={role} onValueChange={(value: 'admin' | 'user') => setRole(value)}>
+              <Select value={role} onValueChange={(value: 'admin' | 'manager' | 'user') => setRole(value)}>
                 <SelectTrigger id="userRole">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="manager">Manager</SelectItem>
                   <SelectItem value="user">User</SelectItem>
                 </SelectContent>
               </Select>
