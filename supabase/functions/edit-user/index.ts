@@ -88,13 +88,14 @@ Deno.serve(async (req) => {
       }
     }
 
-    const { data: existingUsername, error: lookupError } = await supabaseAdmin
+    const { data: usernameRows, error: lookupError } = await supabaseAdmin
       .from('user_login_names')
-      .select('user_id')
-      .eq('username', normalizedUsername)
-      .maybeSingle()
+      .select('user_id, username')
 
     if (lookupError) return json({ error: 'Could not validate username uniqueness.' }, 500)
+    const existingUsername = (usernameRows ?? []).find(
+      (row) => String(row.username).toLowerCase() === normalizedUsername,
+    )
     if (existingUsername && existingUsername.user_id !== userId) {
       return json({ error: 'That username is already in use. Choose another username.' }, 409)
     }
@@ -116,7 +117,7 @@ Deno.serve(async (req) => {
 
     const { error: usernameUpsertError } = await supabaseAdmin
       .from('user_login_names')
-      .upsert({ user_id: userId, username: normalizedUsername }, { onConflict: 'user_id' })
+      .upsert({ user_id: userId, username: displayUsername }, { onConflict: 'user_id' })
     if (usernameUpsertError) {
       console.error('Username mapping update failed:', usernameUpsertError)
       return json({ error: 'Email was updated, but saving the username failed. Please retry the edit.' }, 500)
