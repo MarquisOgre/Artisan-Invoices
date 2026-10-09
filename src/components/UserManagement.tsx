@@ -51,6 +51,9 @@ export const UserManagement = () => {
           description: `User ${username} created successfully with ${role} role.`
         });
 
+        // Notify the User List to refresh without reloading the page.
+        window.dispatchEvent(new CustomEvent("artisan-users-updated"));
+
         // Reset form
         setUsername("");
         setEmail("");
