@@ -41,7 +41,7 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [quoInvoicesOpen, setQuoInvoicesOpen] = useState(false);
   const { signOut } = useAuth();
-  const { isAdmin } = useUserRole();
+  const { isAdmin, canManage } = useUserRole();
 
   const standaloneNavigation = [
     { name: "Dashboard", icon: BarChart3, key: "dashboard" },
@@ -75,7 +75,7 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
             </div>
 
             <nav className="hidden md:flex items-center space-x-1 ml-auto">
-              {isAdmin && (
+              {canManage && (
                 <Button
                   variant={currentPage === "dashboard" ? "default" : "ghost"}
                   className="flex items-center gap-2"
@@ -86,7 +86,7 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
                 </Button>
               )}
 
-              {isAdmin && (
+              {canManage && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
@@ -113,7 +113,7 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
                 </DropdownMenu>
               )}
 
-              {isAdmin && (
+              {canManage && (
                 <Button
                   variant={currentPage === "customers" ? "default" : "ghost"}
                   className="flex items-center gap-2"
@@ -133,7 +133,7 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
                 Order Forms
               </Button>
 
-              {isAdmin && (
+              {canManage && (
                 <Button
                   variant={currentPage === "fabrics" ? "default" : "ghost"}
                   className="flex items-center gap-2"
@@ -179,7 +179,7 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
         {mobileMenuOpen && (
           <div className="md:hidden absolute top-full left-0 right-0 z-50 border-t bg-card shadow-lg">
             <div className="px-4 py-2 space-y-1">
-              {isAdmin && (
+              {canManage && (
                 <Button
                   variant={currentPage === "dashboard" ? "default" : "ghost"}
                   className="w-full justify-start"
@@ -193,7 +193,7 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
                 </Button>
               )}
 
-              {isAdmin && (
+              {canManage && (
                 <Collapsible open={quoInvoicesOpen} onOpenChange={setQuoInvoicesOpen}>
                   <CollapsibleTrigger asChild>
                     <Button
@@ -226,7 +226,7 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
                 </Collapsible>
               )}
 
-              {isAdmin && (
+              {canManage && (
                 <Button
                   variant={currentPage === "customers" ? "default" : "ghost"}
                   className="w-full justify-start"
@@ -252,7 +252,7 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
                 Order Forms
               </Button>
 
-              {isAdmin && (
+              {canManage && (
                 <Button
                   variant={currentPage === "fabrics" ? "default" : "ghost"}
                   className="w-full justify-start"
@@ -266,7 +266,7 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
                 </Button>
               )}
 
-              {isAdmin && (
+              {canManage && (
                 <Button
                   variant={currentPage === "settings" ? "default" : "ghost"}
                   className="w-full justify-start"
