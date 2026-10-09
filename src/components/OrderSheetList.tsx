@@ -32,6 +32,7 @@ export type OrderSheet = {
   delivery_state: string | null;
   delivery_pincode: string | null;
   delivery_date: string | null;
+  status?: string;
   order_booked_by: string | null;
   created_at: string;
 };
@@ -246,6 +247,29 @@ const OrderSheetList = ({ onCreateNew, onEdit }: Props) => {
   const [selected, setSelected] = useState<OrderSheet | null>(null);
   const [fabricCodesByOrder, setFabricCodesByOrder] = useState<Record<string, OrderFabricCodes>>({});
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [updatingStatusId, setUpdatingStatusId] = useState<string | null>(null);
+
+  const ORDER_STATUSES = ["Pending", "In Progress", "Ready", "Delivered", "Cancelled"] as const;
+
+  const handleStatusChange = async (order: OrderSheet, status: string) => {
+    if ((order.status || "Pending") === status) return;
+    setUpdatingStatusId(order.id);
+    try {
+      const { error } = await (supabase as any)
+        .from("order_sheets")
+        .update({ status })
+        .eq("id", order.id);
+      if (error) throw error;
+      setOrders(current => current.map(item => item.id === order.id ? { ...item, status } : item));
+      if (selected?.id === order.id) setSelected(current => current ? { ...current, status } : current);
+      toast({ title: "Order status updated", description: `${order.order_no}: ${status}` });
+    } catch (error: any) {
+      console.error("Error updating order status:", error);
+      toast({ title: "Unable to update status", description: error?.message || "Please try again.", variant: "destructive" });
+    } finally {
+      setUpdatingStatusId(null);
+    }
+  };
 
   const handleDelete = async (order: OrderSheet) => {
     const confirmed = window.confirm(
@@ -385,10 +409,10 @@ const OrderSheetList = ({ onCreateNew, onEdit }: Props) => {
           <div className="overflow-x-auto rounded-md border">
             <Table>
               <TableHeader><TableRow>
-                <TableHead>Order Form ID</TableHead><TableHead>Date</TableHead><TableHead>Customer ID</TableHead><TableHead>Customer</TableHead><TableHead>Delivery Date</TableHead><TableHead className="text-right">Actions</TableHead>
+                <TableHead>Order Form ID</TableHead><TableHead>Date</TableHead><TableHead>Customer ID</TableHead><TableHead>Customer</TableHead><TableHead>Delivery Date</TableHead><TableHead>Order Status</TableHead><TableHead className="text-right">Actions</TableHead>
               </TableRow></TableHeader>
               <TableBody>
-                {loading ? <TableRow><TableCell colSpan={6} className="py-8 text-center text-muted-foreground">Loading order forms...</TableCell></TableRow> :
+                {loading ? <TableRow><TableCell colSpan={7} className="py-8 text-center text-muted-foreground">Loading order forms...</TableCell></TableRow> :
                 filtered.length === 0 ? <TableRow><TableCell colSpan={6} className="py-8 text-center text-muted-foreground">No saved order forms found.</TableCell></TableRow> :
                 filtered.map(order => (
                   <TableRow key={order.id}>
@@ -397,6 +421,17 @@ const OrderSheetList = ({ onCreateNew, onEdit }: Props) => {
                     <TableCell className="font-medium">{order.customer_code || "-"}</TableCell>
                     <TableCell>{order.customer_name}</TableCell>
                     <TableCell>{formatDate(order.delivery_date)}</TableCell>
+                    <TableCell>
+                      <select
+                        aria-label={`Order status for ${order.order_no}`}
+                        value={order.status || "Pending"}
+                        onChange={event => handleStatusChange(order, event.target.value)}
+                        disabled={updatingStatusId === order.id}
+                        className="h-9 min-w-[135px] rounded-md border border-input bg-background px-3 text-sm shadow-sm outline-none focus:ring-2 focus:ring-ring disabled:cursor-wait disabled:opacity-60"
+                      >
+                        {ORDER_STATUSES.map(status => <option key={status} value={status}>{status}</option>)}
+                      </select>
+                    </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
                         <Button size="sm" variant="ghost" onClick={() => setSelected(order)}><Eye className="mr-1 h-4 w-4" />View</Button>
