@@ -275,9 +275,9 @@ const Settings = () => {
           <div>
             <Label htmlFor="logo">Header Logo</Label>
             <p className="text-sm text-muted-foreground mb-2">This logo appears in the website header and is used as the default logo for printed documents unless a separate Print Logo is set.</p>
-            <div className="flex items-center space-x-4">
+            <div className="flex flex-wrap items-center gap-4">
               {companySettings.logo && (
-                <img src={companySettings.logo} alt="Header Logo" className="h-16 w-16 object-contain border rounded" />
+                <img src={companySettings.logo} alt="Header Logo preview" className="h-16 w-16 object-contain border rounded" />
               )}
               <Button
                 variant="outline"
@@ -294,6 +294,31 @@ const Settings = () => {
                 onChange={handleLogoUpload}
               />
             </div>
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg">
+              <div>
+                <Label htmlFor="headerLogoWidth">Header Logo Width (px)</Label>
+                <Input
+                  id="headerLogoWidth"
+                  type="number"
+                  min="16"
+                  max="240"
+                  value={companySettings.headerLogoWidth ?? 40}
+                  onChange={(e) => handleCompanyChange("headerLogoWidth", String(Math.min(240, Math.max(16, Number(e.target.value) || 16))))}
+                />
+              </div>
+              <div>
+                <Label htmlFor="headerLogoHeight">Header Logo Height (px)</Label>
+                <Input
+                  id="headerLogoHeight"
+                  type="number"
+                  min="16"
+                  max="120"
+                  value={companySettings.headerLogoHeight ?? 40}
+                  onChange={(e) => handleCompanyChange("headerLogoHeight", String(Math.min(120, Math.max(16, Number(e.target.value) || 16))))}
+                />
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground mt-2">Choose the logo's display size, then click Save Company Information.</p>
           </div>
 
           <div>
