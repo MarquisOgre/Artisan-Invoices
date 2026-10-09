@@ -71,9 +71,18 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
       >
         <div className="w-full h-full px-2.5">
           <div className="flex items-center h-full">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <img src={companySettings.logo || "/logo.png"} alt="Header Logo" className="w-8 h-8 sm:w-10 sm:h-10 object-contain" />
-              <h1 className="text-lg sm:text-xl font-bold text-primary">ARTISAN</h1>
+            <div className="flex items-center">
+              <img
+                src={companySettings.logo || "/logo.png"}
+                alt="Header Logo"
+                className="object-contain"
+                style={{
+                  width: `${companySettings.headerLogoWidth ?? 40}px`,
+                  height: `${companySettings.headerLogoHeight ?? 40}px`,
+                  maxWidth: "min(240px, 35vw)",
+                  maxHeight: `${Math.min(companySettings.headerLogoHeight ?? 40, 64)}px`,
+                }}
+              />
             </div>
 
             <nav className="hidden md:flex items-center space-x-1 ml-auto">
