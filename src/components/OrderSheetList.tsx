@@ -400,7 +400,7 @@ const OrderSheetList = ({ onCreateNew, onEdit }: Props) => {
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
                         <Button size="sm" variant="ghost" onClick={() => setSelected(order)}><Eye className="mr-1 h-4 w-4" />View</Button>
-                        <Button size="sm" variant="outline" onClick={() => onEdit(order)} title="Edit Order Form"><Pencil className="mr-1 h-4 w-4" />Edit</Button>
+                        <Button size="sm" variant="outline" className="shrink-0 border-blue-300 text-blue-700 hover:bg-blue-50" onClick={() => onEdit(order)} title="Edit this existing order form"><Pencil className="mr-1 h-4 w-4" />Edit</Button>
                         <Button size="sm" variant="outline" onClick={() => printOrderSheet(order, fabricCodesByOrder[order.id])}><Printer className="mr-1 h-4 w-4" />Print</Button>
                         <Button
                           size="sm"
