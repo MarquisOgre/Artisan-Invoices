@@ -64,14 +64,42 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Build users list with email + role
+    // Username login uses user_login_names as its canonical mapping.
+    // Read it as well as Auth metadata so older accounts and accounts created
+    // before metadata was populated still display their username in the list.
+    const userIds = (roles ?? []).map((r) => r.user_id)
+    const usernameByUserId = new Map<string, string>()
+
+    if (userIds.length > 0) {
+      const { data: loginNames, error: usernamesError } = await supabaseAdmin
+        .from('user_login_names')
+        .select('user_id, username')
+        .in('user_id', userIds)
+
+      if (usernamesError) {
+        console.error('Error fetching username mappings:', usernamesError)
+        return new Response(
+          JSON.stringify({ error: 'Could not load usernames. Check the user_login_names table and migration.' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
+      for (const row of loginNames ?? []) {
+        usernameByUserId.set(row.user_id, row.username)
+      }
+    }
+
+    // Build users list with email + role. Prefer Auth metadata for the original
+    // display casing, and fall back to the canonical username-login mapping.
     const users: Array<{ id: string; username: string; email: string; role: string; created_at: string }> = []
     for (const r of roles ?? []) {
       const { data: userData, error: userError } = await supabaseAdmin.auth.admin.getUserById(r.user_id)
       if (!userError && userData?.user) {
+        const metadataUsername = String((userData.user.user_metadata as Record<string, unknown> | null)?.username ?? '').trim()
+        const mappedUsername = usernameByUserId.get(userData.user.id) ?? ''
         users.push({
           id: userData.user.id,
-          username: String((userData.user.user_metadata as Record<string, unknown> | null)?.username ?? ''),
+          username: metadataUsername || mappedUsername,
           email: userData.user.email ?? 'Unknown',
           role: r.role as string,
           created_at: r.created_at as string,
