@@ -61,7 +61,8 @@ Deno.serve(async (req) => {
       )
     }
 
-    const normalizedUsername = String(username || '').trim().toLowerCase()
+    const displayUsername = String(username || '').trim()
+    const normalizedUsername = displayUsername.toLowerCase()
     if (!/^[a-z0-9._-]{3,30}$/.test(normalizedUsername)) {
       return new Response(
         JSON.stringify({ error: 'Username must be 3-30 characters and contain only letters, numbers, dot, dash or underscore.' }),
@@ -69,11 +70,12 @@ Deno.serve(async (req) => {
       )
     }
 
-    const { data: existingUsername, error: usernameLookupError } = await supabaseAdmin
+    const { data: usernameRows, error: usernameLookupError } = await supabaseAdmin
       .from('user_login_names')
-      .select('user_id')
-      .eq('username', normalizedUsername)
-      .maybeSingle()
+      .select('user_id, username')
+    const existingUsername = (usernameRows ?? []).find(
+      (row) => String(row.username).toLowerCase() === normalizedUsername,
+    )
 
     if (usernameLookupError) {
       console.error('Username lookup failed:', usernameLookupError)
@@ -97,7 +99,7 @@ Deno.serve(async (req) => {
       email,
       password,
       email_confirm: true,
-      user_metadata: { username: normalizedUsername }
+      user_metadata: { username: displayUsername }
     })
 
     if (createError) {
@@ -119,7 +121,7 @@ Deno.serve(async (req) => {
 
     const { error: usernameInsertError } = await supabaseAdmin
       .from('user_login_names')
-      .insert({ user_id: newUser.user.id, username: normalizedUsername })
+      .insert({ user_id: newUser.user.id, username: displayUsername })
 
     if (usernameInsertError) {
       await supabaseAdmin.auth.admin.deleteUser(newUser.user.id)
@@ -153,7 +155,7 @@ Deno.serve(async (req) => {
         success: true,
         user: {
           id: newUser.user.id,
-          username: normalizedUsername,
+          username: displayUsername,
           email: newUser.user.email,
           role: role
         }
