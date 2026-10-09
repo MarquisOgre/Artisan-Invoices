@@ -75,14 +75,16 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
             </div>
 
             <nav className="hidden md:flex items-center space-x-1 ml-auto">
-              <Button
-                variant={currentPage === "dashboard" ? "default" : "ghost"}
-                className="flex items-center gap-2"
-                onClick={() => onPageChange("dashboard")}
-              >
-                <BarChart3 className="h-4 w-4" />
-                Dashboard
-              </Button>
+              {isAdmin && (
+                <Button
+                  variant={currentPage === "dashboard" ? "default" : "ghost"}
+                  className="flex items-center gap-2"
+                  onClick={() => onPageChange("dashboard")}
+                >
+                  <BarChart3 className="h-4 w-4" />
+                  Dashboard
+                </Button>
+              )}
 
               {isAdmin && (
                 <DropdownMenu>
@@ -122,16 +124,14 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
                 </Button>
               )}
 
-              {isAdmin && (
-                <Button
-                  variant={currentPage === "order-sheet" || currentPage === "new-order-sheet" ? "default" : "ghost"}
-                  className="flex items-center gap-2"
-                  onClick={() => onPageChange("order-sheet")}
-                >
-                  <ClipboardList className="h-4 w-4" />
-                  Order Forms
-                </Button>
-              )}
+              <Button
+                variant={currentPage === "order-sheet" || currentPage === "new-order-sheet" || currentPage === "edit-order-sheet" ? "default" : "ghost"}
+                className="flex items-center gap-2"
+                onClick={() => onPageChange("order-sheet")}
+              >
+                <ClipboardList className="h-4 w-4" />
+                Order Forms
+              </Button>
 
               {isAdmin && (
                 <Button
@@ -179,17 +179,19 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
         {mobileMenuOpen && (
           <div className="md:hidden absolute top-full left-0 right-0 z-50 border-t bg-card shadow-lg">
             <div className="px-4 py-2 space-y-1">
-              <Button
-                variant={currentPage === "dashboard" ? "default" : "ghost"}
-                className="w-full justify-start"
-                onClick={() => {
-                  onPageChange("dashboard");
-                  setMobileMenuOpen(false);
-                }}
-              >
-                <BarChart3 className="mr-3 h-4 w-4" />
-                Dashboard
-              </Button>
+              {isAdmin && (
+                <Button
+                  variant={currentPage === "dashboard" ? "default" : "ghost"}
+                  className="w-full justify-start"
+                  onClick={() => {
+                    onPageChange("dashboard");
+                    setMobileMenuOpen(false);
+                  }}
+                >
+                  <BarChart3 className="mr-3 h-4 w-4" />
+                  Dashboard
+                </Button>
+              )}
 
               {isAdmin && (
                 <Collapsible open={quoInvoicesOpen} onOpenChange={setQuoInvoicesOpen}>
@@ -238,19 +240,17 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
                 </Button>
               )}
 
-              {isAdmin && (
-                <Button
-                  variant={currentPage === "order-sheet" || currentPage === "new-order-sheet" ? "default" : "ghost"}
-                  className="w-full justify-start"
-                  onClick={() => {
-                    onPageChange("order-sheet");
-                    setMobileMenuOpen(false);
-                  }}
-                >
-                  <ClipboardList className="mr-3 h-4 w-4" />
-                  Order Forms
-                </Button>
-              )}
+              <Button
+                variant={currentPage === "order-sheet" || currentPage === "new-order-sheet" || currentPage === "edit-order-sheet" ? "default" : "ghost"}
+                className="w-full justify-start"
+                onClick={() => {
+                  onPageChange("order-sheet");
+                  setMobileMenuOpen(false);
+                }}
+              >
+                <ClipboardList className="mr-3 h-4 w-4" />
+                Order Forms
+              </Button>
 
               {isAdmin && (
                 <Button
