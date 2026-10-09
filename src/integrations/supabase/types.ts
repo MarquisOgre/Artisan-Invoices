@@ -53,6 +53,7 @@ export type Database = {
           city: string | null
           company: string | null
           created_at: string
+          customer_code: string | null
           email: string | null
           gst_no: string | null
           id: string
@@ -69,6 +70,7 @@ export type Database = {
           city?: string | null
           company?: string | null
           created_at?: string
+          customer_code?: string | null
           email?: string | null
           gst_no?: string | null
           id?: string
@@ -85,6 +87,7 @@ export type Database = {
           city?: string | null
           company?: string | null
           created_at?: string
+          customer_code?: string | null
           email?: string | null
           gst_no?: string | null
           id?: string
@@ -98,69 +101,51 @@ export type Database = {
         }
         Relationships: []
       }
-      expense_categories: {
+      fabrics: {
         Row: {
+          article: string
+          brand: string
+          category: string
+          code: string
+          composition: string | null
+          count_spec: string | null
           created_at: string
-          icon: string
+          design: string
+          finish: string | null
           id: string
-          name: string
+          is_active: boolean
+          swatch_url: string | null
           updated_at: string
-          user_id: string
         }
         Insert: {
-          created_at?: string
-          icon?: string
-          id?: string
-          name: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          icon?: string
-          id?: string
-          name?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      expense_register: {
-        Row: {
-          amount: number
-          category: string
-          created_at: string
-          description: string | null
-          expense_date: string | null
-          id: string
-          month: number
-          updated_at: string
-          user_id: string
-          year: number
-        }
-        Insert: {
-          amount: number
-          category: string
-          created_at?: string
-          description?: string | null
-          expense_date?: string | null
-          id?: string
-          month: number
-          updated_at?: string
-          user_id: string
-          year: number
-        }
-        Update: {
-          amount?: number
+          article: string
+          brand: string
           category?: string
+          code: string
+          composition?: string | null
+          count_spec?: string | null
           created_at?: string
-          description?: string | null
-          expense_date?: string | null
+          design: string
+          finish?: string | null
           id?: string
-          month?: number
+          is_active?: boolean
+          swatch_url?: string | null
           updated_at?: string
-          user_id?: string
-          year?: number
+        }
+        Update: {
+          article?: string
+          brand?: string
+          category?: string
+          code?: string
+          composition?: string | null
+          count_spec?: string | null
+          created_at?: string
+          design?: string
+          finish?: string | null
+          id?: string
+          is_active?: boolean
+          swatch_url?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -265,95 +250,177 @@ export type Database = {
           },
         ]
       }
-      inward_register: {
+      order_form_counters: {
         Row: {
-          created_at: string
-          entry_date: string
-          from_party: string | null
-          id: string
-          inward_number: string
-          items: Json
-          month: number
-          notes: string | null
-          total_quantity: number
-          updated_at: string
-          user_id: string
-          year: number
+          last_number: number
+          order_date: string
         }
         Insert: {
-          created_at?: string
-          entry_date: string
-          from_party?: string | null
-          id?: string
-          inward_number: string
-          items?: Json
-          month: number
-          notes?: string | null
-          total_quantity?: number
-          updated_at?: string
-          user_id: string
-          year: number
+          last_number?: number
+          order_date: string
         }
         Update: {
-          created_at?: string
-          entry_date?: string
-          from_party?: string | null
-          id?: string
-          inward_number?: string
-          items?: Json
-          month?: number
-          notes?: string | null
-          total_quantity?: number
-          updated_at?: string
-          user_id?: string
-          year?: number
+          last_number?: number
+          order_date?: string
         }
         Relationships: []
       }
-      outward_register: {
+      order_sheet_fabrics: {
         Row: {
           created_at: string
-          entry_date: string
+          fabric_id: string
+          garment_type: string
           id: string
-          items: Json
-          month: number
-          notes: string | null
-          outward_number: string
-          to_party: string | null
-          total_quantity: number
-          updated_at: string
-          user_id: string
-          year: number
+          order_sheet_id: string
+          sort_order: number
         }
         Insert: {
           created_at?: string
-          entry_date: string
+          fabric_id: string
+          garment_type: string
           id?: string
-          items?: Json
-          month: number
-          notes?: string | null
-          outward_number: string
-          to_party?: string | null
-          total_quantity?: number
-          updated_at?: string
-          user_id: string
-          year: number
+          order_sheet_id: string
+          sort_order?: number
         }
         Update: {
           created_at?: string
-          entry_date?: string
+          fabric_id?: string
+          garment_type?: string
           id?: string
-          items?: Json
-          month?: number
-          notes?: string | null
-          outward_number?: string
-          to_party?: string | null
-          total_quantity?: number
+          order_sheet_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_sheet_fabrics_fabric_id_fkey"
+            columns: ["fabric_id"]
+            isOneToOne: false
+            referencedRelation: "fabrics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_sheet_fabrics_order_sheet_id_fkey"
+            columns: ["order_sheet_id"]
+            isOneToOne: false
+            referencedRelation: "order_sheets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      order_sheets: {
+        Row: {
+          contact_no: string | null
+          created_at: string
+          customer_code: string | null
+          customer_id: string | null
+          customer_name: string
+          delivery_address: string | null
+          delivery_city: string | null
+          delivery_date: string | null
+          delivery_pincode: string | null
+          delivery_state: string | null
+          id: string
+          order_booked_by: string | null
+          order_date: string
+          order_no: string
+          pant_fabric_code: string | null
+          pant_fabric_id: string | null
+          pant_measurements: Json
+          pant_notes: string | null
+          pant_standard_size: string | null
+          pant_style: Json
+          shirt_fabric_code: string | null
+          shirt_fabric_id: string | null
+          shirt_measurements: Json
+          shirt_notes: string | null
+          shirt_standard_size: string | null
+          shirt_style: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          contact_no?: string | null
+          created_at?: string
+          customer_code?: string | null
+          customer_id?: string | null
+          customer_name: string
+          delivery_address?: string | null
+          delivery_city?: string | null
+          delivery_date?: string | null
+          delivery_pincode?: string | null
+          delivery_state?: string | null
+          id?: string
+          order_booked_by?: string | null
+          order_date?: string
+          order_no: string
+          pant_fabric_code?: string | null
+          pant_fabric_id?: string | null
+          pant_measurements?: Json
+          pant_notes?: string | null
+          pant_standard_size?: string | null
+          pant_style?: Json
+          shirt_fabric_code?: string | null
+          shirt_fabric_id?: string | null
+          shirt_measurements?: Json
+          shirt_notes?: string | null
+          shirt_standard_size?: string | null
+          shirt_style?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          contact_no?: string | null
+          created_at?: string
+          customer_code?: string | null
+          customer_id?: string | null
+          customer_name?: string
+          delivery_address?: string | null
+          delivery_city?: string | null
+          delivery_date?: string | null
+          delivery_pincode?: string | null
+          delivery_state?: string | null
+          id?: string
+          order_booked_by?: string | null
+          order_date?: string
+          order_no?: string
+          pant_fabric_code?: string | null
+          pant_fabric_id?: string | null
+          pant_measurements?: Json
+          pant_notes?: string | null
+          pant_standard_size?: string | null
+          pant_style?: Json
+          shirt_fabric_code?: string | null
+          shirt_fabric_id?: string | null
+          shirt_measurements?: Json
+          shirt_notes?: string | null
+          shirt_standard_size?: string | null
+          shirt_style?: Json
           updated_at?: string
           user_id?: string
-          year?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "order_sheets_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_sheets_pant_fabric_id_fkey"
+            columns: ["pant_fabric_id"]
+            isOneToOne: false
+            referencedRelation: "fabrics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_sheets_shirt_fabric_id_fkey"
+            columns: ["shirt_fabric_id"]
+            isOneToOne: false
+            referencedRelation: "fabrics"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       payments: {
         Row: {
@@ -521,54 +588,21 @@ export type Database = {
         }
         Relationships: []
       }
-      stock_register: {
+      user_login_names: {
         Row: {
-          closing_stock: number
           created_at: string
-          id: string
-          month: number
-          notes: string | null
-          opening_stock: number
-          product_name: string
-          production: number
-          sales: number
-          size: string | null
-          unit_price: number | null
-          updated_at: string
           user_id: string
-          year: number
+          username: string
         }
         Insert: {
-          closing_stock?: number
           created_at?: string
-          id?: string
-          month: number
-          notes?: string | null
-          opening_stock?: number
-          product_name: string
-          production?: number
-          sales?: number
-          size?: string | null
-          unit_price?: number | null
-          updated_at?: string
           user_id: string
-          year: number
+          username: string
         }
         Update: {
-          closing_stock?: number
           created_at?: string
-          id?: string
-          month?: number
-          notes?: string | null
-          opening_stock?: number
-          product_name?: string
-          production?: number
-          sales?: number
-          size?: string | null
-          unit_price?: number | null
-          updated_at?: string
           user_id?: string
-          year?: number
+          username?: string
         }
         Relationships: []
       }
@@ -605,6 +639,9 @@ export type Database = {
         }
         Returns: boolean
       }
+      next_order_form_id:
+        | { Args: never; Returns: string }
+        | { Args: { p_order_date: string }; Returns: string }
     }
     Enums: {
       app_role: "admin" | "user"
