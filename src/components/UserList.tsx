@@ -315,17 +315,6 @@ export const UserList = () => {
                         <Pencil className="h-4 w-4 text-muted-foreground" />
                       </Button>
 
-                      {/* Toggle Role Button */}
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        onClick={() => handleToggleRole(user.id, user.role, user.email)}
-                        disabled={updatingRoleUserId === user.id}
-                        title={`Change to ${user.role === 'admin' ? 'user' : user.role === 'user' ? 'manager' : 'admin'}`}
-                      >
-                        <ShieldCheck className={`h-4 w-4 ${user.role === 'admin' ? 'text-primary' : 'text-muted-foreground'}`} />
-                      </Button>
-
                       {/* Reset Password Button */}
                       <Dialog open={passwordDialogOpen && selectedUserId === user.id} onOpenChange={(open) => {
                         setPasswordDialogOpen(open);
