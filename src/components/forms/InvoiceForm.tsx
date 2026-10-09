@@ -73,13 +73,22 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
         taxType: "IGST_18",
         taxMode: "inclusive",
       }));
-      setItems((initialData.items || []).map((item: InvoiceItem) => ({
-        description: item.description || "",
-        shirt_size: item.shirt_size || "",
-        quantity: item.quantity || 1,
-        rate: item.rate || 0,
-        amount: item.amount || 0,
-      })));
+      setItems((initialData.items || []).map((item: InvoiceItem) => {
+        const description = item.description || "";
+        const isBuiltInProduct = PRODUCTS.includes(description);
+        return {
+          ...item,
+          // The product dropdown only accepts built-in product values or
+          // the special custom option. Preserve order-form descriptions as
+          // editable custom descriptions so they appear prefilled.
+          description: isBuiltInProduct ? description : "__custom__",
+          customDescription: isBuiltInProduct ? undefined : (item.customDescription || description),
+          shirt_size: item.shirt_size || "",
+          quantity: item.quantity || 1,
+          rate: item.rate || 0,
+          amount: item.amount || 0,
+        };
+      }));
       return;
     }
 
