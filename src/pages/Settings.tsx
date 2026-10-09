@@ -273,17 +273,18 @@ const Settings = () => {
           </div>
 
           <div>
-            <Label htmlFor="logo">Company Logo</Label>
+            <Label htmlFor="logo">Header Logo</Label>
+            <p className="text-sm text-muted-foreground mb-2">This logo appears in the website header and is used as the default logo for printed documents unless a separate Print Logo is set.</p>
             <div className="flex items-center space-x-4">
               {companySettings.logo && (
-                <img src={companySettings.logo} alt="Company Logo" className="h-16 w-16 object-contain border rounded" />
+                <img src={companySettings.logo} alt="Header Logo" className="h-16 w-16 object-contain border rounded" />
               )}
               <Button
                 variant="outline"
                 onClick={() => document.getElementById('logo-upload')?.click()}
               >
                 <Upload className="mr-2 h-4 w-4" />
-                Upload Logo
+                Upload Header Logo
               </Button>
               <input
                 id="logo-upload"
