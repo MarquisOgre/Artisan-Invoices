@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Eye, Pencil, Printer, Plus, Search, Trash2 } from "lucide-react";
+import { Eye, FilePlus2, Pencil, Printer, Plus, Search, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -40,6 +40,7 @@ export type OrderSheet = {
 type Props = {
   onCreateNew: () => void;
   onEdit: (order: OrderSheet) => void;
+  onConvertToInvoice: (order: OrderSheet) => void;
 };
 
 const safeObject = (value: unknown): Record<string, string> =>
@@ -238,7 +239,7 @@ const printOrderSheet = (order: OrderSheet, fabricCodes?: OrderFabricCodes) => {
   printWindow.document.close();
 };
 
-const OrderSheetList = ({ onCreateNew, onEdit }: Props) => {
+const OrderSheetList = ({ onCreateNew, onEdit, onConvertToInvoice }: Props) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [orders, setOrders] = useState<OrderSheet[]>([]);
@@ -435,6 +436,7 @@ const OrderSheetList = ({ onCreateNew, onEdit }: Props) => {
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
                         <Button size="sm" variant="ghost" onClick={() => setSelected(order)}><Eye className="mr-1 h-4 w-4" />View</Button>
+                        <Button size="sm" variant="outline" className="shrink-0 border-emerald-300 text-emerald-700 hover:bg-emerald-50" onClick={() => onConvertToInvoice(order)} title="Create an invoice from this order form"><FilePlus2 className="mr-1 h-4 w-4" />Convert to Invoice</Button>
                         <Button size="sm" variant="outline" className="shrink-0 border-blue-300 text-blue-700 hover:bg-blue-50" onClick={() => onEdit(order)} title="Edit this existing order form"><Pencil className="mr-1 h-4 w-4" />Edit</Button>
                         <Button size="sm" variant="outline" onClick={() => printOrderSheet(order, fabricCodesByOrder[order.id])}><Printer className="mr-1 h-4 w-4" />Print</Button>
                         <Button
