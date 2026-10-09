@@ -23,11 +23,12 @@ Deno.serve(async (req) => {
       { auth: { autoRefreshToken: false, persistSession: false } }
     )
 
-    const { data: loginName, error: lookupError } = await supabaseAdmin
+    const { data: usernameRows, error: lookupError } = await supabaseAdmin
       .from('user_login_names')
-      .select('user_id')
-      .eq('username', normalizedUsername)
-      .maybeSingle()
+      .select('user_id, username')
+    const loginName = (usernameRows ?? []).find(
+      (row) => String(row.username).toLowerCase() === normalizedUsername,
+    )
 
     if (lookupError || !loginName) {
       return new Response(
