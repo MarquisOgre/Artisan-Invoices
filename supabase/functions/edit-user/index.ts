@@ -68,10 +68,27 @@ Deno.serve(async (req) => {
       .maybeSingle()
     if (targetRoleError || !targetRole) return json({ error: 'User not found.' }, 404)
 
+    // Prevent an edit from removing the final administrator account.
+    if (targetRole.role === 'admin' && role === 'user') {
+      const { count: adminCount, error: adminCountError } = await supabaseAdmin
+        .from('user_roles')
+        .select('user_id', { count: 'exact', head: true })
+        .eq('role', 'admin')
+
+      if (adminCountError) {
+        console.error('Could not verify administrator count:', adminCountError)
+        return json({ error: 'Could not verify administrator safety. Please try again.' }, 500)
+      }
+
+      if ((adminCount ?? 0) <= 1) {
+        return json({ error: 'The last administrator cannot be changed to a regular user.' }, 400)
+      }
+    }
+
     const { data: existingUsername, error: lookupError } = await supabaseAdmin
       .from('user_login_names')
       .select('user_id')
-      .ilike('username', normalizedUsername)
+      .eq('username', normalizedUsername)
       .maybeSingle()
 
     if (lookupError) return json({ error: 'Could not validate username uniqueness.' }, 500)
