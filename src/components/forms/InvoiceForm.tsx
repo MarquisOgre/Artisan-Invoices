@@ -695,11 +695,15 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
                     {index === 0 && <Label htmlFor={`rate-${index}`}>Rate</Label>}
                     <Input
                       id={`rate-${index}`}
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={item.rate}
-                      onChange={(e) => handleItemChange(index, "rate", parseFloat(e.target.value) || 0)}
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      value={item.rate === 0 ? "" : String(Math.trunc(item.rate))}
+                      placeholder="0"
+                      onChange={(e) => {
+                        const digitsOnly = e.target.value.replace(/[^0-9]/g, "");
+                        handleItemChange(index, "rate", digitsOnly === "" ? 0 : Number(digitsOnly));
+                      }}
                     />
                   </div>
                   <div className="col-span-2">
