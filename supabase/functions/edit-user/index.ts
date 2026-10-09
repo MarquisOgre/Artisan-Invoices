@@ -55,8 +55,8 @@ Deno.serve(async (req) => {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return json({ error: 'Enter a valid email address.' }, 400)
     }
-    if (role !== 'admin' && role !== 'user') {
-      return json({ error: 'Role must be admin or user.' }, 400)
+    if (role !== 'admin' && role !== 'manager' && role !== 'user') {
+      return json({ error: 'Role must be admin, manager, or user.' }, 400)
     }
 
     // Avoid accidentally removing the last administrator.
