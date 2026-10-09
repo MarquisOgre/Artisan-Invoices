@@ -143,7 +143,7 @@ export const UserList = () => {
         throw new Error('Not authenticated');
       }
 
-      const newRole = currentRole === 'admin' ? 'user' : 'admin';
+      const newRole = currentRole === 'admin' ? 'user' : currentRole === 'user' ? 'manager' : 'admin';
 
       const { data, error } = await supabase.functions.invoke('update-user-role', {
         body: { userId, newRole },
@@ -293,7 +293,9 @@ export const UserList = () => {
                     <span className={`capitalize px-2 py-1 rounded text-xs ${
                       user.role === 'admin' 
                         ? 'bg-primary/10 text-primary' 
-                        : 'bg-secondary/10 text-secondary-foreground'
+                        : user.role === 'manager'
+                          ? 'bg-blue-100 text-blue-800'
+                          : 'bg-secondary/10 text-secondary-foreground'
                     }`}>
                       {user.role}
                     </span>
@@ -319,7 +321,7 @@ export const UserList = () => {
                         size="icon"
                         onClick={() => handleToggleRole(user.id, user.role, user.email)}
                         disabled={updatingRoleUserId === user.id}
-                        title={`Change to ${user.role === 'admin' ? 'user' : 'admin'}`}
+                        title={`Change to ${user.role === 'admin' ? 'user' : user.role === 'user' ? 'manager' : 'admin'}`}
                       >
                         <ShieldCheck className={`h-4 w-4 ${user.role === 'admin' ? 'text-primary' : 'text-muted-foreground'}`} />
                       </Button>
@@ -472,6 +474,7 @@ export const UserList = () => {
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                 >
                   <option value="user">User</option>
+                  <option value="manager">Manager</option>
                   <option value="admin">Admin</option>
                 </select>
               </div>
