@@ -53,6 +53,12 @@ export const UserList = () => {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [newPassword, setNewPassword] = useState("");
   const [updatingPassword, setUpdatingPassword] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<UserWithRole | null>(null);
+  const [editUsername, setEditUsername] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+  const [editRole, setEditRole] = useState("user");
+  const [savingEdit, setSavingEdit] = useState(false);
 
   const fetchUsers = async () => {
     try {
@@ -205,6 +211,55 @@ export const UserList = () => {
     }
   };
 
+  const openEditDialog = (user: UserWithRole) => {
+    setEditingUser(user);
+    setEditUsername(user.username || "");
+    setEditEmail(user.email);
+    setEditRole(user.role);
+    setEditDialogOpen(true);
+  };
+
+  const handleSaveUser = async () => {
+    if (!editingUser) return;
+
+    setSavingEdit(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+
+      const { data, error } = await supabase.functions.invoke("edit-user", {
+        body: {
+          userId: editingUser.id,
+          username: editUsername.trim(),
+          email: editEmail.trim(),
+          role: editRole,
+        },
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      toast({
+        title: "User Updated",
+        description: `Updated ${editEmail.trim()} successfully.`,
+      });
+
+      setEditDialogOpen(false);
+      setEditingUser(null);
+      await fetchUsers();
+    } catch (error: any) {
+      console.error("Error editing user:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update user",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -248,6 +303,16 @@ export const UserList = () => {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
+                      {/* Edit User Button */}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => openEditDialog(user)}
+                        title="Edit user"
+                      >
+                        <Pencil className="h-4 w-4 text-muted-foreground" />
+                      </Button>
+
                       {/* Toggle Role Button */}
                       <Button 
                         variant="ghost" 
@@ -356,6 +421,85 @@ export const UserList = () => {
             </TableBody>
           </Table>
         )}
+        <Dialog
+          open={editDialogOpen}
+          onOpenChange={(open) => {
+            setEditDialogOpen(open);
+            if (!open && !savingEdit) setEditingUser(null);
+          }}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit User</DialogTitle>
+              <DialogDescription>
+                Update this user's username, email address, and role.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="editUsername">Username</Label>
+                <Input
+                  id="editUsername"
+                  value={editUsername}
+                  onChange={(event) => setEditUsername(event.target.value)}
+                  placeholder="Enter username"
+                  autoComplete="off"
+                  disabled={savingEdit}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Use 3–30 lowercase letters, numbers, dots, dashes, or underscores.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="editEmail">Email</Label>
+                <Input
+                  id="editEmail"
+                  type="email"
+                  value={editEmail}
+                  onChange={(event) => setEditEmail(event.target.value)}
+                  placeholder="Enter email address"
+                  autoComplete="email"
+                  disabled={savingEdit}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="editRole">Role</Label>
+                <select
+                  id="editRole"
+                  value={editRole}
+                  onChange={(event) => setEditRole(event.target.value)}
+                  disabled={savingEdit}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                >
+                  <option value="user">User</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setEditDialogOpen(false)}
+                disabled={savingEdit}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                onClick={handleSaveUser}
+                disabled={
+                  savingEdit ||
+                  !editUsername.trim() ||
+                  !editEmail.trim() ||
+                  !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editEmail.trim())
+                }
+              >
+                {savingEdit ? "Saving..." : "Save Changes"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   );
