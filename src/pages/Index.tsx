@@ -444,6 +444,18 @@ const Index = () => {
           <OrderSheetList
             onCreateNew={() => { setEditingOrderSheet(null); navigate("/order-forms/new"); }}
             onEdit={(order) => { setEditingOrderSheet(order); navigate(`/order-forms/${order.id}/edit`, { state: { order } }); }}
+            onConvertToInvoice={(order) => {
+              const customer = customers.find((item: any) => item.id === order.customer_id) || customers.find((item: any) => item.customer_code === order.customer_code) || customers.find((item: any) => item.name === order.customer_name);
+              if (!customer) {
+                toast({ title: "Customer not found", description: "Link this order form to an existing customer before converting it to an invoice.", variant: "destructive" });
+                return;
+              }
+              const orderItems = [
+                ...(order.shirt_fabric_code ? [{ description: `Shirt - Fabric: ${order.shirt_fabric_code}`, shirt_size: order.shirt_standard_size || "", quantity: 1, rate: 0, amount: 0 }] : []),
+                ...(order.pant_fabric_code ? [{ description: `Pant - Fabric: ${order.pant_fabric_code}`, shirt_size: order.pant_standard_size || "", quantity: 1, rate: 0, amount: 0 }] : []),
+              ];
+              navigate("/invoices/new", { state: { orderToInvoice: { customerId: customer.id, items: orderItems, notes: `Created from order form ${order.order_no}. Delivery date: ${order.delivery_date || "Not set"}.` , orderId: order.id, orderNo: order.order_no } } });
+            }}
           />
         );
       case "new-order-sheet":
