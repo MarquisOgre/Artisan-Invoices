@@ -474,6 +474,7 @@ export const UserList = () => {
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                 >
                   <option value="user">User</option>
+                  {/* Manager role: available to Admins when editing users. */}
                   <option value="manager">Manager</option>
                   <option value="admin">Admin</option>
                 </select>
