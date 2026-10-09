@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
 
 const SHIRT_MEASUREMENTS = [
@@ -94,6 +95,7 @@ const requestOrderNo = async (orderDate: string) => {
 
 const OrderSheetForm = ({ customers, onSaved, initialOrder = null }: OrderSheetFormProps) => {
   const { user } = useAuth();
+  const { canManage } = useUserRole();
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
   const [loadedOrderId, setLoadedOrderId] = useState<string | null>(null);
@@ -574,7 +576,7 @@ const OrderSheetForm = ({ customers, onSaved, initialOrder = null }: OrderSheetF
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="new-customer">+ Add New Customer</SelectItem>
-                  {customers.map(customer => (
+                  {canManage && customers.map(customer => (
                     <SelectItem key={customer.id} value={customer.id}>
                       {customer.name}
                       {customer.customer_code ? ` — ${customer.customer_code}` : ""}
