@@ -698,8 +698,12 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
                       type="text"
                       inputMode="numeric"
                       pattern="[0-9]*"
+                      autoComplete="off"
                       value={item.rate === 0 ? "" : String(Math.trunc(item.rate))}
                       placeholder="0"
+                      onFocus={(e) => {
+                        if (item.rate === 0) e.currentTarget.value = "";
+                      }}
                       onChange={(e) => {
                         const digitsOnly = e.target.value.replace(/[^0-9]/g, "");
                         handleItemChange(index, "rate", digitsOnly === "" ? 0 : Number(digitsOnly));
