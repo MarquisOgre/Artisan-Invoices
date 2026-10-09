@@ -49,7 +49,7 @@ export const printOrderSheet = (order: OrderSheet, fabricCodes?: OrderFabricCode
   const checked = (styles: string[] | undefined, value: string) => styles?.includes(value) ? "☑" : "☐";
   const styleText = (selected: string[] | undefined, other: string | undefined) =>
     [...(selected || []), other || ""].filter(Boolean).join(", ") || "-";
-  const measureRows = (rows: string[][]) => rows.slice(0, 5).map(([label, value]) =>
+  const measureRows = (rows: string[][]) => rows.slice(0, 7).map(([label, value]) =>
     `<div class="measure-row"><span>${esc(label)}</span><b>:</b><span class="line-value">${esc(value || "")}</span></div>`
   ).join("");
   const shirtStyle = order.shirt_style?.selected || [];
@@ -99,15 +99,15 @@ export const printOrderSheet = (order: OrderSheet, fabricCodes?: OrderFabricCode
   .garment-icon { position:absolute; left:6mm; top:-2mm; width:15mm; height:17mm; color:white; font-size:13mm; line-height:17mm; }
   .garment-icon.shirt-icon:before { content:"♧"; transform:rotate(180deg); display:block; font-size:15mm; }
   .garment-icon.pant-icon:before { content:"♜"; display:block; font-size:13mm; }
-  .section-grid { display:grid; grid-template-columns:18% 11% 31% 14% 26%; background:#fff; min-height:48mm; max-height:48mm; }
+  .section-grid { display:grid; grid-template-columns:18% 11% 31% 14% 26%; background:#fff; min-height:58mm; max-height:58mm; }
   .cell { border-right:1px solid currentColor; }
   .cell:last-child { border-right:0; }
   .cell-head { height:7mm; background:linear-gradient(#e6f1fb,#d7e9f8); display:flex; align-items:center; justify-content:center; font-size:3.6mm; font-weight:800; text-align:center; color:#0b2d62; border-bottom:1px solid currentColor; }
   .pant .cell-head { background:linear-gradient(#fff2df,#f7e7d0); }
-  .cell-body { padding:2mm 2.5mm 1.5mm; min-height:41mm; color:#08265b; }
+  .cell-body { padding:2mm 2.5mm 1.5mm; min-height:51mm; color:#08265b; }
   .fabric-body { display:flex; align-items:flex-start; justify-content:flex-start; padding:3mm 2mm; font-weight:700; font-size:3mm; line-height:1.45; overflow-wrap:anywhere; }
   .measurements { padding:2mm 3mm; }
-  .measure-row { height:8mm; display:grid; grid-template-columns:20mm 3mm minmax(0, 1fr); align-items:end; font-size:3.3mm; }
+  .measure-row { height:7mm; display:grid; grid-template-columns:20mm 3mm minmax(0, 1fr); align-items:end; font-size:3.3mm; }
   .line-value { border-bottom:1px solid #123e73; min-width:10mm; height:5mm; padding-left:1mm; }
   .style-list { padding:2mm 3mm; font-size:3.5mm; }
   .style-row { height:7.5mm; display:flex; align-items:center; gap:2mm; white-space:nowrap; }
@@ -130,7 +130,7 @@ export const printOrderSheet = (order: OrderSheet, fabricCodes?: OrderFabricCode
     <div class="brand">
       <img class="brand-logo" src="${esc(companyLogoUrl)}" alt="Artisan Apparels" />
     </div>
-    <div class="banner"><div class="banner-title">ORDER SHEET</div><div class="banner-sub">SHIRT &amp; PANT</div></div>
+    <div class="banner"><div class="banner-title">ORDER SHEET</div></div>
     <div class="meta">
       <div class="meta-row"><b>Order No.</b><b>:</b><div class="meta-line">${esc(order.order_no)}</div></div>
       <div class="meta-row"><b>Date</b><b>:</b><div class="meta-line">${esc(formatDate(order.order_date))}</div></div>
