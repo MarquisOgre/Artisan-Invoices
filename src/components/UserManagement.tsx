@@ -190,6 +190,7 @@ export const UserManagement = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="admin">Admin</SelectItem>
+                  {/* Manager role: available to Admins when creating users. */}
                   <SelectItem value="manager">Manager</SelectItem>
                   <SelectItem value="user">User</SelectItem>
                 </SelectContent>
