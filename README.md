@@ -1,257 +1,73 @@
-# InvoiceFlow - Complete Invoice & Quotation Management System
+# Artisan Invoices
 
-A comprehensive web application for managing customers, quotations, and invoices with authentication and real-time data persistence using Supabase.
+Artisan Invoices is a React + TypeScript application for customer, quotation, invoice, payment, and business-settings management. Supabase provides authentication, PostgreSQL, realtime, and Edge Functions.
 
-## 🚀 Live Demo
+## Stack
 
-**URL**: https://lovable.dev/projects/1cd2f0e2-2256-4542-8049-6b7b6008cca9
+- React 18, TypeScript, Vite
+- Tailwind CSS and shadcn/ui
+- Supabase Auth, PostgreSQL, Realtime, Storage and Edge Functions
+- Vite PWA for installable web-app support
 
-## ✨ Features
+## Local development
 
-### 🔐 Authentication System
-- **Secure user authentication** powered by Supabase Auth
-- **User registration and login** with email/password
-- **Protected routes** - only authenticated users can access the app
-- **Session persistence** - stay logged in across browser sessions
-- **Default admin account**: `admin@gmail.com` / `123456`
-
-### 👥 Customer Management
-- **Add new customers** with comprehensive form validation
-- **Customer information**: Name, email, phone, company, address
-- **View all customers** in a searchable, sortable table
-- **Customer actions**: View details, edit, create documents, send emails, delete
-- **Real-time customer statistics** with visual dashboard cards
-
-### 📄 Quotation Management
-- **Create detailed quotations** with multiple line items
-- **Dynamic item management**: Add/remove items with automatic calculations
-- **Quotation statuses**: Save, Sent, Accepted, Rejected, Expired
-- **Customer selection** from existing customer database
-- **Automatic quotation numbering** with customizable prefixes
-- **Date management**: Creation date and validity period
-- **Actions available**:
-  - View details
-  - Edit quotations
-  - Download PDF
-  - Convert to invoice
-  - Send to customer
-  - Update status
-  - Delete
-
-### 🧾 Invoice Management
-- **Create comprehensive invoices** with itemized billing
-- **Multiple invoice statuses**: Draft, Sent, Pending, Paid, Overdue
-- **Due date tracking** with overdue highlighting
-- **Automatic invoice numbering** system
-- **Actions available**:
-  - View details
-  - Edit invoices
-  - Download PDF
-  - Send payment reminders
-  - Mark as paid
-  - Delete
-
-### 📊 Dashboard & Analytics
-- **Real-time statistics** for revenue, quotations, invoices, and customers
-- **Visual indicators** with color-coded status badges
-- **Recent activity** showing latest quotations and invoices
-- **Quick actions** for creating new records
-- **Responsive design** with mobile-friendly interface
-
-### ⚙️ Settings Management
-- **Company information** setup with logo upload
-- **Invoice customization**: Prefixes, terms, notes, currency
-- **Notification settings** for payments and reminders
-- **Favicon upload** capability
-- **Branding customization** options
-
-### 🛡️ Data Security & Validation
-- **Row Level Security (RLS)** - users only see their own data
-- **Form validation** - prevent saving incomplete records
-- **Real-time data synchronization** with Supabase
-- **Secure data storage** with automatic backups
-
-## 🏗️ Technical Architecture
-
-### Frontend Technologies
-- **React 18** - Modern React with hooks and functional components
-- **TypeScript** - Type-safe development with full IntelliSense
-- **Vite** - Lightning-fast development and build tool
-- **Tailwind CSS** - Utility-first CSS framework for rapid styling
-- **shadcn/ui** - Beautiful, accessible UI components
-- **React Router** - Client-side routing with protected routes
-
-### Backend & Database
-- **Supabase** - Backend-as-a-Service with PostgreSQL database
-- **Real-time subscriptions** - Live data updates across clients
-- **Auto-generated API** - RESTful and GraphQL endpoints
-- **Row Level Security** - Database-level security policies
-- **Authentication** - Built-in user management with JWT tokens
-
-### Database Schema
-```sql
--- Users have profiles with role-based access
-profiles (id, email, full_name, role, created_at, updated_at)
-
--- Customers belong to authenticated users
-customers (id, user_id, name, email, phone, company, address, created_at, updated_at)
-
--- Quotations with automatic numbering
-quotations (id, user_id, customer_id, quotation_number, amount, status, date, valid_until, items, notes, created_at, updated_at)
-
--- Invoices with payment tracking
-invoices (id, user_id, customer_id, quotation_id, invoice_number, amount, status, date, due_date, items, notes, created_at, updated_at)
-```
-
-## 🎯 Key Functionality
-
-### Customer Workflow
-1. **Add Customer** → Fill form with validation → Save to database
-2. **View Customers** → Search/filter → Perform actions
-3. **Customer Actions** → View/Edit/Delete/Create documents
-
-### Quotation Workflow
-1. **Create Quotation** → Select customer → Add items → Calculate total → Save
-2. **Send to Customer** → Update status to "Sent"
-3. **Track Response** → Update to "Accepted" or "Rejected"
-4. **Convert to Invoice** → Automatically create invoice from quotation
-
-### Invoice Workflow
-1. **Create Invoice** → Select customer → Add items → Set due date → Save
-2. **Send to Customer** → Track delivery status
-3. **Payment Tracking** → Send reminders → Mark as paid
-4. **Overdue Management** → Automatic status updates
-
-### Form Validation Rules
-- **Customer Name**: Required field
-- **Email**: Valid email format when provided
-- **Quotation/Invoice Items**: At least one valid item required
-- **Item Validation**: Description, quantity > 0, rate > 0
-- **Customer Selection**: Required for all quotations and invoices
-- **Date Validation**: Logical date ranges and constraints
-
-## 🚀 Getting Started
-
-### Prerequisites
-- Node.js 16+ installed
-- npm or yarn package manager
-- Modern web browser
-
-### Installation & Development
+Requirements: Node.js 18+ and npm.
 
 ```bash
-# Clone the repository
-git clone <YOUR_GIT_URL>
-cd <YOUR_PROJECT_NAME>
-
-# Install dependencies
+git clone https://github.com/MarquisOgre/Artisan-Invoices.git
+cd Artisan-Invoices
 npm install
-
-# Start development server
+cp .env.example .env.local
 npm run dev
+```
 
-# Build for production
+On Windows PowerShell, use `Copy-Item .env.example .env.local` instead of `cp`.
+
+Set `VITE_SUPABASE_URL`, `VITE_SUPABASE_PROJECT_ID`, and `VITE_SUPABASE_PUBLISHABLE_KEY` in `.env.local`. The publishable/anon key is a browser key; never expose a Supabase service-role or secret key in frontend environment variables.
+
+## Supabase project setup
+
+The repository is configured for project `cohywcxpfusfsdqvlchr` at `https://cohywcxpfusfsdqvlchr.supabase.co`.
+
+Before deploying:
+1. Apply the reviewed SQL schema/migrations to the target Supabase project.
+2. Configure Auth providers, Site URL and redirect URLs.
+3. Deploy all required functions in `supabase/functions/` and configure their secrets.
+4. Configure Storage buckets/policies and Realtime table publication as required.
+5. Verify Row Level Security, user-role checks and tenant isolation.
+6. If switching from an existing project, migrate production data and Auth users deliberately and validate row counts and foreign keys.
+
+See [Supabase migration checklist](supabase/README-MIGRATION.md). Historical migration files overlap and some contain permissive policies; review the current target schema and policies before applying these SQL files to production. Changing the frontend URL alone does not migrate the database, users, uploaded files, or Edge Functions.
+
+## Build, lint, preview
+
+```bash
 npm run build
-
-# Preview production build
+npm run lint
 npm run preview
 ```
 
-### Authentication Setup
-1. Navigate to the application
-2. Use default admin account: `admin@gmail.com` / `123456`
-3. Or register a new account
-4. Start creating customers, quotations, and invoices
+## Deployment
 
-### Environment Configuration
-- **Supabase URL**: Pre-configured in the project
-- **Authentication**: Email/password enabled
-- **Database**: Automatic schema migration on deployment
-- **Storage**: Ready for file uploads (logos, documents)
+Deploy the Vite static frontend with any static hosting provider (for example, Vercel, Netlify, or Cloudflare Pages). Configure the three Vite environment variables in the host's project settings. Use `npm run build` and publish `dist/`.
 
-## 📱 Responsive Design
+Do not commit `.env.local` or secrets. The repository ignores local environment files.
 
-- **Mobile-first approach** with touch-friendly interfaces
-- **Responsive tables** with horizontal scrolling on mobile
-- **Collapsible sidebar** for navigation on smaller screens
-- **Optimized forms** with proper input types for mobile keyboards
-- **Touch-friendly buttons** with appropriate sizing
+## Supabase Edge Functions
 
-## 🔧 Customization Options
+Function source is under `supabase/functions/`. Deploy using the Supabase CLI after logging in and linking the project:
 
-### Branding
-- Upload company logo in Settings
-- Customize favicon
-- Set company information
-- Configure invoice/quotation prefixes
-
-### Business Logic
-- Modify default terms and conditions
-- Adjust automatic numbering sequences
-- Customize status workflows
-- Set payment terms and due dates
-
-### UI Theming
-- Tailwind CSS configuration
-- Color scheme customization
-- Component styling via shadcn/ui
-- Dark/light mode support
-
-## 🚀 Deployment
-
-### Via Lovable Platform
-1. Open [Lovable Project](https://lovable.dev/projects/1cd2f0e2-2256-4542-8049-6b7b6008cca9)
-2. Click **Share → Publish**
-3. Your app will be live with automatic SSL and CDN
-
-### Custom Domain Setup
-1. Navigate to **Project > Settings > Domains**
-2. Click **Connect Domain**
-3. Follow DNS configuration instructions
-4. SSL certificate automatically provisioned
-
-### Manual Deployment
-- **Vercel**: Connect GitHub repo for automatic deployments
-- **Netlify**: Drag-and-drop build folder or connect repo
-- **AWS S3 + CloudFront**: Static site hosting with CDN
-
-## 🛠️ Development Notes
-
-### Component Structure
-```
-src/
-├── components/           # Reusable UI components
-│   ├── forms/           # Form components
-│   └── ui/              # shadcn/ui components
-├── hooks/               # Custom React hooks
-├── pages/               # Page components
-├── integrations/        # Supabase integration
-└── lib/                 # Utility functions
+```bash
+supabase login
+supabase link --project-ref cohywcxpfusfsdqvlchr
+supabase functions deploy
 ```
 
-### State Management
-- **React hooks** for local component state
-- **Custom hooks** for data fetching and business logic
-- **Supabase realtime** for live data synchronization
-- **Context API** for authentication state
+Review each function's JWT and authorization requirements before deploying. In particular, functions configured with `verify_jwt = false` must enforce any needed authentication/authorization checks internally.
 
-### Code Quality
-- **TypeScript** for type safety
-- **ESLint** for code linting
-- **Prettier** for code formatting
-- **Component-driven development**
+## Security
 
-## 📄 License
-
-This project is created with Lovable and is available under the MIT License.
-
-## 🤝 Support
-
-For technical support or feature requests:
-- Visit the [Lovable Documentation](https://docs.lovable.dev/)
-- Join the [Lovable Discord Community](https://discord.com/channels/1119885301872070706/1280461670979993613)
-- Check the [Troubleshooting Guide](https://docs.lovable.dev/tips-tricks/troubleshooting)
-
----
-
-**Built with ❤️ using Lovable - The AI-powered web development platform**
+- Keep Row Level Security enabled on application tables.
+- Restrict access to each user's own rows, and check admin roles server-side.
+- Never put service-role keys, database passwords or other server secrets in browser code or Vite-prefixed environment variables.
+- Set production Auth redirect URLs explicitly and test isolation using more than one account.
