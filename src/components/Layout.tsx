@@ -77,10 +77,10 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
                 alt="Header Logo"
                 className="object-contain"
                 style={{
-                  width: `${companySettings.headerLogoWidth ?? 40}px`,
-                  height: `${companySettings.headerLogoHeight ?? 40}px`,
+                  width: `${Math.min(Number(companySettings.headerLogoWidth ?? 40), Number(companySettings.headerLogoHeight ?? 40))}px`,
+                  height: `${Math.min(Number(companySettings.headerLogoWidth ?? 40), Number(companySettings.headerLogoHeight ?? 40))}px`,
                   maxWidth: "min(240px, 35vw)",
-                  maxHeight: `${Math.min(companySettings.headerLogoHeight ?? 40, 64)}px`,
+                  maxHeight: "64px",
                 }}
               />
             </div>
