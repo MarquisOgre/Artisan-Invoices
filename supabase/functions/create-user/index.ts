@@ -61,6 +61,13 @@ Deno.serve(async (req) => {
       )
     }
 
+    if (!['admin', 'manager', 'user'].includes(role)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid role. Must be admin, manager, or user.' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
     const displayUsername = String(username || '').trim()
     const normalizedUsername = displayUsername.toLowerCase()
     if (!/^[a-z0-9._-]{3,30}$/.test(normalizedUsername)) {
