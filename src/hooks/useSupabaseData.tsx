@@ -290,31 +290,6 @@ export const useSupabaseData = () => {
     };
   }, [user]);
 
-  // Realtime subscription for stock_register
-  useEffect(() => {
-    if (!user) return;
-
-    const channel = supabase
-      .channel('stock-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'stock_register'
-        },
-        () => {
-          // Refresh all data when stock changes to ensure consistency
-          fetchData();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user]);
-
   const addCustomer = async (customerData: Omit<Customer, "id" | "created_at" | "updated_at">) => {
     if (!user) {
       toast({
@@ -379,55 +354,6 @@ export const useSupabaseData = () => {
         items: Array.isArray(data.items) ? data.items : []
       };
       setInvoices(prev => [processedData, ...prev]);
-      
-      // Update stock register with sales from invoice
-      const currentDate = new Date(data.invoice_date);
-      const month = currentDate.getMonth() + 1;
-      const year = currentDate.getFullYear();
-      
-      for (const item of processedData.items) {
-        const invoiceItem = item as any;
-        if (invoiceItem.description && invoiceItem.quantity && invoiceItem.shirt_size) {
-          // Fetch existing stock entry for this product + size
-          const { data: existingStock } = await supabase
-            .from("stock_register")
-            .select("*")
-            .eq("product_name", invoiceItem.description)
-            .eq("size", invoiceItem.shirt_size)
-            .eq("month", month)
-            .eq("year", year)
-            .maybeSingle();
-          
-          if (existingStock) {
-            // Update existing entry
-            const newSales = existingStock.sales + invoiceItem.quantity;
-            const newClosingStock = existingStock.opening_stock + existingStock.production - newSales;
-            
-            await supabase
-              .from("stock_register")
-              .update({ 
-                sales: newSales,
-                closing_stock: newClosingStock
-              })
-              .eq("id", existingStock.id);
-          } else {
-            // Create new entry for this product + size
-            await supabase
-              .from("stock_register")
-              .insert([{
-                user_id: user.id,
-                product_name: invoiceItem.description,
-                size: invoiceItem.shirt_size,
-                month: month,
-                year: year,
-                opening_stock: 0,
-                production: 0,
-                sales: invoiceItem.quantity,
-                closing_stock: -invoiceItem.quantity
-              }]);
-          }
-        }
-      }
       
       return processedData;
     }
@@ -720,105 +646,6 @@ export const useSupabaseData = () => {
     return false;
   };
 
-  const addStockEntry = async (stockData: any) => {
-    if (!user) {
-      toast({
-        title: "Error",
-        description: "You must be logged in to add stock entries.",
-        variant: "destructive",
-      });
-      return null;
-    }
-
-    const { data, error } = await supabase
-      .from("stock_register")
-      .insert([{ ...stockData, user_id: user.id }])
-      .select()
-      .single();
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to add stock entry.",
-        variant: "destructive",
-      });
-    }
-    return data;
-  };
-
-  const updateStockEntry = async (stockId: string, stockData: any) => {
-    if (!user) {
-      toast({
-        title: "Error",
-        description: "You must be logged in to update stock entries.",
-        variant: "destructive",
-      });
-      return null;
-    }
-
-    const { data, error } = await supabase
-      .from("stock_register")
-      .update(stockData)
-      .eq("id", stockId)
-      .select()
-      .single();
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update stock entry.",
-        variant: "destructive",
-      });
-    }
-    return data;
-  };
-
-  const fetchStockRegister = async (month: number, year: number) => {
-    if (!user) return [];
-
-    const { data, error } = await supabase
-      .from("stock_register")
-      .select("*")
-      .eq("month", month)
-      .eq("year", year);
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to fetch stock register.",
-        variant: "destructive",
-      });
-      return [];
-    }
-    return data || [];
-  };
-
-  const deleteStockEntry = async (stockId: string) => {
-    if (!user) {
-      toast({
-        title: "Error",
-        description: "You must be logged in to delete stock entries.",
-        variant: "destructive",
-      });
-      return false;
-    }
-
-    const { error } = await supabase
-      .from("stock_register")
-      .delete()
-      .eq("id", stockId);
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to delete stock entry.",
-        variant: "destructive",
-      });
-      return false;
-    }
-    return true;
-  };
-
   return {
     customers,
     invoices,
@@ -835,10 +662,6 @@ export const useSupabaseData = () => {
     updateQuotation,
     deleteQuotation,
     addPayment,
-    addStockEntry,
-    updateStockEntry,
-    fetchStockRegister,
-    deleteStockEntry,
     refreshData: fetchData
   };
 };
