@@ -28,6 +28,7 @@ const Index = () => {
   const [editingCustomer, setEditingCustomer] = useState(null);
   const [editingInvoice, setEditingInvoice] = useState(null);
   const [editingQuotation, setEditingQuotation] = useState(null);
+  const [editingOrderSheet, setEditingOrderSheet] = useState<any>(null);
   const [viewingInvoice, setViewingInvoice] = useState(null);
   const [viewingQuotation, setViewingQuotation] = useState(null);
 
@@ -43,6 +44,7 @@ const Index = () => {
     path === "/quotations/new" ? "quotation-form" :
     path === "/order-forms" ? "order-sheet" :
     path === "/order-forms/new" ? "new-order-sheet" :
+    path.match(/^\/order-forms\/[^/]+\/edit$/) ? "edit-order-sheet" :
     path === "/settings" ? "settings" :
     path === "/fabrics" ? "fabrics" :
     path.startsWith("/customers/") ? "customer-form" :
@@ -123,6 +125,7 @@ const Index = () => {
       "quotation-form": "/quotations/new",
       "order-sheet": "/order-forms",
       "new-order-sheet": "/order-forms/new",
+      "edit-order-sheet": editingOrderSheet ? `/order-forms/${editingOrderSheet.id}/edit` : "/order-forms",
       settings: "/settings",
       fabrics: "/fabrics",
     };
@@ -438,13 +441,28 @@ const Index = () => {
         );
       case "order-sheet":
         return (
-          <OrderSheetList onCreateNew={() => navigate("/order-forms/new")} />
+          <OrderSheetList
+            onCreateNew={() => { setEditingOrderSheet(null); navigate("/order-forms/new"); }}
+            onEdit={(order) => { setEditingOrderSheet(order); navigate(`/order-forms/${order.id}/edit`, { state: { order } }); }}
+          />
         );
       case "new-order-sheet":
         return (
           <OrderSheetForm
             customers={customers}
             onSaved={() => {
+              setEditingOrderSheet(null);
+              navigate("/order-forms");
+            }}
+          />
+        );
+      case "edit-order-sheet":
+        return (
+          <OrderSheetForm
+            customers={customers}
+            initialOrder={editingOrderSheet || (location.state as any)?.order || null}
+            onSaved={() => {
+              setEditingOrderSheet(null);
               navigate("/order-forms");
             }}
           />
