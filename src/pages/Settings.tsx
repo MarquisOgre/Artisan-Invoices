@@ -294,31 +294,28 @@ const Settings = () => {
                 onChange={handleLogoUpload}
               />
             </div>
-            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg">
-              <div>
-                <Label htmlFor="headerLogoWidth">Header Logo Width (px)</Label>
-                <Input
-                  id="headerLogoWidth"
-                  type="number"
-                  min="16"
-                  max="240"
-                  value={companySettings.headerLogoWidth ?? 40}
-                  onChange={(e) => handleCompanyChange("headerLogoWidth", String(Math.min(240, Math.max(16, Number(e.target.value) || 16))))}
-                />
-              </div>
-              <div>
-                <Label htmlFor="headerLogoHeight">Header Logo Height (px)</Label>
-                <Input
-                  id="headerLogoHeight"
-                  type="number"
-                  min="16"
+            <div className="mt-4 max-w-lg">
+              <Label htmlFor="headerLogoSize">Header Logo Size</Label>
+              <div className="flex items-center gap-4 mt-2">
+                <input
+                  id="headerLogoSize"
+                  type="range"
+                  min="24"
                   max="120"
-                  value={companySettings.headerLogoHeight ?? 40}
-                  onChange={(e) => handleCompanyChange("headerLogoHeight", String(Math.min(120, Math.max(16, Number(e.target.value) || 16))))}
+                  step="2"
+                  value={Math.min(Number(companySettings.headerLogoWidth ?? 40), Number(companySettings.headerLogoHeight ?? 40))}
+                  onChange={(e) => {
+                    const size = Number(e.target.value);
+                    setCompanySettings(prev => ({ ...prev, headerLogoWidth: size, headerLogoHeight: size }));
+                  }}
+                  className="w-full accent-primary"
                 />
+                <span className="w-16 shrink-0 text-right text-sm text-muted-foreground">
+                  {Math.min(Number(companySettings.headerLogoWidth ?? 40), Number(companySettings.headerLogoHeight ?? 40))} px
+                </span>
               </div>
             </div>
-            <p className="text-sm text-muted-foreground mt-2">Choose the logo's display size, then click Save Company Information.</p>
+            <p className="text-sm text-muted-foreground mt-2">Adjust one size control to scale the Header Logo proportionately, then click Save Company Information.</p>
           </div>
 
           <div>
