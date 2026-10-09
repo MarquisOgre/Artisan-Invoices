@@ -91,6 +91,16 @@ export const UserList = () => {
 
   useEffect(() => {
     fetchUsers();
+
+    // Keep the list in sync when another component creates a user.
+    const handleUsersUpdated = () => {
+      void fetchUsers();
+    };
+
+    window.addEventListener("artisan-users-updated", handleUsersUpdated);
+    return () => {
+      window.removeEventListener("artisan-users-updated", handleUsersUpdated);
+    };
   }, []);
 
   const handleDeleteUser = async (userId: string, email: string) => {
