@@ -2,6 +2,11 @@ import type { OrderSheet } from "../OrderSheetList";
 
 export type OrderFabricCodes = { shirt: string[]; pant: string[] };
 
+type CompanyLogoSettings = { printLogo?: string | null; logo?: string | null };
+
+const getCompanyLogoUrl = (settings?: CompanyLogoSettings) =>
+  settings?.printLogo || settings?.logo || `${window.location.origin}/Logo - IAM Ratan.png`;
+
 const formatDate = (value: string | null | undefined) => {
   if (!value) return "-";
   const d = new Date(value);
@@ -20,7 +25,8 @@ const formatFabricCodes = (codes: string[] | undefined, fallback: string | null)
   return unique.join("\n") || "-";
 };
 
-export const printOrderSheet = (order: OrderSheet, fabricCodes?: OrderFabricCodes) => {
+export const printOrderSheet = (order: OrderSheet, fabricCodes?: OrderFabricCodes, companySettings?: CompanyLogoSettings) => {
+  const companyLogoUrl = getCompanyLogoUrl(companySettings);
   const shirtMeasurements = [
     ["Shoulder", order.shirt_measurements?.shoulder],
     ["Chest", order.shirt_measurements?.chest],
@@ -122,7 +128,7 @@ export const printOrderSheet = (order: OrderSheet, fabricCodes?: OrderFabricCode
 <div class="sheet">
   <div class="top">
     <div class="brand">
-      <img class="brand-logo" src="/logo.png" alt="Artisan Apparels" />
+      <img class="brand-logo" src="${esc(companyLogoUrl)}" alt="Artisan Apparels" />
     </div>
     <div class="banner"><div class="banner-title">ORDER SHEET</div><div class="banner-sub">SHIRT &amp; PANT</div></div>
     <div class="meta">
