@@ -10,6 +10,8 @@ export interface CompanySettings {
   website: string;
   taxNumber: string;
   logo: string;
+  headerLogoWidth?: number;
+  headerLogoHeight?: number;
   printLogo?: string; // Logo specifically for print documents
   favicon?: string;
   bankName?: string;
@@ -45,6 +47,8 @@ export const useSettings = () => {
     website: "www.artisanapparels.com",
     taxNumber: "37AGDPR6197G1ZW",
     logo: "https://i.ibb.co/p6NHDnrb/Logo-IAM-Ratan.png",
+    headerLogoWidth: 40,
+    headerLogoHeight: 40,
     bankName: "HDFC BANK",
     accountNumber: "9998019993333",
     routingNumber: "",
