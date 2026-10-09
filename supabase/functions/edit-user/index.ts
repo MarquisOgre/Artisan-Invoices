@@ -40,7 +40,10 @@ Deno.serve(async (req) => {
 
     const body = await req.json()
     const userId = String(body.userId ?? '').trim()
-    const normalizedUsername = String(body.username ?? '').trim().toLowerCase()
+    // Keep the administrator's chosen display casing, while normalizing the
+    // canonical login mapping so username-based sign-in remains case-insensitive.
+    const displayUsername = String(body.username ?? '').trim()
+    const normalizedUsername = displayUsername.toLowerCase()
     const email = String(body.email ?? '').trim().toLowerCase()
     const role = body.role
 
@@ -106,7 +109,7 @@ Deno.serve(async (req) => {
       email,
       user_metadata: {
         ...(targetAuth.user.user_metadata ?? {}),
-        username: normalizedUsername,
+        username: displayUsername,
       },
     })
     if (authUpdateError) return json({ error: authUpdateError.message }, 400)
@@ -130,7 +133,7 @@ Deno.serve(async (req) => {
 
     return json({
       success: true,
-      user: { id: userId, username: normalizedUsername, email, role },
+      user: { id: userId, username: displayUsername, email, role },
     })
   } catch (error) {
     console.error('Error editing user:', error)
