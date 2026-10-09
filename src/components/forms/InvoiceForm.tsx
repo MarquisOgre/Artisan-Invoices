@@ -60,6 +60,29 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
   const { toast } = useToast();
 
   useEffect(() => {
+    if (initialData && mode === 'create' && initialData.orderId) {
+      const due = new Date();
+      due.setDate(due.getDate() + 10);
+      setFormData(prev => ({
+        ...prev,
+        customerId: initialData.customerId || "",
+        date: new Date().toISOString().split("T")[0],
+        dueDate: due.toISOString().split("T")[0],
+        notes: initialData.notes || "",
+        status: "unpaid",
+        taxType: "IGST_18",
+        taxMode: "inclusive",
+      }));
+      setItems((initialData.items || []).map((item: InvoiceItem) => ({
+        description: item.description || "",
+        shirt_size: item.shirt_size || "",
+        quantity: item.quantity || 1,
+        rate: item.rate || 0,
+        amount: item.amount || 0,
+      })));
+      return;
+    }
+
     if (initialData && mode === 'edit') {
       // Find customer by name since invoices store customer data denormalized
       const matchingCustomer = customers.find(c => c.name === initialData.customer_name);
