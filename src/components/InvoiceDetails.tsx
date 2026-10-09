@@ -34,14 +34,43 @@ const InvoiceDetails = ({ invoice, isOpen, onClose }: InvoiceDetailsProps) => {
   const cgstAmount = taxAmount / 2;
   const sgstAmount = taxAmount / 2;
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
     const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      const invoiceHtml = generateInvoicePrintHTML(invoice, companySettings, invoiceSettings.termsAndConditions);
-      printWindow.document.write(invoiceHtml);
-      printWindow.document.close();
-      printWindow.print();
-    }
+    if (!printWindow) return;
+
+    const invoiceHtml = generateInvoicePrintHTML(invoice, companySettings, invoiceSettings.termsAndConditions);
+    printWindow.document.write(invoiceHtml);
+    printWindow.document.close();
+
+    // Wait for print images to load/decode before opening the browser print dialog.
+    const images = Array.from(printWindow.document.images);
+    await Promise.all(images.map(async (img) => {
+      try {
+        if (!img.complete) {
+          await new Promise<void>((resolve) => {
+            img.onload = () => resolve();
+            img.onerror = () => resolve();
+          });
+        }
+        if (img.complete && img.naturalWidth > 0 && typeof img.decode === "function") {
+          await img.decode().catch(() => undefined);
+        }
+        // If the configured upload is broken, fall back to the app's bundled logo.
+        if (img.naturalWidth === 0 && !img.dataset.fallbackTried) {
+          img.dataset.fallbackTried = "true";
+          img.src = `${window.location.origin}/logo.png`;
+          await new Promise<void>((resolve) => {
+            img.onload = () => resolve();
+            img.onerror = () => resolve();
+          });
+        }
+      } catch {
+        // Continue printing even if a logo cannot be decoded.
+      }
+    }));
+
+    printWindow.focus();
+    printWindow.print();
   };
 
   const getStatusBadge = (status: string) => {
