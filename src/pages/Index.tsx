@@ -415,6 +415,7 @@ const Index = () => {
             customers={customers}
             onSubmit={handleSubmitInvoice}
             onCancel={() => navigate("/invoices")}
+            initialData={(location.state as any)?.orderToInvoice || null}
           />
         );
       case "invoice-edit-form":
