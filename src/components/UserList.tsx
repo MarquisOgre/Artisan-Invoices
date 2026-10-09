@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Trash2, Users, ShieldCheck, Key } from "lucide-react";
+import { Trash2, Users, ShieldCheck, Key, Pencil } from "lucide-react";
 import {
   Table,
   TableBody,
