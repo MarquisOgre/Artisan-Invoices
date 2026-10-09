@@ -58,7 +58,15 @@ const formatDeliveryAddress = (order: Pick<OrderSheet, "delivery_address" | "del
 const escapeHtml = (value: unknown) =>
   String(value ?? "-").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-const printOrderSheet = (order: OrderSheet) => {
+type OrderFabricCodes = { shirt: string[]; pant: string[] };
+
+const formatFabricCodes = (codes: string[] | undefined, fallback: string | null) => {
+  const unique = [...new Set((codes || []).map(code => code.trim()).filter(Boolean))];
+  if (!unique.length && fallback) unique.push(fallback);
+  return unique.join("\n") || "-";
+};
+
+const printOrderSheet = (order: OrderSheet, fabricCodes?: OrderFabricCodes) => {
   const shirtMeasurements = [
     ["Shoulder", order.shirt_measurements?.shoulder],
     ["Chest", order.shirt_measurements?.chest],
@@ -182,7 +190,7 @@ const printOrderSheet = (order: OrderSheet) => {
   <div class="section shirt">
     <div class="section-head"><div class="garment-title"><span class="garment-icon shirt-icon"></span>SHIRT</div><div></div></div>
     <div class="section-grid">
-      <div class="cell"><div class="cell-head">Fabric Code</div><div class="cell-body fabric-body">${esc(order.shirt_fabric_code)}</div></div>
+      <div class="cell"><div class="cell-head">Fabric Code</div><div class="cell-body fabric-body" style="white-space:pre-line;align-items:flex-start;justify-content:flex-start;padding:3mm;font-size:3mm;line-height:1.5">${esc(formatFabricCodes(fabricCodes?.shirt, order.shirt_fabric_code))}</div></div>
       <div class="cell"><div class="cell-head">Standard Size</div><div class="cell-body fabric-body">${esc(order.shirt_standard_size)}</div></div>
       <div class="cell"><div class="cell-head">Measurements (inches)</div><div class="cell-body measurements">${measureRows(shirtMeasurements)}</div></div>
       <div class="cell"><div class="cell-head">Style</div><div class="cell-body style-list">
@@ -199,7 +207,7 @@ const printOrderSheet = (order: OrderSheet) => {
   <div class="section pant">
     <div class="section-head"><div class="garment-title"><span class="garment-icon pant-icon"></span>PANT</div><div></div></div>
     <div class="section-grid">
-      <div class="cell"><div class="cell-head">Fabric Code</div><div class="cell-body fabric-body">${esc(order.pant_fabric_code)}</div></div>
+      <div class="cell"><div class="cell-head">Fabric Code</div><div class="cell-body fabric-body" style="white-space:pre-line;align-items:flex-start;justify-content:flex-start;padding:3mm;font-size:3mm;line-height:1.5">${esc(formatFabricCodes(fabricCodes?.pant, order.pant_fabric_code))}</div></div>
       <div class="cell"><div class="cell-head">Standard Size</div><div class="cell-body fabric-body">${esc(order.pant_standard_size)}</div></div>
       <div class="cell"><div class="cell-head">Measurements (inches)</div><div class="cell-body measurements">${measureRows(pantMeasurements)}</div></div>
       <div class="cell"><div class="cell-head">Style</div><div class="cell-body style-list">
@@ -235,6 +243,7 @@ const OrderSheetList = ({ onCreateNew }: Props) => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<OrderSheet | null>(null);
+  const [fabricCodesByOrder, setFabricCodesByOrder] = useState<Record<string, OrderFabricCodes>>({});
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const handleDelete = async (order: OrderSheet) => {
@@ -275,13 +284,34 @@ const OrderSheetList = ({ onCreateNew }: Props) => {
         .select("*")
         .order("created_at", { ascending: false });
       if (error) throw error;
-      setOrders((data || []).map((row: any) => ({
+      const normalizedOrders = (data || []).map((row: any) => ({
         ...row,
         shirt_measurements: safeObject(row.shirt_measurements),
         pant_measurements: safeObject(row.pant_measurements),
         shirt_style: row.shirt_style || {},
         pant_style: row.pant_style || {},
-      })));
+      }));
+      setOrders(normalizedOrders);
+      const { data: fabricRows, error: fabricError } = await (supabase as any)
+        .from("order_sheet_fabrics")
+        .select("order_sheet_id, garment_type, sort_order, fabrics(code)")
+        .in("order_sheet_id", normalizedOrders.map((row: any) => row.id))
+        .order("sort_order", { ascending: true });
+      if (fabricError) throw fabricError;
+      const grouped: Record<string, OrderFabricCodes> = {};
+      for (const row of fabricRows || []) {
+        const orderId = String(row.order_sheet_id);
+        if (!grouped[orderId]) grouped[orderId] = { shirt: [], pant: [] };
+        const code = String(row.fabrics?.code || "").trim();
+        const garment = row.garment_type === "shirt" ? "shirt" : row.garment_type === "pant" ? "pant" : null;
+        if (garment && code && !grouped[orderId][garment].includes(code)) grouped[orderId][garment].push(code);
+      }
+      for (const order of normalizedOrders) {
+        if (!grouped[order.id]) grouped[order.id] = { shirt: [], pant: [] };
+        if (!grouped[order.id].shirt.length && order.shirt_fabric_code) grouped[order.id].shirt.push(order.shirt_fabric_code);
+        if (!grouped[order.id].pant.length && order.pant_fabric_code) grouped[order.id].pant.push(order.pant_fabric_code);
+      }
+      setFabricCodesByOrder(grouped);
     } catch (error: any) {
       console.error("Error loading order sheets:", error);
       toast({ title: "Unable to load order forms", description: error?.message || "Please try again.", variant: "destructive" });
@@ -353,7 +383,7 @@ const OrderSheetList = ({ onCreateNew }: Props) => {
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
                         <Button size="sm" variant="ghost" onClick={() => setSelected(order)}><Eye className="mr-1 h-4 w-4" />View</Button>
-                        <Button size="sm" variant="outline" onClick={() => printOrderSheet(order)}><Printer className="mr-1 h-4 w-4" />Print</Button>
+                        <Button size="sm" variant="outline" onClick={() => printOrderSheet(order, fabricCodesByOrder[order.id])}><Printer className="mr-1 h-4 w-4" />Print</Button>
                         <Button
                           size="sm"
                           variant="destructive"
@@ -378,7 +408,7 @@ const OrderSheetList = ({ onCreateNew }: Props) => {
           <DialogHeader>
             <DialogTitle className="flex flex-wrap items-center justify-between gap-2">
               <span>{selected?.order_no} — {selected?.customer_name}</span>
-              {selected && <Button variant="outline" onClick={() => printOrderSheet(selected)}><Printer className="mr-2 h-4 w-4" />Print</Button>}
+              {selected && <Button variant="outline" onClick={() => printOrderSheet(selected, fabricCodesByOrder[selected.id])}><Printer className="mr-2 h-4 w-4" />Print</Button>}
             </DialogTitle>
           </DialogHeader>
           {selected && (
@@ -391,7 +421,7 @@ const OrderSheetList = ({ onCreateNew }: Props) => {
                 <Info label="Contact No." value={selected.contact_no || "-"} />
               </div>
               <DetailSection title="SHIRT" values={[
-                ["Fabric Code", selected.shirt_fabric_code || "-"],
+                ["Fabric Code", formatFabricCodes(fabricCodesByOrder[selected.id]?.shirt, selected.shirt_fabric_code)],
                 ["Standard Size", selected.shirt_standard_size || "-"],
               ]}>
                 {measurementRows(selected.shirt_measurements)}
@@ -399,7 +429,7 @@ const OrderSheetList = ({ onCreateNew }: Props) => {
                 <div className="mt-2"><b>Notes:</b> {selected.shirt_notes || "-"}</div>
               </DetailSection>
               <DetailSection title="PANT" values={[
-                ["Fabric Code", selected.pant_fabric_code || "-"],
+                ["Fabric Code", formatFabricCodes(fabricCodesByOrder[selected.id]?.pant, selected.pant_fabric_code)],
                 ["Standard Size", selected.pant_standard_size || "-"],
               ]}>
                 {measurementRows(selected.pant_measurements)}
