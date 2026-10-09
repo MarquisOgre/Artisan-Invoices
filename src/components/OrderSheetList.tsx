@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { useSettings } from "@/hooks/useSettings";
 import { supabase } from "@/integrations/supabase/client";
 import { printOrderSheet } from "@/components/order-print/OrderSheetPrint";
 
@@ -72,6 +73,7 @@ const formatFabricCodes = (codes: string[] | undefined, fallback: string | null)
 
 const OrderSheetList = ({ onCreateNew, onEdit, onConvertToInvoice }: Props) => {
   const { user } = useAuth();
+  const { companySettings } = useSettings();
   const { toast } = useToast();
   const [orders, setOrders] = useState<OrderSheet[]>([]);
   const [loading, setLoading] = useState(true);
@@ -269,7 +271,7 @@ const OrderSheetList = ({ onCreateNew, onEdit, onConvertToInvoice }: Props) => {
                         <Button size="sm" variant="ghost" onClick={() => setSelected(order)}><Eye className="mr-1 h-4 w-4" />View</Button>
                         <Button size="sm" variant="outline" className="shrink-0 border-emerald-300 text-emerald-700 hover:bg-emerald-50" onClick={() => onConvertToInvoice(order)} title="Create an invoice from this order form"><FilePlus2 className="mr-1 h-4 w-4" />Convert to Invoice</Button>
                         <Button size="sm" variant="outline" className="shrink-0 border-blue-300 text-blue-700 hover:bg-blue-50" onClick={() => onEdit(order)} title="Edit this existing order form"><Pencil className="mr-1 h-4 w-4" />Edit</Button>
-                        <Button size="sm" variant="outline" onClick={() => printOrderSheet(order, fabricCodesByOrder[order.id])}><Printer className="mr-1 h-4 w-4" />Print</Button>
+                        <Button size="sm" variant="outline" onClick={() => printOrderSheet(order, fabricCodesByOrder[order.id], companySettings)}><Printer className="mr-1 h-4 w-4" />Print</Button>
                         <Button
                           size="sm"
                           variant="destructive"
@@ -294,7 +296,7 @@ const OrderSheetList = ({ onCreateNew, onEdit, onConvertToInvoice }: Props) => {
           <DialogHeader>
             <DialogTitle className="flex flex-wrap items-center justify-between gap-2">
               <span>{selected?.order_no} — {selected?.customer_name}</span>
-              {selected && <Button variant="outline" onClick={() => printOrderSheet(selected, fabricCodesByOrder[selected.id])}><Printer className="mr-2 h-4 w-4" />Print</Button>}
+              {selected && <Button variant="outline" onClick={() => printOrderSheet(selected, fabricCodesByOrder[selected.id], companySettings)}><Printer className="mr-2 h-4 w-4" />Print</Button>}
             </DialogTitle>
           </DialogHeader>
           {selected && (
