@@ -287,7 +287,7 @@ const QuotationForm = ({ customers, onSubmit, onCancel, initialData, mode = 'cre
   }
 
   return (
-    <Card className="max-w-4xl mx-auto">
+    <Card className="mx-auto w-full min-w-0 max-w-4xl">
         <CardHeader className="flex justify-center items-center">
           <CardTitle>
             {mode === 'edit' ? 'Edit Quotation' : 'Create New Quotation'}
