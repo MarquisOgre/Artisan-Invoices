@@ -98,7 +98,7 @@ export const printOrderSheet = (order: OrderSheet, fabricCodes?: OrderFabricCode
   .garment-icon svg { display:block; width:10mm; height:10mm; fill:#fff; stroke:#fff; stroke-width:0.6; stroke-linecap:round; stroke-linejoin:round; }
   .garment-icon.shirt-icon svg { width:10mm; height:10mm; }
   .garment-icon.pant-icon svg { width:9mm; height:10mm; }
-  .section-grid { display:grid; grid-template-columns:18% 11% 31% 14% 26%; background:#fff; min-height:58mm; max-height:58mm; }
+  .section-grid { display:grid; grid-template-columns:19% 11% 31% 14% 25%; background:#fff; min-height:58mm; max-height:58mm; }
   .cell { border-right:1px solid currentColor; }
   .cell:last-child { border-right:0; }
   .cell-head { height:7mm; background:linear-gradient(#e6f1fb,#d7e9f8); display:flex; align-items:center; justify-content:center; font-size:3.6mm; font-weight:800; text-align:center; color:#0b2d62; border-bottom:1px solid currentColor; }
