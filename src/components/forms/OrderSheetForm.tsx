@@ -518,7 +518,7 @@ const OrderSheetForm = ({ customers, onSaved, initialOrder = null }: OrderSheetF
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="relative overflow-hidden bg-white px-5 py-5 sm:px-8 sm:py-6">
           <div className="pointer-events-none absolute -right-16 -top-20 h-52 w-52 rounded-full bg-blue-50" />
-          <div className="relative grid grid-cols-1 gap-4 lg:grid-cols-[1fr_auto_1fr] lg:items-center">
+          <div className="relative grid min-w-0 grid-cols-1 gap-4 px-1 sm:px-0 lg:grid-cols-[1fr_auto_1fr] lg:items-center">
             <div className="hidden lg:block" aria-hidden="true" />
 
             <div className="justify-self-center rounded-xl bg-[#eaf2fb] px-5 py-3 text-center text-[#123766]">
