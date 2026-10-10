@@ -76,7 +76,7 @@ export const printOrderSheet = (order: OrderSheet, fabricCodes?: OrderFabricCode
   .brand-name { font-family: Georgia, "Times New Roman", serif; font-size:10.5mm; line-height:.85; font-weight:700; letter-spacing:.8mm; color:#0a2b59; }
   .brand-sub { font-size:3.1mm; line-height:1.35; letter-spacing:1.1mm; font-weight:700; margin-top:2mm; }
   .divider { height:20mm; border-left:1px solid #5a5a5a; margin-left:2mm; padding-left:5mm; }
-  .banner { height:26mm; background:#082f60; color:white; border-radius:0 0 5mm 5mm; clip-path:polygon(5% 0,95% 0,95% 100%,5% 100%); display:flex; flex-direction:column; align-items:center; justify-content:center; margin:0; text-align:center; }
+  .banner { height:26mm; background:White; color:#082f60; border-radius:0 0 5mm 5mm; clip-path:polygon(5% 0,95% 0,95% 100%,5% 100%); display:flex; flex-direction:column; align-items:center; justify-content:center; margin:0; text-align:center; }
   .banner-title { font-size:8.2mm; font-weight:800; letter-spacing:.4mm; line-height:1; }
   .banner-sub { font-size:4mm; font-weight:700; letter-spacing:1.5mm; margin-top:3mm; }
   .meta { background:#e7f1fb; border-radius:3mm; padding:3mm 3.5mm; font-size:3.5mm; line-height:1.8; margin:0; min-width:0; width:100%; }
@@ -98,7 +98,7 @@ export const printOrderSheet = (order: OrderSheet, fabricCodes?: OrderFabricCode
   .garment-icon svg { display:block; width:10mm; height:10mm; fill:#fff; stroke:#fff; stroke-width:0.6; stroke-linecap:round; stroke-linejoin:round; }
   .garment-icon.shirt-icon svg { width:10mm; height:10mm; }
   .garment-icon.pant-icon svg { width:9mm; height:10mm; }
-  .section-grid { display:grid; grid-template-columns:19% 11% 31% 14% 25%; background:#fff; min-height:58mm; max-height:58mm; }
+  .section-grid { display:grid; grid-template-columns:30% 15% 15% 15% 25%; background:#fff; min-height:58mm; max-height:58mm; }
   .cell { border-right:1px solid currentColor; }
   .cell:last-child { border-right:0; }
   .cell-head { height:7mm; background:linear-gradient(#e6f1fb,#d7e9f8); display:flex; align-items:center; justify-content:center; font-size:3.6mm; font-weight:800; text-align:center; color:#0b2d62; border-bottom:1px solid currentColor; }
@@ -148,7 +148,7 @@ export const printOrderSheet = (order: OrderSheet, fabricCodes?: OrderFabricCode
     <div class="section-grid">
       <div class="cell"><div class="cell-head">Fabric Code</div><div class="cell-body fabric-body" style="white-space:pre-line;align-items:flex-start;justify-content:flex-start;padding:3mm;font-size:3mm;line-height:1.5">${esc(formatFabricCodes(fabricCodes?.shirt, order.shirt_fabric_code))}</div></div>
       <div class="cell"><div class="cell-head">Standard Size</div><div class="cell-body fabric-body">${esc(order.shirt_standard_size)}</div></div>
-      <div class="cell"><div class="cell-head">Measurements (inches)</div><div class="cell-body measurements">${measureRows(shirtMeasurements)}</div></div>
+      <div class="cell"><div class="cell-head">Measurements</div><div class="cell-body measurements">${measureRows(shirtMeasurements)}</div></div>
       <div class="cell"><div class="cell-head">Style</div><div class="cell-body style-list">
         <div class="style-row"><span class="check">${checked(shirtStyle,"Half")}</span>Half</div>
         <div class="style-row"><span class="check">${checked(shirtStyle,"Full")}</span>Full</div>
@@ -165,7 +165,7 @@ export const printOrderSheet = (order: OrderSheet, fabricCodes?: OrderFabricCode
     <div class="section-grid">
       <div class="cell"><div class="cell-head">Fabric Code</div><div class="cell-body fabric-body" style="white-space:pre-line;align-items:flex-start;justify-content:flex-start;padding:3mm;font-size:3mm;line-height:1.5">${esc(formatFabricCodes(fabricCodes?.pant, order.pant_fabric_code))}</div></div>
       <div class="cell"><div class="cell-head">Standard Size</div><div class="cell-body fabric-body">${esc(order.pant_standard_size)}</div></div>
-      <div class="cell"><div class="cell-head">Measurements (inches)</div><div class="cell-body measurements">${measureRows(pantMeasurements)}</div></div>
+      <div class="cell"><div class="cell-head">Measurements</div><div class="cell-body measurements">${measureRows(pantMeasurements)}</div></div>
       <div class="cell"><div class="cell-head">Style</div><div class="cell-body style-list">
         <div class="style-row"><span class="check">${checked(pantStyle,"Regular Fit")}</span>Regular Fit</div>
         <div class="style-row"><span class="check">${checked(pantStyle,"Slim Fit")}</span>Slim Fit</div>

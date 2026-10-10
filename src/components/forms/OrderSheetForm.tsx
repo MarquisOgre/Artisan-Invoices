@@ -525,9 +525,6 @@ const OrderSheetForm = ({ customers, onSaved, initialOrder = null }: OrderSheetF
               <div className="text-2xl font-black uppercase leading-none sm:text-3xl">
                 Order Sheet
               </div>
-              <div className="mt-1 text-center text-xs font-bold uppercase tracking-[0.3em]">
-                Shirt & Pant
-              </div>
             </div>
 
             <div className="flex justify-center gap-2 lg:justify-self-end">
@@ -727,6 +724,7 @@ const OrderSheetForm = ({ customers, onSaved, initialOrder = null }: OrderSheetF
                   className="h-11 border-[#ead7bf] bg-white pl-10"
                 />
               </div>
+              <div className="mt-6 border-b border-[#123766]" />
               <p className="mt-3 text-xs text-slate-500">
                 Default is 7 days after the Order Date. You can edit it.
               </p>
@@ -739,10 +737,10 @@ const OrderSheetForm = ({ customers, onSaved, initialOrder = null }: OrderSheetF
                 readOnly
                 className="h-11 border-[#c8dced] bg-slate-50 text-slate-700"
               />
+              <div className="mt-6 border-b border-[#123766]" />
               <p className="mt-2 text-xs text-slate-500">
                 Automatically recorded from the currently logged-in user for future reference.
               </p>
-              <div className="mt-6 border-b border-[#123766]" />
             </div>
           </div>
         </div>
