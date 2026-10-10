@@ -320,7 +320,7 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
   }
 
   return (
-    <Card className="max-w-4xl mx-auto">
+    <Card className="mx-auto w-full min-w-0 max-w-4xl">
       <CardHeader>
         <div className="flex justify-center">
           <CardTitle>
