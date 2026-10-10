@@ -38,6 +38,13 @@ alter table public.chat_conversations enable row level security;
 alter table public.chat_conversation_members enable row level security;
 alter table public.chat_messages enable row level security;
 
+-- Explicit grants: keep chat data private and limit updates to fields the UI needs.
+grant select, insert on public.chat_conversations to authenticated;
+grant update (updated_at) on public.chat_conversations to authenticated;
+grant select, insert on public.chat_conversation_members to authenticated;
+grant update (last_read_at) on public.chat_conversation_members to authenticated;
+grant select, insert on public.chat_messages to authenticated;
+
 -- SECURITY DEFINER helpers avoid recursive RLS checks on the membership table.
 create or replace function public.is_chat_member(p_conversation_id uuid, p_user_id uuid default auth.uid())
 returns boolean
