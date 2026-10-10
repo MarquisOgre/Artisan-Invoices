@@ -2,10 +2,10 @@ import type { OrderSheet } from "../OrderSheetList";
 
 export type OrderFabricCodes = { shirt: string[]; pant: string[] };
 
-type CompanyLogoSettings = { printLogo?: string | null; logo?: string | null };
+type CompanyLogoSettings = { favicon?: string | null; printLogo?: string | null; logo?: string | null };
 
 const getCompanyLogoUrl = (settings?: CompanyLogoSettings) =>
-  settings?.printLogo || settings?.logo || `${window.location.origin}/logo.png`;
+  settings?.favicon || settings?.printLogo || settings?.logo || `${window.location.origin}/favicon.png`;
 
 const formatDate = (value: string | null | undefined) => {
   if (!value) return "-";
@@ -144,7 +144,7 @@ export const printOrderSheet = (order: OrderSheet, fabricCodes?: OrderFabricCode
   </div>
 
   <div class="section shirt">
-    <div class="section-head"><div class="garment-title"><span class="garment-icon shirt-icon"></span>SHIRT</div><div></div></div>
+    <div class="section-head"><div class="garment-title"><span class="garment-icon shirt-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4 4 6 2 11l4 2 2-3v10h8V10l2 3 4-2-2-5-4-2c-.8 1.3-2 2-4 2s-3.2-.7-4-2Z"/></svg></span>SHIRT</div><div></div></div>
     <div class="section-grid">
       <div class="cell"><div class="cell-head">Fabric Code</div><div class="cell-body fabric-body" style="white-space:pre-line;align-items:flex-start;justify-content:flex-start;padding:3mm;font-size:3mm;line-height:1.5">${esc(formatFabricCodes(fabricCodes?.shirt, order.shirt_fabric_code))}</div></div>
       <div class="cell"><div class="cell-head">Standard Size</div><div class="cell-body fabric-body">${esc(order.shirt_standard_size)}</div></div>
@@ -161,7 +161,7 @@ export const printOrderSheet = (order: OrderSheet, fabricCodes?: OrderFabricCode
   </div>
 
   <div class="section pant">
-    <div class="section-head"><div class="garment-title"><span class="garment-icon pant-icon"></span>PANT</div><div></div></div>
+    <div class="section-head"><div class="garment-title"><span class="garment-icon pant-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12l1 18h-5l-2-8-2 8H5L6 3Z"/><path d="M6 7h12M12 3v10"/></svg></span>PANT</div><div></div></div>
     <div class="section-grid">
       <div class="cell"><div class="cell-head">Fabric Code</div><div class="cell-body fabric-body" style="white-space:pre-line;align-items:flex-start;justify-content:flex-start;padding:3mm;font-size:3mm;line-height:1.5">${esc(formatFabricCodes(fabricCodes?.pant, order.pant_fabric_code))}</div></div>
       <div class="cell"><div class="cell-head">Standard Size</div><div class="cell-body fabric-body">${esc(order.pant_standard_size)}</div></div>
