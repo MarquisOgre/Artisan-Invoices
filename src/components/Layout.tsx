@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/collapsible";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
+import NotificationBell from "@/components/NotificationBell";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -77,7 +78,11 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
               />
             </div>
 
-            <nav className="hidden md:flex items-center space-x-1 ml-auto">
+            <div className="ml-auto mr-1 md:ml-3 md:mr-2">
+              <NotificationBell />
+            </div>
+
+            <nav className="hidden md:flex items-center space-x-1">
               {canManage && (
                 <Button
                   variant={currentPage === "dashboard" ? "default" : "ghost"}
