@@ -78,11 +78,7 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
               />
             </div>
 
-            <div className="ml-auto mr-1 md:ml-3 md:mr-2">
-              <NotificationBell />
-            </div>
-
-            <nav className="hidden md:flex items-center space-x-1">
+            <nav className="hidden md:flex items-center space-x-1 ml-auto">
               {canManage && (
                 <Button
                   variant={currentPage === "dashboard" ? "default" : "ghost"}
@@ -157,6 +153,8 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
                 </Button>
               )}
 
+              <NotificationBell />
+
               <Button
                 variant="ghost"
                 size="icon"
@@ -167,10 +165,13 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
               </Button>
             </nav>
 
+            <div className="md:hidden ml-auto mr-1">
+              <NotificationBell />
+            </div>
             <Button
               variant="ghost"
               size="sm"
-              className="md:hidden ml-auto"
+              className="md:hidden"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
               {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
