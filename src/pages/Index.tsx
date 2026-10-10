@@ -14,6 +14,7 @@ import QuotationDetails from "@/components/QuotationDetails";
 import OrderSheetForm from "@/components/forms/OrderSheetForm";
 import OrderSheetList from "@/components/OrderSheetList";
 import FabricPage from "@/pages/FabricPage";
+import TeamChat from "@/components/TeamChat";
 import { useSupabaseData } from "@/hooks/useSupabaseData";
 import { useToast } from "@/hooks/use-toast";
 import { useSettings } from "@/hooks/useSettings";
@@ -47,6 +48,7 @@ const Index = () => {
     path.match(/^\/order-forms\/[^/]+\/edit$/) ? "edit-order-sheet" :
     path === "/settings" ? "settings" :
     path === "/fabrics" ? "fabrics" :
+    path === "/chat" ? "chat" :
     path.startsWith("/customers/") ? "customer-form" :
     path.match(/^\/invoices\/[^/]+\/edit$/) ? "invoice-edit-form" :
     path.startsWith("/invoices/") ? "invoice-detail" :
@@ -128,6 +130,7 @@ const Index = () => {
       "edit-order-sheet": editingOrderSheet ? `/order-forms/${editingOrderSheet.id}/edit` : "/order-forms",
       settings: "/settings",
       fabrics: "/fabrics",
+      chat: "/chat",
     };
 
     if (page === "new-invoice") {
@@ -482,6 +485,8 @@ const Index = () => {
         );
       case "fabrics":
         return <FabricPage />;
+      case "chat":
+        return <TeamChat />;
       case "settings":
         return <Settings />;
       default:
