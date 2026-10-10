@@ -26,7 +26,6 @@ import {
 } from "@/components/ui/collapsible";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
-import { useSettings } from "@/hooks/useSettings";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -43,7 +42,6 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
   const [quoInvoicesOpen, setQuoInvoicesOpen] = useState(false);
   const { signOut } = useAuth();
   const { isAdmin, canManage } = useUserRole();
-  const { companySettings } = useSettings();
 
   const standaloneNavigation = [
     { name: "Dashboard", icon: BarChart3, key: "dashboard" },
@@ -73,14 +71,14 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
           <div className="flex items-center h-full">
             <div className="flex items-center">
               <img
-                src={companySettings.logo || "/logo.png"}
+                src="/logo.png"
                 alt="Header Logo"
                 className="object-contain"
                 style={{
                   // Use a single square sizing box; object-contain preserves the image's
                   // original aspect ratio and prevents stretching or cropping.
-                  width: `${Math.min(Number(companySettings.headerLogoWidth ?? 40), 240, Math.max(16, window.innerWidth * 0.35))}px`,
-                  height: `${Math.min(Number(companySettings.headerLogoWidth ?? 40), 64)}px`,
+                  width: "40px",
+                  height: "40px",
                   maxWidth: "min(240px, 35vw)",
                   maxHeight: "64px",
                   flexShrink: 0,
@@ -324,7 +322,7 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-center">
           <p className="text-xs sm:text-sm select-none">
-            &copy; {new Date().getFullYear()} Dexorzo Creations. All rights reserved.
+            &copy; {new Date().getFullYear()} Avantro Technologies. All rights reserved.
           </p>
         </div>
       </footer>
