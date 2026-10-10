@@ -47,8 +47,10 @@ export default function TeamChat() {
       if (roleError) throw roleError;
       // Resolve names from the app's existing username directory; keep chat usable if
       // directory access is restricted by an existing policy.
+      // Direct reads from user_login_names are intentionally blocked by RLS.
+      // Use a narrowly scoped authenticated RPC to resolve team display names.
       const { data: usernameRows, error: usernameError } = await (supabase as any)
-        .from("user_login_names").select("user_id, username");
+        .rpc("get_chat_member_names");
       if (usernameError) console.warn("Unable to load team usernames", usernameError);
       const usernames = new Map<string, string>((usernameRows || []).map((row: any) => [row.user_id, String(row.username || "").trim()]));
       const memberRows: Member[] = (roleRows || []).map((row: any) => ({
