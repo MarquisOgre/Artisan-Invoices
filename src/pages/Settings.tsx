@@ -301,7 +301,7 @@ const Settings = () => {
                   id="headerLogoSize"
                   type="range"
                   min="24"
-                  max="120"
+                  max="180"
                   step="2"
                   value={Math.min(Number(companySettings.headerLogoWidth ?? 40), Number(companySettings.headerLogoHeight ?? 40))}
                   onChange={(e) => {
