@@ -164,7 +164,7 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
         </div>
 
         {mobileMenuOpen && (
-          <div className="md:hidden absolute top-full left-0 right-0 z-50 border-t bg-card shadow-lg">
+          <div className="md:hidden absolute top-full left-0 right-0 z-50 max-h-[calc(100dvh-72px)] overflow-y-auto border-t bg-card shadow-lg">
             <div className="px-4 py-2 space-y-1">
               {canManage && (
                 <Button
@@ -267,7 +267,7 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
         className="h-screen flex flex-col"
         style={{ paddingTop: HEADER_HEIGHT, paddingBottom: FOOTER_HEIGHT }}
       >
-        <main className="flex-1 min-h-0 overflow-auto p-6">
+        <main className="flex-1 min-h-0 min-w-0 overflow-auto p-3 sm:p-4 lg:p-6">
           {children}
         </main>
       </div>
@@ -277,8 +277,8 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
         className="fixed bottom-0 left-0 right-0 bg-gray-900 text-gray-300 border-t z-50"
         style={{ height: FOOTER_HEIGHT }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-center">
-          <p className="text-xs sm:text-sm select-none text-center">
+        <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 h-full flex items-center justify-center">
+          <p className="text-[10px] leading-tight sm:text-sm select-none text-center">
             &copy; {new Date().getFullYear()} All rights reserved.
             Developed With <span className="text-red-500">❤️</span> by Avantro Technologies.
           </p>
