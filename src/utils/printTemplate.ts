@@ -76,6 +76,7 @@ const generateStyles = () => `
       display: block;
       height: 100px;
       width: 150px;
+      min-width: 150px;
       max-width: 150px;
       object-fit: contain;
       object-position: center;
