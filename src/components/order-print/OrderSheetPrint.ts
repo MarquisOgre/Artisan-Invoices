@@ -96,9 +96,10 @@ export const printOrderSheet = (order: OrderSheet, fabricCodes?: OrderFabricCode
   .shirt .section-head { background:#0a4f88; }
   .pant .section-head { background:#80603a; }
   .garment-title { font-size:6mm; font-weight:800; padding-left:25mm; position:relative; }
-  .garment-icon { position:absolute; left:6mm; top:-2mm; width:15mm; height:17mm; color:white; font-size:13mm; line-height:17mm; }
-  .garment-icon.shirt-icon:before { content:"♧"; transform:rotate(180deg); display:block; font-size:15mm; }
-  .garment-icon.pant-icon:before { content:"♜"; display:block; font-size:13mm; }
+  .garment-icon { position:absolute; left:6mm; top:50%; transform:translateY(-50%); width:12mm; height:12mm; color:#fff; display:flex; align-items:center; justify-content:center; pointer-events:none; }
+  .garment-icon svg { display:block; width:10mm; height:10mm; fill:#fff; stroke:#fff; stroke-width:0.6; stroke-linecap:round; stroke-linejoin:round; }
+  .garment-icon.shirt-icon svg { width:10mm; height:10mm; }
+  .garment-icon.pant-icon svg { width:9mm; height:10mm; }
   .section-grid { display:grid; grid-template-columns:18% 11% 31% 14% 26%; background:#fff; min-height:58mm; max-height:58mm; }
   .cell { border-right:1px solid currentColor; }
   .cell:last-child { border-right:0; }
@@ -144,7 +145,7 @@ export const printOrderSheet = (order: OrderSheet, fabricCodes?: OrderFabricCode
   </div>
 
   <div class="section shirt">
-    <div class="section-head"><div class="garment-title"><span class="garment-icon shirt-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4 4 6 2 11l4 2 2-3v10h8V10l2 3 4-2-2-5-4-2c-.8 1.3-2 2-4 2s-3.2-.7-4-2Z"/></svg></span>SHIRT</div><div></div></div>
+    <div class="section-head"><div class="garment-title"><span class="garment-icon shirt-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3 4 5 1.5 11l4.5 2 2-3v11h8V10l2 3 4.5-2L20 5l-4-2c-.8 1.4-2 2-4 2s-3.2-.6-4-2Z"/></svg></span>SHIRT</div><div></div></div>
     <div class="section-grid">
       <div class="cell"><div class="cell-head">Fabric Code</div><div class="cell-body fabric-body" style="white-space:pre-line;align-items:flex-start;justify-content:flex-start;padding:3mm;font-size:3mm;line-height:1.5">${esc(formatFabricCodes(fabricCodes?.shirt, order.shirt_fabric_code))}</div></div>
       <div class="cell"><div class="cell-head">Standard Size</div><div class="cell-body fabric-body">${esc(order.shirt_standard_size)}</div></div>
@@ -161,7 +162,7 @@ export const printOrderSheet = (order: OrderSheet, fabricCodes?: OrderFabricCode
   </div>
 
   <div class="section pant">
-    <div class="section-head"><div class="garment-title"><span class="garment-icon pant-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12l1 18h-5l-2-8-2 8H5L6 3Z"/><path d="M6 7h12M12 3v10"/></svg></span>PANT</div><div></div></div>
+    <div class="section-head"><div class="garment-title"><span class="garment-icon pant-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12l1 18h-5l-2-8-2 8H5L6 3Z"/><path d="M6 7h12M12 3v10" fill="none" stroke="#80603a" stroke-width="0.8"/></svg></span>PANT</div><div></div></div>
     <div class="section-grid">
       <div class="cell"><div class="cell-head">Fabric Code</div><div class="cell-body fabric-body" style="white-space:pre-line;align-items:flex-start;justify-content:flex-start;padding:3mm;font-size:3mm;line-height:1.5">${esc(formatFabricCodes(fabricCodes?.pant, order.pant_fabric_code))}</div></div>
       <div class="cell"><div class="cell-head">Standard Size</div><div class="cell-body fabric-body">${esc(order.pant_standard_size)}</div></div>
