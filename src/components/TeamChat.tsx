@@ -95,6 +95,22 @@ export default function TeamChat() {
 
   useEffect(() => { void loadChat(); }, [loadChat]);
 
+  // Keep conversation badges current even while another conversation is open.
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase.channel(`chat-inbox:${user.id}`)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "chat_messages" }, (payload) => {
+        const incoming = payload.new as ChatMessage;
+        if (!incoming || incoming.sender_id === user.id) return;
+        setConversations(current => current.map(conversation => {
+          if (conversation.id !== incoming.conversation_id || conversation.id === activeId) return conversation;
+          return { ...conversation, unread: (conversation.unread || 0) + 1 };
+        }));
+      })
+      .subscribe();
+    return () => { void supabase.removeChannel(channel); };
+  }, [user, activeId]);
+
   useEffect(() => {
     if (!user || !activeId) { setMessages([]); return; }
     let cancelled = false;
