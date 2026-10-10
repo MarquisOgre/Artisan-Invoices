@@ -7,7 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { useSettings } from "@/hooks/useSettings";
 import { useUserRole } from "@/hooks/useUserRole";
-import { Upload, Settings as SettingsIcon, Building, Bell, Trash2, Folder } from "lucide-react";
+import { Settings as SettingsIcon, Building, Bell, Folder } from "lucide-react";
 import { useSupabaseData } from "@/hooks/useSupabaseData";
 import { UserManagement } from "@/components/UserManagement";
 import { UserList } from "@/components/UserList";
@@ -60,40 +60,6 @@ const Settings = () => {
 
   const handleSaveNotifications = async () => {
     await saveNotificationSettings(notificationSettings);
-  };
-
-  const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setCompanySettings(prev => ({ ...prev, logo: e.target?.result as string }));
-        toast({
-          title: "Logo Uploaded",
-          description: "Your company logo has been uploaded."
-        });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleFaviconUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        const faviconData = e.target?.result as string;
-        // Save favicon to company settings
-        const updatedSettings = { ...companySettings, favicon: faviconData };
-        setCompanySettings(updatedSettings);
-        await saveCompanySettings(updatedSettings);
-        toast({
-          title: "Favicon Uploaded",
-          description: "Your favicon has been saved to settings."
-        });
-      };
-      reader.readAsDataURL(file);
-    }
   };
 
   const handleDeleteItems = async () => {
@@ -269,122 +235,6 @@ const Settings = () => {
                   placeholder="Enter SWIFT code"
                 />
               </div>
-            </div>
-          </div>
-
-          <div>
-            <Label htmlFor="logo">Header Logo</Label>
-            <p className="text-sm text-muted-foreground mb-2">This logo appears in the website header and is used as the default logo for printed documents unless a separate Print Logo is set.</p>
-            <div className="flex flex-wrap items-center gap-4">
-              {companySettings.logo && (
-                <img src={companySettings.logo} alt="Header Logo preview" className="h-16 w-16 object-contain border rounded" />
-              )}
-              <Button
-                variant="outline"
-                onClick={() => document.getElementById('logo-upload')?.click()}
-              >
-                <Upload className="mr-2 h-4 w-4" />
-                Upload Header Logo
-              </Button>
-              <input
-                id="logo-upload"
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleLogoUpload}
-              />
-            </div>
-            <div className="mt-4 max-w-lg">
-              <Label htmlFor="headerLogoSize">Header Logo Size</Label>
-              <div className="flex items-center gap-4 mt-2">
-                <input
-                  id="headerLogoSize"
-                  type="range"
-                  min="24"
-                  max="180"
-                  step="2"
-                  value={Math.min(Number(companySettings.headerLogoWidth ?? 40), Number(companySettings.headerLogoHeight ?? 40))}
-                  onChange={(e) => {
-                    const size = Number(e.target.value);
-                    setCompanySettings(prev => ({ ...prev, headerLogoWidth: size, headerLogoHeight: size }));
-                  }}
-                  className="w-full accent-primary"
-                />
-                <span className="w-16 shrink-0 text-right text-sm text-muted-foreground">
-                  {Math.min(Number(companySettings.headerLogoWidth ?? 40), Number(companySettings.headerLogoHeight ?? 40))} px
-                </span>
-              </div>
-            </div>
-            <p className="text-sm text-muted-foreground mt-2">Adjust one size control to scale the Header Logo proportionately, then click Save Company Information.</p>
-          </div>
-
-          <div>
-            <Label htmlFor="printLogo">Print Logo (for Invoices/Quotations)</Label>
-            <p className="text-sm text-muted-foreground mb-2">
-              This logo will appear on all printed invoices and quotations. If not set, the company logo will be used.
-            </p>
-            <div className="flex items-center space-x-4">
-              {companySettings.printLogo && (
-                <img src={companySettings.printLogo} alt="Print Logo" className="h-16 w-16 object-contain border rounded" />
-              )}
-              <Button
-                variant="outline"
-                onClick={() => document.getElementById('print-logo-upload')?.click()}
-              >
-                <Upload className="mr-2 h-4 w-4" />
-                Upload Print Logo
-              </Button>
-              <input
-                id="print-logo-upload"
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(event) => {
-                  const file = event.target.files?.[0];
-                  if (file) {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                      setCompanySettings(prev => ({ ...prev, printLogo: e.target?.result as string }));
-                      toast({
-                        title: "Print Logo Uploaded",
-                        description: "Your print logo has been uploaded. Don't forget to save!"
-                      });
-                    };
-                    reader.readAsDataURL(file);
-                  }
-                }}
-              />
-              {companySettings.printLogo && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setCompanySettings(prev => ({ ...prev, printLogo: '' }))}
-                >
-                  <Trash2 className="h-4 w-4 mr-1" />
-                  Remove
-                </Button>
-              )}
-            </div>
-          </div>
-
-          <div>
-            <Label htmlFor="favicon">Favicon</Label>
-            <div className="flex items-center space-x-4">
-              <Button
-                variant="outline"
-                onClick={() => document.getElementById('favicon-upload')?.click()}
-              >
-                <Upload className="mr-2 h-4 w-4" />
-                Upload Favicon
-              </Button>
-              <input
-                id="favicon-upload"
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleFaviconUpload}
-              />
-              <span className="text-sm text-muted-foreground">Upload PNG/JPG file (ICO not supported)</span>
             </div>
           </div>
 
