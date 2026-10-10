@@ -11,6 +11,7 @@ import { Settings as SettingsIcon, Building, Bell, Folder } from "lucide-react";
 import { useSupabaseData } from "@/hooks/useSupabaseData";
 import { UserManagement } from "@/components/UserManagement";
 import { UserList } from "@/components/UserList";
+import NotificationManagement from "@/components/NotificationManagement";
 
 const Settings = () => {
   const { toast } = useToast();
@@ -300,6 +301,9 @@ const Settings = () => {
           <Button onClick={handleSaveInvoice}>Save Invoice Settings</Button>
         </CardContent>
       </Card>
+
+      {/* Admin-only global notification deletion */}
+      <NotificationManagement />
 
       {/* Notification Settings */}
       <Card>
