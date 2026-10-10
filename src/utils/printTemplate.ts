@@ -30,11 +30,12 @@ const getTaxRate = (taxType: string) => {
 const generateCommonHeader = (title: string, companySettings: CompanySettings) => {
   // Use printLogo if available, otherwise fall back to logo
   const logoUrl = companySettings.printLogo || companySettings.logo || `${window.location.origin}/logo.png`;
+  const fallbackLogoUrl = `${window.location.origin}/logo.png`;
   
   return `
   <div class="header">
     <div class="header-top">
-      <img src="${logoUrl}" alt="Company Logo" class="logo" />
+      <img src="${logoUrl}" alt="Company Logo" class="logo" onerror="if (!this.dataset.fallbackTried) { this.dataset.fallbackTried = 'true'; this.src = '${fallbackLogoUrl}'; }" />
       <div class="title-block">
         <h1>${title}</h1>
         <h2>${companySettings.name || 'Artisan Apparels'}</h2>
@@ -72,9 +73,13 @@ const generateStyles = () => `
     }
 
     .logo {
+      display: block;
       height: 100px;
-      width: auto;
+      width: 150px;
+      max-width: 150px;
       object-fit: contain;
+      object-position: center;
+      flex: 0 0 150px;
     }
 
     .title-block {
