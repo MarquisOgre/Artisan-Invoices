@@ -15,6 +15,7 @@ export type FabricOption = {
   count_spec?: string | null;
   composition?: string | null;
   swatch_url?: string | null;
+  category?: string | null;
   is_active?: boolean;
 };
 

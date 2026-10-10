@@ -69,6 +69,7 @@ export interface Invoice {
   invoice_date: string;
   due_date?: string | null;
   status: string;
+  paid_date?: string | null;
   items: any[];
   notes?: string | null;
   created_at: string;

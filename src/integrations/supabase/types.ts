@@ -10,154 +10,50 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "13.0.5"
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
-      order_sheets: {
+      audit_log: {
         Row: {
-          id: string
-          user_id: string
-          order_no: string
-          order_date: string
-          customer_id: string | null
-          shirt_fabric_id: string | null
-          pant_fabric_id: string | null
-          customer_code: string | null
-          customer_name: string
-          contact_no: string | null
-          shirt_fabric_code: string | null
-          shirt_standard_size: string | null
-          shirt_measurements: Json
-          shirt_style: Json
-          shirt_notes: string | null
-          pant_fabric_code: string | null
-          pant_standard_size: string | null
-          pant_measurements: Json
-          pant_style: Json
-          pant_notes: string | null
-          delivery_address: string | null
-          delivery_date: string | null
-          customer_signature: string | null
+          actor_email: string | null
+          actor_user_id: string | null
           created_at: string
-          updated_at: string
+          details: Json
+          event_type: string
+          id: string
+          target_email: string | null
+          target_user_id: string | null
         }
         Insert: {
-          id?: string
-          user_id: string
-          order_no: string
-          order_date?: string
-          customer_id?: string | null
-          shirt_fabric_id?: string | null
-          pant_fabric_id?: string | null
-          customer_code?: string | null
-          customer_name: string
-          contact_no?: string | null
-          shirt_fabric_code?: string | null
-          shirt_standard_size?: string | null
-          shirt_measurements?: Json
-          shirt_style?: Json
-          shirt_notes?: string | null
-          pant_fabric_code?: string | null
-          pant_standard_size?: string | null
-          pant_measurements?: Json
-          pant_style?: Json
-          pant_notes?: string | null
-          delivery_address?: string | null
-          delivery_date?: string | null
-          customer_signature?: string | null
+          actor_email?: string | null
+          actor_user_id?: string | null
           created_at?: string
-          updated_at?: string
+          details?: Json
+          event_type: string
+          id?: string
+          target_email?: string | null
+          target_user_id?: string | null
         }
         Update: {
-          id?: string
-          user_id?: string
-          order_no?: string
-          order_date?: string
-          customer_id?: string | null
-          shirt_fabric_id?: string | null
-          pant_fabric_id?: string | null
-          customer_code?: string | null
-          customer_name?: string
-          contact_no?: string | null
-          shirt_fabric_code?: string | null
-          shirt_standard_size?: string | null
-          shirt_measurements?: Json
-          shirt_style?: Json
-          shirt_notes?: string | null
-          pant_fabric_code?: string | null
-          pant_standard_size?: string | null
-          pant_measurements?: Json
-          pant_style?: Json
-          pant_notes?: string | null
-          delivery_address?: string | null
-          delivery_date?: string | null
-          customer_signature?: string | null
+          actor_email?: string | null
+          actor_user_id?: string | null
           created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "order_sheets_customer_id_fkey"
-            columns: ["customer_id"]
-            isOneToOne: false
-            referencedRelation: "customers"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      fabrics: {
-        Row: {
-          id: string
-          code: string
-          brand: string
-          article: string
-          design: string
-          finish: string | null
-          count_spec: string | null
-          composition: string | null
-          swatch_url: string | null
-          is_active: boolean
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
+          details?: Json
+          event_type?: string
           id?: string
-          code: string
-          brand: string
-          article: string
-          design: string
-          finish?: string | null
-          count_spec?: string | null
-          composition?: string | null
-          swatch_url?: string | null
-          is_active?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          code?: string
-          brand?: string
-          article?: string
-          design?: string
-          finish?: string | null
-          count_spec?: string | null
-          composition?: string | null
-          swatch_url?: string | null
-          is_active?: boolean
-          created_at?: string
-          updated_at?: string
+          target_email?: string | null
+          target_user_id?: string | null
         }
         Relationships: []
       }
       customers: {
         Row: {
           address: string | null
-          customer_code: string | null
           city: string | null
           company: string | null
           created_at: string
+          customer_code: string | null
           email: string | null
           gst_no: string | null
           id: string
@@ -171,10 +67,10 @@ export type Database = {
         }
         Insert: {
           address?: string | null
-          customer_code?: string | null
           city?: string | null
           company?: string | null
           created_at?: string
+          customer_code?: string | null
           email?: string | null
           gst_no?: string | null
           id?: string
@@ -188,10 +84,10 @@ export type Database = {
         }
         Update: {
           address?: string | null
-          customer_code?: string | null
           city?: string | null
           company?: string | null
           created_at?: string
+          customer_code?: string | null
           email?: string | null
           gst_no?: string | null
           id?: string
@@ -202,6 +98,54 @@ export type Database = {
           state?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      fabrics: {
+        Row: {
+          article: string
+          brand: string
+          category: string
+          code: string
+          composition: string | null
+          count_spec: string | null
+          created_at: string
+          design: string
+          finish: string | null
+          id: string
+          is_active: boolean
+          swatch_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          article: string
+          brand: string
+          category?: string
+          code: string
+          composition?: string | null
+          count_spec?: string | null
+          created_at?: string
+          design: string
+          finish?: string | null
+          id?: string
+          is_active?: boolean
+          swatch_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          article?: string
+          brand?: string
+          category?: string
+          code?: string
+          composition?: string | null
+          count_spec?: string | null
+          created_at?: string
+          design?: string
+          finish?: string | null
+          id?: string
+          is_active?: boolean
+          swatch_url?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -302,6 +246,178 @@ export type Database = {
             columns: ["customer_id"]
             isOneToOne: false
             referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      order_form_counters: {
+        Row: {
+          last_number: number
+          order_date: string
+        }
+        Insert: {
+          last_number?: number
+          order_date: string
+        }
+        Update: {
+          last_number?: number
+          order_date?: string
+        }
+        Relationships: []
+      }
+      order_sheet_fabrics: {
+        Row: {
+          created_at: string
+          fabric_id: string
+          garment_type: string
+          id: string
+          order_sheet_id: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          fabric_id: string
+          garment_type: string
+          id?: string
+          order_sheet_id: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          fabric_id?: string
+          garment_type?: string
+          id?: string
+          order_sheet_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_sheet_fabrics_fabric_id_fkey"
+            columns: ["fabric_id"]
+            isOneToOne: false
+            referencedRelation: "fabrics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_sheet_fabrics_order_sheet_id_fkey"
+            columns: ["order_sheet_id"]
+            isOneToOne: false
+            referencedRelation: "order_sheets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      order_sheets: {
+        Row: {
+          contact_no: string | null
+          created_at: string
+          customer_code: string | null
+          customer_id: string | null
+          customer_name: string
+          delivery_address: string | null
+          delivery_city: string | null
+          delivery_date: string | null
+          delivery_pincode: string | null
+          delivery_state: string | null
+          id: string
+          order_booked_by: string | null
+          order_date: string
+          order_no: string
+          pant_fabric_code: string | null
+          pant_fabric_id: string | null
+          pant_measurements: Json
+          pant_notes: string | null
+          pant_standard_size: string | null
+          pant_style: Json
+          shirt_fabric_code: string | null
+          shirt_fabric_id: string | null
+          shirt_measurements: Json
+          shirt_notes: string | null
+          shirt_standard_size: string | null
+          shirt_style: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          contact_no?: string | null
+          created_at?: string
+          customer_code?: string | null
+          customer_id?: string | null
+          customer_name: string
+          delivery_address?: string | null
+          delivery_city?: string | null
+          delivery_date?: string | null
+          delivery_pincode?: string | null
+          delivery_state?: string | null
+          id?: string
+          order_booked_by?: string | null
+          order_date?: string
+          order_no: string
+          pant_fabric_code?: string | null
+          pant_fabric_id?: string | null
+          pant_measurements?: Json
+          pant_notes?: string | null
+          pant_standard_size?: string | null
+          pant_style?: Json
+          shirt_fabric_code?: string | null
+          shirt_fabric_id?: string | null
+          shirt_measurements?: Json
+          shirt_notes?: string | null
+          shirt_standard_size?: string | null
+          shirt_style?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          contact_no?: string | null
+          created_at?: string
+          customer_code?: string | null
+          customer_id?: string | null
+          customer_name?: string
+          delivery_address?: string | null
+          delivery_city?: string | null
+          delivery_date?: string | null
+          delivery_pincode?: string | null
+          delivery_state?: string | null
+          id?: string
+          order_booked_by?: string | null
+          order_date?: string
+          order_no?: string
+          pant_fabric_code?: string | null
+          pant_fabric_id?: string | null
+          pant_measurements?: Json
+          pant_notes?: string | null
+          pant_standard_size?: string | null
+          pant_style?: Json
+          shirt_fabric_code?: string | null
+          shirt_fabric_id?: string | null
+          shirt_measurements?: Json
+          shirt_notes?: string | null
+          shirt_standard_size?: string | null
+          shirt_style?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_sheets_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_sheets_pant_fabric_id_fkey"
+            columns: ["pant_fabric_id"]
+            isOneToOne: false
+            referencedRelation: "fabrics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_sheets_shirt_fabric_id_fkey"
+            columns: ["shirt_fabric_id"]
+            isOneToOne: false
+            referencedRelation: "fabrics"
             referencedColumns: ["id"]
           },
         ]
@@ -472,6 +588,24 @@ export type Database = {
         }
         Relationships: []
       }
+      user_login_names: {
+        Row: {
+          created_at: string
+          user_id: string
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          user_id: string
+          username: string
+        }
+        Update: {
+          created_at?: string
+          user_id?: string
+          username?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -505,6 +639,9 @@ export type Database = {
         }
         Returns: boolean
       }
+      next_order_form_id:
+        | { Args: never; Returns: string }
+        | { Args: { p_order_date: string }; Returns: string }
     }
     Enums: {
       app_role: "admin" | "user"
@@ -523,12 +660,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -552,11 +689,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -577,11 +714,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -602,11 +739,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -619,11 +756,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
