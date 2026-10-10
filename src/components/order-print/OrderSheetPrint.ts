@@ -68,7 +68,8 @@ export const printOrderSheet = (order: OrderSheet, fabricCodes?: OrderFabricCode
   body { font-family: Arial, Helvetica, sans-serif; color: #08265b; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
   .sheet { width: 297mm; height: 210mm; min-height: 210mm; max-height: 210mm; padding: 3mm 3.5mm 3mm; margin: 0 auto; background: #fff; overflow: hidden; }
   .top { height: 28mm; display: grid; grid-template-columns: 36% 36% 28%; align-items: center; gap: 1mm; }
-  .brand { display:flex; align-items:center; justify-content:center; height:100%; padding:1mm; }\n  .brand-logo { display:block; width:180px; min-width:180px; max-width:180px; height:100px; min-height:100px; max-height:100px; object-fit:contain; object-position:center; flex:0 0 180px; }
+  .brand { display:flex; align-items:center; justify-content:center; height:100%; padding:1mm; }
+  .brand-logo { display:block; width:180px; min-width:180px; max-width:180px; height:100px; min-height:100px; max-height:100px; object-fit:contain; object-position:center; flex:0 0 180px; }
   .brand-mark { width:19mm; height:19mm; border-radius:50%; background:#0b2c58; position:relative; flex:0 0 auto; }
   .brand-mark:before { content:""; position:absolute; left:5.5mm; top:4.2mm; width:0; height:0; border-left:5.5mm solid transparent; border-right:5.5mm solid transparent; border-bottom:8mm solid white; }
   .brand-mark:after { content:""; position:absolute; left:8.3mm; top:10mm; width:5.4mm; height:6.7mm; background:white; clip-path:polygon(50% 0,100% 100%,0 100%); }
@@ -82,10 +83,10 @@ export const printOrderSheet = (order: OrderSheet, fabricCodes?: OrderFabricCode
   .meta-row { display:grid; grid-template-columns:17mm 3mm minmax(0, 1fr); align-items:end; gap:1mm; }
   .meta-line { border-bottom:1px solid #0a376d; min-height:6mm; overflow-wrap:anywhere; line-height:1.2; }
   .customer-bar { height:11mm; background:#e7f1fb; border-radius:2.2mm; display:grid; grid-template-columns:27% 37% 36%; align-items:center; font-size:3.7mm; font-weight:700; padding:0 3.5mm; margin-bottom:2mm; }
-  .customer-cell { height:9mm; display:flex; align-items:center; gap:2mm; border-right:1px solid #173e70; padding-right:5mm; }
-  .customer-cell + .customer-cell { padding-left:5mm; }
+  .customer-cell { height:9mm; display:flex; align-items:center; justify-content:center; text-align:center; gap:2mm; border-right:1px solid #173e70; padding:0 2mm; }
+  .customer-cell + .customer-cell { padding-left:2mm; }
   .customer-cell:last-child { border-right:0; }
-  .fill-line { flex:1; border-bottom:1px solid #173e70; min-width:10mm; height:5mm; }
+  .fill-line { flex:0 1 auto; border-bottom:0; min-width:0; height:auto; text-align:center; }
   .section { border:1px solid currentColor; border-radius:2.5mm; overflow:hidden; margin-bottom:1.5mm; }
   .section.shirt { color:#07508d; }
   .section.pant { color:#805c2d; }
@@ -112,13 +113,14 @@ export const printOrderSheet = (order: OrderSheet, fabricCodes?: OrderFabricCode
   .check { font-size:5.5mm; line-height:1; width:5mm; }
   .other-line { border-bottom:1px solid #123e73; display:inline-block; min-width:13mm; height:5mm; }
   .notes-body { padding:3mm; font-size:3.2mm; line-height:1.45; white-space:pre-wrap; overflow:hidden; }
-  .footer { display:grid; grid-template-columns:minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr); gap:2mm; width:100%; min-width:0; }
+  .footer { display:grid; grid-template-columns:minmax(0, 3fr) minmax(0, 1fr) minmax(0, 1fr); gap:2mm; width:100%; min-width:0; }
   .footer-box { box-sizing:border-box; min-width:0; overflow:hidden; border:1px solid #9bbbdc; border-radius:2.5mm; min-height:24mm; padding:3mm 3mm; background:#eaf4fc; }
-  .footer-box.delivery-date { background:#fff0df; border-color:#e9cda7; }
-  .footer-box.signature { background:#fff; }
-  .footer-title { font-size:3.7mm; font-weight:800; }
-  .footer-content { margin-top:2mm; font-size:2.8mm; white-space:pre-line; line-height:1.35; overflow-wrap:anywhere; min-width:0; }\n  .footer-content.delivery-address { display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:3; line-clamp:3; max-height:11.4mm; overflow:hidden; }
-  .signature-line, .date-line { box-sizing:border-box; border-bottom:1px solid #0a376d; min-height:7mm; height:auto; margin-top:3mm; padding-bottom:1mm; font-size:3mm; line-height:1.25; overflow-wrap:anywhere; }
+  .footer-box.delivery-date { background:#fff0df; border-color:#e9cda7; text-align:center; }
+  .footer-box.signature { background:#fff; text-align:center; }
+  .footer-title { font-size:3.7mm; font-weight:800; text-align:inherit; }
+  .footer-content { margin-top:2mm; font-size:2.8mm; white-space:pre-line; line-height:1.35; overflow-wrap:anywhere; min-width:0; } 
+  .footer-content.delivery-address { display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:3; line-clamp:3; max-height:11.4mm; overflow:hidden; text-align:left; }
+  .signature-line, .date-line { box-sizing:border-box; border-bottom:0; min-height:0; height:auto; margin-top:3mm; padding-bottom:0; font-size:3mm; line-height:1.25; overflow-wrap:anywhere; text-align:center; }
   .print-note { display:none; }
 </style>
 </head>
