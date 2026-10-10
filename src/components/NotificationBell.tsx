@@ -81,7 +81,6 @@ export default function NotificationBell() {
   const markAllRead = async () => {
     if (!user || unreadCount === 0) return;
     const readAt = new Date().toISOString();
-    const unreadIds = items.filter(item => !item.read_at).map(item => item.id);
     setItems(current => current.map(item => item.read_at ? item : { ...item, read_at: readAt }));
     const { error } = await (supabase as any).from("notifications")
       .update({ read_at: readAt }).eq("user_id", user.id).is("read_at", null);
