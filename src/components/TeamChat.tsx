@@ -53,12 +53,21 @@ export default function TeamChat() {
         .rpc("get_chat_member_names");
       if (usernameError) console.warn("Unable to load team usernames", usernameError);
       const usernames = new Map<string, string>((usernameRows || []).map((row: any) => [row.user_id, String(row.username || "").trim()]));
-      const memberRows: Member[] = (roleRows || []).map((row: any) => ({
-        user_id: row.user_id,
-        display_name: row.user_id === user.id
-          ? String(usernames.get(row.user_id) || user.user_metadata?.username || user.email?.split("@")[0] || "You")
-          : String(usernames.get(row.user_id) || displayName(row.user_id)),
-        role: row.role,
+      const roles = new Map<string, string>((roleRows || []).map((row: any) => [row.user_id, row.role]));
+      // Non-admin users can only read their own user_roles row under RLS.
+      // Build the member directory from the secure username RPC, then enrich roles
+      // wherever the current user is permitted to see them.
+      const memberIds = new Set<string>([
+        ...(usernameRows || []).map((row: any) => row.user_id as string),
+        ...(roleRows || []).map((row: any) => row.user_id as string),
+        user.id,
+      ]);
+      const memberRows: Member[] = [...memberIds].map((userId) => ({
+        user_id: userId,
+        display_name: userId === user.id
+          ? String(usernames.get(userId) || user.user_metadata?.username || user.email?.split("@")[0] || "You")
+          : String(usernames.get(userId) || displayName(userId)),
+        role: roles.get(userId),
       }));
       setMembers(memberRows);
       const { data: memberRowsForUser, error: membershipError } = await (supabase as any)
