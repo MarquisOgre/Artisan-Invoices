@@ -36,6 +36,7 @@ export default function TeamChat() {
   const [onlineUserIds, setOnlineUserIds] = useState<string[]>([]);
   const [typingUserIds, setTypingUserIds] = useState<string[]>([]);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const activeChannelRef = useRef<any>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const loadChat = useCallback(async () => {
@@ -102,7 +103,9 @@ export default function TeamChat() {
       setConversations(current => current.map(conversation => conversation.id === activeId ? { ...conversation, unread: 0 } : conversation));
     };
     void loadMessages();
-    const channel = supabase.channel(`chat:${activeId}`, { config: { presence: { key: user.id } } })
+    const channel = supabase.channel(`chat:${activeId}`, { config: { presence: { key: user.id } } });
+    activeChannelRef.current = channel;
+    channel
       .on("presence", { event: "sync" }, () => {
         const state = channel.presenceState<{ user_id?: string }>();
         setOnlineUserIds(Object.keys(state));
@@ -121,7 +124,7 @@ export default function TeamChat() {
       .subscribe(async status => {
         if (status === "SUBSCRIBED") await channel.track({ user_id: user.id, online_at: new Date().toISOString() });
       });
-    return () => { cancelled = true; if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current); void supabase.removeChannel(channel); };
+    return () => { cancelled = true; if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current); activeChannelRef.current = null; void supabase.removeChannel(channel); };
   }, [activeId, user, toast]);
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" }); }, [messages]);
@@ -136,8 +139,7 @@ export default function TeamChat() {
 
   const broadcastTyping = () => {
     if (!user || !activeId) return;
-    const channel = supabase.channel(`chat:${activeId}`);
-    void channel.send({ type: "broadcast", event: "typing", payload: { user_id: user.id } });
+    void activeChannelRef.current?.send({ type: "broadcast", event: "typing", payload: { user_id: user.id } });
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     typingTimeoutRef.current = setTimeout(() => { typingTimeoutRef.current = null; }, 900);
   };
