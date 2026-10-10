@@ -172,7 +172,7 @@ const OrderSheetList = ({ onCreateNew, onEdit, onConvertToInvoice }: Props) => {
 
         if (fabricsError) throw fabricsError;
 
-        const codeByFabricId = new Map((fabricRecords || []).map((fabric: any) => [String(fabric.id), String(fabric.code || "").trim()]));
+        const codeByFabricId = new Map<string, string>((fabricRecords || []).map((fabric: any) => [String(fabric.id), String(fabric.code || "").trim()]));
         for (const row of fabricRows || []) {
           const orderId = String(row.order_sheet_id);
           if (!grouped[orderId]) grouped[orderId] = { shirt: [], pant: [] };

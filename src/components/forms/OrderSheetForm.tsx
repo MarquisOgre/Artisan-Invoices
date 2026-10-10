@@ -200,7 +200,7 @@ const OrderSheetForm = ({ customers, onSaved, initialOrder = null }: OrderSheetF
         toast({ title: "Unable to load fabrics", description: error.message, variant: "destructive" });
         return;
       }
-      setFabrics((data || []) as FabricOption[]);
+      setFabrics((data || []) as unknown as FabricOption[]);
     };
     loadFabrics();
   }, [toast]);

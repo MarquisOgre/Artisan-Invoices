@@ -114,7 +114,7 @@ export default function Auth() {
         }
       } else {
         const { error } = await supabase.auth.signUp({
-          email,
+          email: identifier,
           password,
           options: {
             emailRedirectTo: `${window.location.origin}/`,
