@@ -32,21 +32,35 @@ export default function NotificationBell() {
     }
 
     let cancelled = false;
-    setLoading(true);
-    const load = async () => {
+    let channelReady = false;
+
+    const load = async (showSpinner = false) => {
+      if (showSpinner && !cancelled) setLoading(true);
       const { data, error } = await (supabase as any)
         .from("notifications")
         .select("id, event_type, title, message, target_path, entity_id, created_at, read_at")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(50);
-      if (!cancelled) {
-        if (error) console.error("Unable to load notifications", error);
-        else setItems(data || []);
-        setLoading(false);
+      if (cancelled) return;
+      if (error) {
+        console.error("Unable to load notifications", error);
+      } else {
+        // Merge server state with the current list to avoid dropping a Realtime
+        // event that arrived while this request was in flight.
+        setItems(current => {
+          const merged = new Map<string, NotificationRow>();
+          for (const row of data || []) merged.set(row.id, row);
+          for (const row of current) if (!merged.has(row.id)) merged.set(row.id, row);
+          return [...merged.values()]
+            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+            .slice(0, 50);
+        });
       }
+      if (showSpinner && !cancelled) setLoading(false);
     };
-    void load();
+
+    void load(true);
 
     const channel = supabase.channel(`notifications:${user.id}`)
       .on("postgres_changes", {
@@ -58,13 +72,57 @@ export default function NotificationBell() {
         const incoming = payload.new as NotificationRow;
         setItems(current => [incoming, ...current.filter(item => item.id !== incoming.id)].slice(0, 50));
       })
-      .subscribe();
+      .subscribe((status, error) => {
+        if (status === "SUBSCRIBED") {
+          channelReady = true;
+          void load();
+        } else {
+          channelReady = false;
+          if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+            console.warn("Notification realtime subscription unavailable; polling will keep the list updated.", error);
+          }
+        }
+      });
+
+    // Poll while visible as a safety net: a channel can report SUBSCRIBED yet
+    // miss events because of a transient connection interruption.
+    const pollId = window.setInterval(() => {
+      if (document.visibilityState === "visible") void load();
+    }, 15000);
+
+    const refreshOnReturn = () => {
+      if (document.visibilityState === "visible") void load();
+    };
+    window.addEventListener("focus", refreshOnReturn);
+    document.addEventListener("visibilitychange", refreshOnReturn);
 
     return () => {
       cancelled = true;
+      window.clearInterval(pollId);
+      window.removeEventListener("focus", refreshOnReturn);
+      document.removeEventListener("visibilitychange", refreshOnReturn);
       void supabase.removeChannel(channel);
     };
   }, [user?.id]);
+
+  // Always refresh when opening the panel, even if Realtime missed an event.
+  useEffect(() => {
+    if (!open || !user) return;
+    let cancelled = false;
+    const refresh = async () => {
+      const { data, error } = await (supabase as any)
+        .from("notifications")
+        .select("id, event_type, title, message, target_path, entity_id, created_at, read_at")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(50);
+      if (cancelled) return;
+      if (error) console.error("Unable to refresh notifications when panel opens", error);
+      else setItems(data || []);
+    };
+    void refresh();
+    return () => { cancelled = true; };
+  }, [open, user?.id]);
 
   const markRead = async (item: NotificationRow) => {
     if (!item.read_at) {
