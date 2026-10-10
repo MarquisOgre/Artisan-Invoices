@@ -75,12 +75,12 @@ const generateStyles = () => `
     .logo {
       display: block;
       height: 100px;
-      width: 150px;
-      min-width: 150px;
-      max-width: 150px;
+      width: 180px;
+      min-width: 180px;
+      max-width: 180px;
       object-fit: contain;
       object-position: center;
-      flex: 0 0 150px;
+      flex: 0 0 180px;
     }
 
     .title-block {
