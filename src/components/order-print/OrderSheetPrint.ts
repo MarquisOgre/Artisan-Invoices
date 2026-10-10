@@ -2,10 +2,7 @@ import type { OrderSheet } from "../OrderSheetList";
 
 export type OrderFabricCodes = { shirt: string[]; pant: string[] };
 
-type CompanyLogoSettings = { printLogo?: string | null; logo?: string | null };
-
-const getCompanyLogoUrl = (settings?: CompanyLogoSettings) =>
-  settings?.printLogo || settings?.logo || `${window.location.origin}/logo.png`;
+const getCompanyLogoUrl = () => `${window.location.origin}/logo.png`;
 
 const formatDate = (value: string | null | undefined) => {
   if (!value) return "-";
@@ -25,8 +22,8 @@ const formatFabricCodes = (codes: string[] | undefined, fallback: string | null)
   return unique.join("\n") || "-";
 };
 
-export const printOrderSheet = (order: OrderSheet, fabricCodes?: OrderFabricCodes, companySettings?: CompanyLogoSettings) => {
-  const companyLogoUrl = getCompanyLogoUrl(companySettings);
+export const printOrderSheet = (order: OrderSheet, fabricCodes?: OrderFabricCodes, _companySettings?: unknown) => {
+  const companyLogoUrl = getCompanyLogoUrl();
   const shirtMeasurements = [
     ["Shoulder", order.shirt_measurements?.shoulder],
     ["Chest", order.shirt_measurements?.chest],
