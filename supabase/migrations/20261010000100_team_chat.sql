@@ -43,23 +43,13 @@ create or replace function public.is_chat_member(p_conversation_id uuid, p_user_
 returns boolean
 language sql stable security definer
 set search_path = public
-as $
-  select exists (
-    select 1 from public.chat_conversation_members m
-    where m.conversation_id = p_conversation_id and m.user_id = p_user_id
-  );
-$;
+as 'select exists (select 1 from public.chat_conversation_members m where m.conversation_id = p_conversation_id and m.user_id = p_user_id)';
 
 create or replace function public.is_chat_creator(p_conversation_id uuid, p_user_id uuid default auth.uid())
 returns boolean
 language sql stable security definer
 set search_path = public
-as $
-  select exists (
-    select 1 from public.chat_conversations c
-    where c.id = p_conversation_id and c.created_by = p_user_id
-  );
-$;
+as 'select exists (select 1 from public.chat_conversations c where c.id = p_conversation_id and c.created_by = p_user_id)';
 
 revoke all on function public.is_chat_member(uuid, uuid) from public;
 revoke all on function public.is_chat_creator(uuid, uuid) from public;
