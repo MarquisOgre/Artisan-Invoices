@@ -112,7 +112,7 @@ export const printOrderSheet = (order: OrderSheet, fabricCodes?: OrderFabricCode
   .check { font-size:5.5mm; line-height:1; width:5mm; }
   .other-line { border-bottom:1px solid #123e73; display:inline-block; min-width:13mm; height:5mm; }
   .notes-body { padding:3mm; font-size:3.2mm; line-height:1.45; white-space:pre-wrap; overflow:hidden; }
-  .footer { display:grid; grid-template-columns:minmax(0, 1fr) 32mm 32mm; gap:2mm; width:100%; min-width:0; }
+  .footer { display:grid; grid-template-columns:minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr); gap:2mm; width:100%; min-width:0; }
   .footer-box { box-sizing:border-box; min-width:0; overflow:hidden; border:1px solid #9bbbdc; border-radius:2.5mm; min-height:24mm; padding:3mm 3mm; background:#eaf4fc; }
   .footer-box.delivery-date { background:#fff0df; border-color:#e9cda7; }
   .footer-box.signature { background:#fff; }
