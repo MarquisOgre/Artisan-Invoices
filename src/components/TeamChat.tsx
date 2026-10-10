@@ -33,6 +33,9 @@ export default function TeamChat() {
   const [groupTitle, setGroupTitle] = useState("");
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
   const [mobileConversationOpen, setMobileConversationOpen] = useState(false);
+  const [onlineUserIds, setOnlineUserIds] = useState<string[]>([]);
+  const [typingUserIds, setTypingUserIds] = useState<string[]>([]);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const loadChat = useCallback(async () => {
@@ -52,6 +55,7 @@ export default function TeamChat() {
       const { data: memberRowsForUser, error: membershipError } = await (supabase as any)
         .from("chat_conversation_members").select("conversation_id, last_read_at").eq("user_id", user.id);
       if (membershipError) throw membershipError;
+      const readMarkers = new Map<string, string | null>((memberRowsForUser || []).map((row: any) => [row.conversation_id, row.last_read_at || null]));
       const ids = (memberRowsForUser || []).map((row: any) => row.conversation_id);
       if (!ids.length) { setConversations([]); setMessages([]); setActiveId(""); return; }
       const { data: conversationRows, error: conversationError } = await (supabase as any)
@@ -60,8 +64,16 @@ export default function TeamChat() {
       const { data: allMembers, error: allMembersError } = await (supabase as any)
         .from("chat_conversation_members").select("conversation_id, user_id").in("conversation_id", ids);
       if (allMembersError) throw allMembersError;
+      const { data: unreadMessages, error: unreadError } = await (supabase as any).from("chat_messages").select("conversation_id, sender_id, created_at").in("conversation_id", ids).neq("sender_id", user.id);
+      if (unreadError) throw unreadError;
+      const unreadCounts = new Map<string, number>();
+      (unreadMessages || []).forEach((message: any) => {
+        const lastReadAt = readMarkers.get(message.conversation_id);
+        if (!lastReadAt || message.created_at > lastReadAt) unreadCounts.set(message.conversation_id, (unreadCounts.get(message.conversation_id) || 0) + 1);
+      });
       const enriched = (conversationRows || []).map((conversation: any) => ({
         ...conversation,
+        unread: unreadCounts.get(conversation.id) || 0,
         members: (allMembers || []).filter((m: any) => m.conversation_id === conversation.id).map((m: any) => memberRows.find(member => member.user_id === m.user_id) || { user_id: m.user_id, display_name: displayName(m.user_id) }),
       }));
       setConversations(enriched);
@@ -85,17 +97,31 @@ export default function TeamChat() {
       if (cancelled) return;
       if (error) { toast({ title: "Unable to load messages", description: error.message, variant: "destructive" }); return; }
       setMessages(data || []);
-      await (supabase as any).from("chat_conversation_members").update({ last_read_at: new Date().toISOString() }).eq("conversation_id", activeId).eq("user_id", user.id);
+      const readAt = new Date().toISOString();
+      await (supabase as any).from("chat_conversation_members").update({ last_read_at: readAt }).eq("conversation_id", activeId).eq("user_id", user.id);
+      setConversations(current => current.map(conversation => conversation.id === activeId ? { ...conversation, unread: 0 } : conversation));
     };
     void loadMessages();
-    const channel = supabase.channel(`chat:${activeId}`)
+    const channel = supabase.channel(`chat:${activeId}`, { config: { presence: { key: user.id } } })
+      .on("presence", { event: "sync" }, () => {
+        const state = channel.presenceState<{ user_id?: string }>();
+        setOnlineUserIds(Object.keys(state));
+      })
+      .on("broadcast", { event: "typing" }, ({ payload }) => {
+        const typingId = String((payload as any)?.user_id || "");
+        if (!typingId || typingId === user.id) return;
+        setTypingUserIds(current => current.includes(typingId) ? current : [...current, typingId]);
+        window.setTimeout(() => setTypingUserIds(current => current.filter(id => id !== typingId)), 2200);
+      })
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "chat_messages", filter: `conversation_id=eq.${activeId}` }, (payload) => {
         const next = payload.new as ChatMessage;
         setMessages(current => current.some(message => message.id === next.id) ? current : [...current, next]);
         if (next.sender_id !== user.id) void (supabase as any).from("chat_conversation_members").update({ last_read_at: new Date().toISOString() }).eq("conversation_id", activeId).eq("user_id", user.id);
       })
-      .subscribe();
-    return () => { cancelled = true; void supabase.removeChannel(channel); };
+      .subscribe(async status => {
+        if (status === "SUBSCRIBED") await channel.track({ user_id: user.id, online_at: new Date().toISOString() });
+      });
+    return () => { cancelled = true; if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current); void supabase.removeChannel(channel); };
   }, [activeId, user, toast]);
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" }); }, [messages]);
@@ -107,6 +133,14 @@ export default function TeamChat() {
   }), [conversations, search, user?.id]);
 
   const conversationLabel = (conversation: Conversation) => conversation.title || conversation.members?.filter(member => member.user_id !== user?.id).map(member => member.display_name).join(", ") || "Private chat";
+
+  const broadcastTyping = () => {
+    if (!user || !activeId) return;
+    const channel = supabase.channel(`chat:${activeId}`);
+    void channel.send({ type: "broadcast", event: "typing", payload: { user_id: user.id } });
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(() => { typingTimeoutRef.current = null; }, 900);
+  };
 
   const sendMessage = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -162,7 +196,7 @@ export default function TeamChat() {
             {loading && <div className="p-4 text-center text-sm text-muted-foreground"><Loader2 className="mr-2 inline h-4 w-4 animate-spin" />Loading conversations…</div>}
             {!loading && filteredConversations.map(conversation => <button key={conversation.id} onClick={() => { setActiveId(conversation.id); setMobileConversationOpen(true); }} className={`flex w-full items-center gap-3 rounded-lg p-3 text-left hover:bg-muted ${activeId === conversation.id ? "bg-muted" : ""}`}>
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">{conversation.is_group ? <Users className="h-5 w-5" /> : <MessageCircle className="h-5 w-5" />}</span>
-              <span className="min-w-0 flex-1"><span className="block truncate text-sm font-medium">{conversationLabel(conversation)}</span><span className="block truncate text-xs text-muted-foreground">{conversation.is_group ? `${conversation.members?.length || 0} members` : "Direct message"}</span></span>
+              <span className="min-w-0 flex-1"><span className="block truncate text-sm font-medium">{conversationLabel(conversation)}</span><span className="block truncate text-xs text-muted-foreground">{conversation.is_group ? `${conversation.members?.length || 0} members` : "Direct message"}</span></span>{Boolean(conversation.unread) && <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground">{conversation.unread! > 99 ? "99+" : conversation.unread}</span>}
             </button>)}
             {!loading && filteredConversations.length === 0 && <div className="p-5 text-center text-sm text-muted-foreground">No conversations yet. Start a chat with a teammate.</div>}
           </div>
@@ -173,7 +207,7 @@ export default function TeamChat() {
           <header className="flex items-center gap-3 border-b p-4">
             <Button variant="ghost" size="icon" className="md:hidden" aria-label="Back to conversations" onClick={() => setMobileConversationOpen(false)}><ArrowLeft className="h-4 w-4" /></Button>
             <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">{activeConversation.is_group ? <Users className="h-4 w-4" /> : <MessageCircle className="h-4 w-4" />}</span>
-            <div className="min-w-0"><h2 className="truncate font-semibold">{conversationLabel(activeConversation)}</h2><p className="text-xs text-muted-foreground">{activeConversation.is_group ? `${activeConversation.members?.length || 0} members` : "Private conversation"}</p></div>
+            <div className="min-w-0"><h2 className="truncate font-semibold">{conversationLabel(activeConversation)}</h2><p className="text-xs text-muted-foreground">{activeConversation.is_group ? `${activeConversation.members?.length || 0} members` : onlineUserIds.includes(activeConversation.members?.find(member => member.user_id !== user?.id)?.user_id || "") ? "Online" : "Private conversation"}</p></div>
           </header>
           <ScrollArea className="min-h-0 flex-1 p-4">
             <div className="space-y-4">
@@ -188,12 +222,13 @@ export default function TeamChat() {
                   </div>
                 </div>;
               })}
+              {typingUserIds.some(id => activeConversation.members?.some(member => member.user_id === id)) && <p className="text-xs italic text-muted-foreground">Someone is typing…</p>}
               {messages.length === 0 && <p className="py-12 text-center text-sm text-muted-foreground">This conversation is ready. Send the first message.</p>}
               <div ref={bottomRef} />
             </div>
           </ScrollArea>
           <form onSubmit={sendMessage} className="flex items-end gap-2 border-t p-3 sm:p-4">
-            <Textarea value={messageText} onChange={event => setMessageText(event.target.value)} placeholder="Write a message…" rows={1} className="max-h-32 min-h-10 resize-y" maxLength={5000} />
+            <Textarea value={messageText} onChange={event => { setMessageText(event.target.value); broadcastTyping(); }} placeholder="Write a message…" rows={1} className="max-h-32 min-h-10 resize-y" maxLength={5000} />
             <Button type="submit" disabled={!messageText.trim() || sending || !activeId} aria-label="Send message" className="shrink-0"><Send className="mr-2 h-4 w-4" />Send</Button>
           </form>
         </> : <div className="flex flex-1 flex-col items-center justify-center p-8 text-center"><MessageCircle className="mb-4 h-12 w-12 text-muted-foreground/50" /><h2 className="text-lg font-semibold">Welcome to Team Chat</h2><p className="mt-1 max-w-sm text-sm text-muted-foreground">Select a conversation or start a new one with a teammate.</p><Button className="mt-4" onClick={() => setCreateOpen(true)}><Plus className="mr-2 h-4 w-4" />New conversation</Button></div>}
