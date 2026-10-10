@@ -11,6 +11,7 @@ import {
   LogOut,
   ClipboardList,
   Layers3,
+  MessageCircle,
 } from "lucide-react";
 import {
 } from "@/components/ui/dropdown-menu";
@@ -120,6 +121,15 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
                 Order Forms
               </Button>
 
+              <Button
+                variant={currentPage === "chat" ? "default" : "ghost"}
+                className="flex items-center gap-2"
+                onClick={() => onPageChange("chat")}
+              >
+                <MessageCircle className="h-4 w-4" />
+                Chat
+              </Button>
+
               {canManage && (
                 <Button
                   variant={currentPage === "fabrics" ? "default" : "ghost"}
@@ -219,6 +229,18 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
               >
                 <ClipboardList className="mr-3 h-4 w-4" />
                 Order Forms
+              </Button>
+
+              <Button
+                variant={currentPage === "chat" ? "default" : "ghost"}
+                className="w-full justify-start"
+                onClick={() => {
+                  onPageChange("chat");
+                  setMobileMenuOpen(false);
+                }}
+              >
+                <MessageCircle className="mr-3 h-4 w-4" />
+                Chat
               </Button>
 
               {canManage && (
