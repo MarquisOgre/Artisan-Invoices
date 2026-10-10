@@ -559,7 +559,7 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
               {items.map((item, index) => (
                 <div key={index} className="grid grid-cols-12 gap-2 items-end">
                   {index === 0 && (
-                    <div className="col-span-5">
+                    <div className="col-span-4">
                       <Label htmlFor={`description-${index}`}>Description *</Label>
                       <Select 
                         value={item.description} 
@@ -592,7 +592,7 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
                     </div>
                   )}
                   {index > 0 && (
-                    <div className="col-span-5">
+                    <div className="col-span-4">
                       <Select 
                         value={item.description} 
                         onValueChange={(value) => handleItemChange(index, "description", value)}
@@ -624,7 +624,7 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
                     </div>
                   )}
                   {index === 0 && (
-                    <div className="col-span-2">
+                    <div className="col-span-1 min-w-0">
                       <Label htmlFor={`shirt_size-${index}`}>Size *</Label>
                       {item.description === "__custom__" ? (
                         <Input
@@ -654,7 +654,7 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
                     </div>
                   )}
                   {index > 0 && (
-                    <div className="col-span-2">
+                    <div className="col-span-1 min-w-0">
                       {item.description === "__custom__" ? (
                         <Input
                           value={item.shirt_size}
@@ -710,11 +710,11 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
                       }}
                     />
                   </div>
-                  <div className="col-span-2">
+                  <div className="col-span-2 min-w-0">
                     {index === 0 && <Label>Amount</Label>}
                     <Input value={`₹${item.amount.toFixed(2)}`} disabled />
                   </div>
-                  <div className="col-span-2">
+                  <div className="col-span-1 min-w-0">
                     {items.length > 1 && (
                       <Button
                         type="button"
