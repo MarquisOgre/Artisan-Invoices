@@ -9,20 +9,12 @@ import {
   Menu,
   X,
   LogOut,
-  ChevronDown,
   ClipboardList,
   Layers3,
 } from "lucide-react";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -39,7 +31,6 @@ const FOOTER_HEIGHT = 48;
 
 const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [quoInvoicesOpen, setQuoInvoicesOpen] = useState(false);
   const { signOut } = useAuth();
   const { isAdmin, canManage } = useUserRole();
 
@@ -54,7 +45,6 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
   ];
 
   const filteredStandaloneNav = standaloneNavigation.filter(item => !item.adminOnly || isAdmin);
-  const isQuoInvoicesActive = quoInvoicesItems.some(item => item.key === currentPage);
 
   const handleLogout = async () => {
     await signOut();
@@ -98,32 +88,17 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
                 </Button>
               )}
 
-              {canManage && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant={isQuoInvoicesActive ? "default" : "ghost"}
-                      className="flex items-center gap-2"
-                    >
-                      <FileText className="h-4 w-4" />
-                      Quotations / Invoices
-                      <ChevronDown className="h-3 w-3" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start">
-                    {quoInvoicesItems.map((item) => (
-                      <DropdownMenuItem
-                        key={item.key}
-                        onClick={() => onPageChange(item.key)}
-                        className={currentPage === item.key ? "bg-muted" : ""}
-                      >
-                        <item.icon className="h-4 w-4 mr-2" />
-                        {item.name}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
+              {canManage && quoInvoicesItems.map((item) => (
+                <Button
+                  key={item.key}
+                  variant={currentPage === item.key ? "default" : "ghost"}
+                  className="flex items-center gap-2"
+                  onClick={() => onPageChange(item.key)}
+                >
+                  <item.icon className="h-4 w-4" />
+                  {item.name}
+                </Button>
+              ))}
 
               {canManage && (
                 <Button
@@ -205,38 +180,20 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
                 </Button>
               )}
 
-              {canManage && (
-                <Collapsible open={quoInvoicesOpen} onOpenChange={setQuoInvoicesOpen}>
-                  <CollapsibleTrigger asChild>
-                    <Button
-                      variant={isQuoInvoicesActive ? "default" : "ghost"}
-                      className="w-full justify-between"
-                    >
-                      <span className="flex items-center">
-                        <FileText className="mr-3 h-4 w-4" />
-                        Quotations / Invoices
-                      </span>
-                      <ChevronDown className={`h-4 w-4 transition-transform ${quoInvoicesOpen ? 'rotate-180' : ''}`} />
-                    </Button>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="pl-6 space-y-1">
-                    {quoInvoicesItems.map((item) => (
-                      <Button
-                        key={item.key}
-                        variant={currentPage === item.key ? "default" : "ghost"}
-                        className="w-full justify-start"
-                        onClick={() => {
-                          onPageChange(item.key);
-                          setMobileMenuOpen(false);
-                        }}
-                      >
-                        <item.icon className="mr-3 h-4 w-4" />
-                        {item.name}
-                      </Button>
-                    ))}
-                  </CollapsibleContent>
-                </Collapsible>
-              )}
+              {canManage && quoInvoicesItems.map((item) => (
+                <Button
+                  key={item.key}
+                  variant={currentPage === item.key ? "default" : "ghost"}
+                  className="w-full justify-start"
+                  onClick={() => {
+                    onPageChange(item.key);
+                    setMobileMenuOpen(false);
+                  }}
+                >
+                  <item.icon className="mr-3 h-4 w-4" />
+                  {item.name}
+                </Button>
+              ))}
 
               {canManage && (
                 <Button
