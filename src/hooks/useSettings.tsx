@@ -46,7 +46,7 @@ export const useSettings = () => {
     address: "HIG 9A, APHB Colony, Adoni, Kurnool District, Pincode - 518301",
     website: "www.artisanapparels.com",
     taxNumber: "37AGDPR6197G1ZW",
-    logo: "https://i.ibb.co/p6NHDnrb/Logo-IAM-Ratan.png",
+    logo: "/logo.png",
     headerLogoWidth: 40,
     headerLogoHeight: 40,
     bankName: "HDFC BANK",
