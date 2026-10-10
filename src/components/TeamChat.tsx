@@ -45,11 +45,17 @@ export default function TeamChat() {
     try {
       const { data: roleRows, error: roleError } = await (supabase as any).from("user_roles").select("user_id, role");
       if (roleError) throw roleError;
+      // Resolve names from the app's existing username directory; keep chat usable if
+      // directory access is restricted by an existing policy.
+      const { data: usernameRows, error: usernameError } = await (supabase as any)
+        .from("user_login_names").select("user_id, username");
+      if (usernameError) console.warn("Unable to load team usernames", usernameError);
+      const usernames = new Map<string, string>((usernameRows || []).map((row: any) => [row.user_id, String(row.username || "").trim()]));
       const memberRows: Member[] = (roleRows || []).map((row: any) => ({
         user_id: row.user_id,
         display_name: row.user_id === user.id
-          ? String(user.user_metadata?.username || user.email?.split("@")[0] || "You")
-          : displayName(row.user_id),
+          ? String(usernames.get(row.user_id) || user.user_metadata?.username || user.email?.split("@")[0] || "You")
+          : String(usernames.get(row.user_id) || displayName(row.user_id)),
         role: row.role,
       }));
       setMembers(memberRows);
