@@ -51,7 +51,7 @@ begin
   end if;
 
   if p_all then
-    delete from public.notifications;
+    delete from public.notifications where true;
   elsif coalesce(array_length(p_ids, 1), 0) > 0 then
     delete from public.notifications where id = any(p_ids);
   else
