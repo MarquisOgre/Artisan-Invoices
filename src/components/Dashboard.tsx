@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,12 +8,14 @@ import {
   FileText,
   ReceiptIndianRupee,
   Users,
+  ClipboardList,
   IndianRupee,
   TrendingUp,
   Eye,
   BarChart3
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
+import { supabase } from "@/integrations/supabase/client";
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 interface DashboardProps {
@@ -81,6 +83,34 @@ const Dashboard = ({ quotations, invoices, customers, onCreateQuotation, onCreat
   const currentDate = new Date();
   const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
+  const [totalOrders, setTotalOrders] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadOrderCount = async () => {
+      try {
+        const { data, error } = await (supabase as any)
+          .from("order_sheets")
+          .select("order_date, created_at");
+        if (error) throw error;
+
+        const count = (data || []).filter((order: any) => {
+          if (selectedMonth === 0) return true;
+          const orderDate = parseDateValue(order.order_date || order.created_at);
+          return !!orderDate && orderDate.getMonth() + 1 === selectedMonth && orderDate.getFullYear() === selectedYear;
+        }).length;
+
+        if (!cancelled) setTotalOrders(count);
+      } catch (error) {
+        console.error("Error loading dashboard order count:", error);
+        if (!cancelled) setTotalOrders(0);
+      }
+    };
+
+    loadOrderCount();
+    return () => { cancelled = true; };
+  }, [selectedMonth, selectedYear]);
 
   const filteredInvoices = invoices.filter(inv => {
     if (selectedMonth === 0) return true;
@@ -177,6 +207,7 @@ const Dashboard = ({ quotations, invoices, customers, onCreateQuotation, onCreat
     { title: "Active Quotation", value: activeQuotations.toString(), change: `${activeQuotations}`, icon: FileText, color: "text-primary" },
     { title: "Invoiced - Unpaid", value: `₹${totalInvoiced.toLocaleString()}`, change: "+8", icon: ReceiptIndianRupee, color: "text-primary" },
     { title: "Total Customers", value: customers.length.toString(), change: "+5", icon: Users, color: "text-muted-foreground" },
+    { title: "Total Orders", value: totalOrders.toLocaleString(), change: "Order forms received", icon: ClipboardList, color: "text-primary" },
   ];
 
   const recentQuotations = quotations.slice(0, 3).map(q => ({
