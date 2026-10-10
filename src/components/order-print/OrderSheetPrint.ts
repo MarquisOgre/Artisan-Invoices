@@ -71,7 +71,7 @@ export const printOrderSheet = (order: OrderSheet, fabricCodes?: OrderFabricCode
   body { font-family: Arial, Helvetica, sans-serif; color: #08265b; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
   .sheet { width: 297mm; height: 210mm; min-height: 210mm; max-height: 210mm; padding: 3mm 3.5mm 3mm; margin: 0 auto; background: #fff; overflow: hidden; }
   .top { height: 28mm; display: grid; grid-template-columns: 36% 36% 28%; align-items: center; gap: 1mm; }
-  .brand { display:flex; align-items:center; justify-content:center; height:100%; padding:1mm; }\n  .brand-logo { display:block; width:150px; min-width:150px; max-width:150px; height:100px; min-height:100px; max-height:100px; object-fit:contain; object-position:center; flex:0 0 150px; }
+  .brand { display:flex; align-items:center; justify-content:center; height:100%; padding:1mm; }\n  .brand-logo { display:block; width:180px; min-width:180px; max-width:180px; height:100px; min-height:100px; max-height:100px; object-fit:contain; object-position:center; flex:0 0 180px; }
   .brand-mark { width:19mm; height:19mm; border-radius:50%; background:#0b2c58; position:relative; flex:0 0 auto; }
   .brand-mark:before { content:""; position:absolute; left:5.5mm; top:4.2mm; width:0; height:0; border-left:5.5mm solid transparent; border-right:5.5mm solid transparent; border-bottom:8mm solid white; }
   .brand-mark:after { content:""; position:absolute; left:8.3mm; top:10mm; width:5.4mm; height:6.7mm; background:white; clip-path:polygon(50% 0,100% 100%,0 100%); }
