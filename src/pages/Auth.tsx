@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { useSettings } from "@/hooks/useSettings";
 import { z } from "zod";
 
 const authSchema = z.object({
@@ -16,6 +17,7 @@ const authSchema = z.object({
 export default function Auth() {
   const { user, loading } = useAuth();
   const { toast } = useToast();
+  const { companySettings } = useSettings();
   const [isLogin, setIsLogin] = useState(true);
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
@@ -161,7 +163,7 @@ export default function Auth() {
       {/* Auth Card */}
       <div className="z-10 w-full max-w-md p-8 rounded-2xl shadow-2xl bg-white/10 backdrop-blur-md border border-white/20">
         <div className="flex flex-col items-center space-y-4 mb-6">
-          <img src="/logo.png" alt="Artisan Logo" className="w-24 h-24" />
+          <img src={companySettings.favicon || "/favicon.png"} alt="Artisan Logo" className="w-24 h-24 object-contain" />
           <h1 className="text-3xl font-bold text-white">ARTISAN</h1>
           <h2 className="text-lg text-white/80">
             {isLogin ? "Welcome Back" : "Create Account"}
