@@ -278,8 +278,9 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
         style={{ height: FOOTER_HEIGHT }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-center">
-          <p className="text-xs sm:text-sm select-none">
-            &copy; {new Date().getFullYear()} Avantro Technologies. All rights reserved.
+          <p className="text-xs sm:text-sm select-none text-center">
+            &copy; {new Date().getFullYear()} All rights reserved.
+            Developed With <span className="text-red-500">❤️</span> by Avantro Technologies.
           </p>
         </div>
       </footer>
