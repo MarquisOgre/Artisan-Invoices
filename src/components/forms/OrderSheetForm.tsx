@@ -518,48 +518,27 @@ const OrderSheetForm = ({ customers, onSaved, initialOrder = null }: OrderSheetF
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="relative overflow-hidden bg-white px-5 py-5 sm:px-8 sm:py-6">
           <div className="pointer-events-none absolute -right-16 -top-20 h-52 w-52 rounded-full bg-blue-50" />
-          <div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex items-center gap-4">
-              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[#0c315c] text-3xl font-black text-white shadow-sm">
-                A
+          <div className="relative grid grid-cols-1 gap-4 lg:grid-cols-[1fr_auto_1fr] lg:items-center">
+            <div className="hidden lg:block" aria-hidden="true" />
+
+            <div className="justify-self-center rounded-xl bg-[#eaf2fb] px-5 py-3 text-center text-[#123766]">
+              <div className="text-2xl font-black uppercase leading-none sm:text-3xl">
+                Order Sheet
               </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="text-2xl font-black tracking-tight text-[#123766] sm:text-3xl">
-                    ARTISAN
-                  </h1>
-                  <span className="hidden h-8 w-px bg-slate-300 sm:block" />
-                  <div className="hidden text-[10px] font-semibold uppercase leading-4 tracking-[0.28em] text-[#123766] sm:block">
-                    Premium Fabrics
-                    <br />
-                    Bespoke Solutions
-                  </div>
-                </div>
-                <p className="mt-1 text-xs font-medium uppercase tracking-[0.28em] text-slate-500">
-                  Apparel Measurement & Order Management
-                </p>
+              <div className="mt-1 text-center text-xs font-bold uppercase tracking-[0.3em]">
+                Shirt & Pant
               </div>
             </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <div className="rounded-xl bg-[#eaf2fb] px-5 py-3 text-[#123766]">
-                <div className="text-2xl font-black uppercase leading-none sm:text-3xl">
-                  Order Sheet
-                </div>
-                <div className="mt-1 text-center text-xs font-bold uppercase tracking-[0.3em]">
-                  Shirt & Pant
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <Button type="button" variant="outline" onClick={resetForm} disabled={saving} className="h-11 px-4">
-                  <RotateCcw className="mr-2 h-4 w-4" />
-                  Clear
-                </Button>
-                <Button type="button" onClick={handleSave} disabled={saving} className="h-11 bg-[#2378dc] px-5 hover:bg-[#1c68c2]">
-                  <Save className="mr-2 h-4 w-4" />
-                  {saving ? "Saving..." : "Save Order"}
-                </Button>
-              </div>
+            <div className="flex justify-center gap-2 lg:justify-self-end">
+              <Button type="button" variant="outline" onClick={resetForm} disabled={saving} className="h-11 px-4">
+                <RotateCcw className="mr-2 h-4 w-4" />
+                Clear
+              </Button>
+              <Button type="button" onClick={handleSave} disabled={saving} className="h-11 bg-[#2378dc] px-5 hover:bg-[#1c68c2]">
+                <Save className="mr-2 h-4 w-4" />
+                {saving ? "Saving..." : "Save Order"}
+              </Button>
             </div>
           </div>
         </div>
