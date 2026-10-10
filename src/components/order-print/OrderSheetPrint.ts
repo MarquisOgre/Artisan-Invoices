@@ -112,13 +112,13 @@ export const printOrderSheet = (order: OrderSheet, fabricCodes?: OrderFabricCode
   .check { font-size:5.5mm; line-height:1; width:5mm; }
   .other-line { border-bottom:1px solid #123e73; display:inline-block; min-width:13mm; height:5mm; }
   .notes-body { padding:3mm; font-size:3.2mm; line-height:1.45; white-space:pre-wrap; overflow:hidden; }
-  .footer { display:grid; grid-template-columns:58% 21% 21%; gap:2.5mm; }
-  .footer-box { border:1px solid #9bbbdc; border-radius:2.5mm; min-height:24mm; padding:3mm 4mm; background:#eaf4fc; }
+  .footer { display:grid; grid-template-columns:minmax(0, 1fr) 32mm 32mm; gap:2mm; width:100%; min-width:0; }
+  .footer-box { box-sizing:border-box; min-width:0; overflow:hidden; border:1px solid #9bbbdc; border-radius:2.5mm; min-height:24mm; padding:3mm 3mm; background:#eaf4fc; }
   .footer-box.delivery-date { background:#fff0df; border-color:#e9cda7; }
   .footer-box.signature { background:#fff; }
   .footer-title { font-size:3.7mm; font-weight:800; }
-  .footer-content { margin-top:3mm; font-size:3.3mm; white-space:pre-wrap; line-height:1.7; }
-  .signature-line, .date-line { border-bottom:1px solid #0a376d; height:7mm; margin-top:3mm; }
+  .footer-content { margin-top:2mm; font-size:2.8mm; white-space:pre-line; line-height:1.35; overflow-wrap:anywhere; min-width:0; }\n  .footer-content.delivery-address { display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:3; line-clamp:3; max-height:11.4mm; overflow:hidden; }
+  .signature-line, .date-line { box-sizing:border-box; border-bottom:1px solid #0a376d; min-height:7mm; height:auto; margin-top:3mm; padding-bottom:1mm; font-size:3mm; line-height:1.25; overflow-wrap:anywhere; }
   .print-note { display:none; }
 </style>
 </head>
@@ -176,7 +176,7 @@ export const printOrderSheet = (order: OrderSheet, fabricCodes?: OrderFabricCode
   </div>
 
   <div class="footer">
-    <div class="footer-box"><div class="footer-title">Delivery Address :</div><div class="footer-content">${esc(formatDeliveryAddress(order))}</div></div>
+    <div class="footer-box"><div class="footer-title">Delivery Address :</div><div class="footer-content delivery-address">${esc(formatDeliveryAddress(order))}</div></div>
     <div class="footer-box delivery-date"><div class="footer-title">Delivery Date :</div><div class="date-line">${esc(formatDate(order.delivery_date))}</div></div>
     <div class="footer-box signature"><div class="footer-title">Order Booked By :</div><div class="signature-line">${esc(order.order_booked_by)}</div></div>
   </div>
