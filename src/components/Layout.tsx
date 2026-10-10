@@ -77,8 +77,8 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
                 style={{
                   // Use a single square sizing box; object-contain preserves the image's
                   // original aspect ratio and prevents stretching or cropping.
-                  width: "40px",
-                  height: "40px",
+                  width: "180px",
+                  height: "64px",
                   maxWidth: "min(240px, 35vw)",
                   maxHeight: "64px",
                   flexShrink: 0,
