@@ -81,7 +81,7 @@ const CustomerForm = ({ onSubmit, onCancel, initialData, mode = 'create' }: Cust
   };
 
   return (
-    <Card className="max-w-4xl mx-auto">
+    <Card className="mx-auto w-full min-w-0 max-w-4xl">
       <CardHeader>
         <CardTitle>{mode === 'edit' ? 'Edit Customer' : 'Add New Customer'}</CardTitle>
       </CardHeader>
