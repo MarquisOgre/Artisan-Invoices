@@ -2,10 +2,10 @@ import type { OrderSheet } from "../OrderSheetList";
 
 export type OrderFabricCodes = { shirt: string[]; pant: string[] };
 
-type CompanyLogoSettings = { favicon?: string | null; printLogo?: string | null; logo?: string | null };
+type CompanyLogoSettings = { printLogo?: string | null; logo?: string | null };
 
 const getCompanyLogoUrl = (settings?: CompanyLogoSettings) =>
-  settings?.printLogo || settings?.logo || settings?.favicon || `${window.location.origin}/logo.png`;
+  settings?.printLogo || settings?.logo || `${window.location.origin}/logo.png`;
 
 const formatDate = (value: string | null | undefined) => {
   if (!value) return "-";
