@@ -46,16 +46,9 @@ export default function NotificationBell() {
       if (error) {
         console.error("Unable to load notifications", error);
       } else {
-        // Merge server state with the current list to avoid dropping a Realtime
-        // event that arrived while this request was in flight.
-        setItems(current => {
-          const merged = new Map<string, NotificationRow>();
-          for (const row of data || []) merged.set(row.id, row);
-          for (const row of current) if (!merged.has(row.id)) merged.set(row.id, row);
-          return [...merged.values()]
-            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-            .slice(0, 50);
-        });
+        // Treat the database response as authoritative so admin-deleted
+        // notifications disappear for every recipient on the next refresh.
+        setItems((data || []) as NotificationRow[]);
       }
       if (showSpinner && !cancelled) setLoading(false);
     };
@@ -71,6 +64,14 @@ export default function NotificationBell() {
       }, (payload) => {
         const incoming = payload.new as NotificationRow;
         setItems(current => [incoming, ...current.filter(item => item.id !== incoming.id)].slice(0, 50));
+      })
+      .on("postgres_changes", {
+        event: "DELETE",
+        schema: "public",
+        table: "notifications",
+      }, (payload) => {
+        const deletedId = (payload.old as { id?: string }).id;
+        if (deletedId) setItems(current => current.filter(item => item.id !== deletedId));
       })
       .subscribe((status, error) => {
         if (status === "SUBSCRIBED") {
