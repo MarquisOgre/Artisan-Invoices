@@ -84,10 +84,10 @@ export default function NotificationBell() {
         }
       });
 
-    // Realtime can be disconnected by a sleeping tab or a transient network issue.
-    // Polling is a small fallback so new notifications still appear without a reload.
+    // Poll while visible as a safety net: a channel can report SUBSCRIBED yet
+    // miss events because of a transient connection interruption.
     const pollId = window.setInterval(() => {
-      if (document.visibilityState === "visible" && !channelReady) void load();
+      if (document.visibilityState === "visible") void load();
     }, 15000);
 
     const refreshOnReturn = () => {
