@@ -320,7 +320,7 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
   }
 
   return (
-    <Card className="max-w-4xl mx-auto">
+    <Card className="mx-auto w-full min-w-0 max-w-4xl">
       <CardHeader>
         <div className="flex justify-center">
           <CardTitle>
@@ -557,9 +557,9 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
 
             <div className="space-y-4">
               {items.map((item, index) => (
-                <div key={index} className="grid grid-cols-12 gap-2 items-end">
+                <div key={index} className="grid min-w-0 grid-cols-1 gap-3 items-end sm:grid-cols-12 sm:gap-2">
                   {index === 0 && (
-                    <div className="col-span-4">
+                    <div className="col-span-full min-w-0 sm:col-span-4">
                       <Label htmlFor={`description-${index}`}>Description *</Label>
                       <Select 
                         value={item.description} 
@@ -592,7 +592,7 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
                     </div>
                   )}
                   {index > 0 && (
-                    <div className="col-span-4">
+                    <div className="col-span-full min-w-0 sm:col-span-4">
                       <Select 
                         value={item.description} 
                         onValueChange={(value) => handleItemChange(index, "description", value)}
@@ -624,7 +624,7 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
                     </div>
                   )}
                   {index === 0 && (
-                    <div className="col-span-1 min-w-0">
+                    <div className="col-span-full min-w-0 sm:col-span-1 min-w-0">
                       <Label htmlFor={`shirt_size-${index}`}>Size *</Label>
                       {item.description === "__custom__" ? (
                         <Input
@@ -654,7 +654,7 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
                     </div>
                   )}
                   {index > 0 && (
-                    <div className="col-span-1 min-w-0">
+                    <div className="col-span-full min-w-0 sm:col-span-1 min-w-0">
                       {item.description === "__custom__" ? (
                         <Input
                           value={item.shirt_size}
@@ -681,7 +681,7 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
                       )}
                     </div>
                   )}
-                  <div className="col-span-2">
+                  <div className="col-span-full min-w-0 sm:col-span-2">
                     {index === 0 && <Label htmlFor={`quantity-${index}`}>Qty</Label>}
                     <Input
                       id={`quantity-${index}`}
@@ -691,7 +691,7 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
                       onChange={(e) => handleItemChange(index, "quantity", parseInt(e.target.value) || 0)}
                     />
                   </div>
-                  <div className="col-span-2">
+                  <div className="col-span-full min-w-0 sm:col-span-2">
                     {index === 0 && <Label htmlFor={`rate-${index}`}>Rate</Label>}
                     <Input
                       id={`rate-${index}`}
@@ -710,11 +710,11 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
                       }}
                     />
                   </div>
-                  <div className="col-span-2 min-w-0">
+                  <div className="col-span-full min-w-0 sm:col-span-2 min-w-0">
                     {index === 0 && <Label>Amount</Label>}
                     <Input value={`₹${item.amount.toFixed(2)}`} disabled />
                   </div>
-                  <div className="col-span-1 min-w-0">
+                  <div className="col-span-full min-w-0 sm:col-span-1 min-w-0">
                     {items.length > 1 && (
                       <Button
                         type="button"

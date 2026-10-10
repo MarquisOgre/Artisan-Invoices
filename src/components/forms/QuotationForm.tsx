@@ -287,7 +287,7 @@ const QuotationForm = ({ customers, onSubmit, onCancel, initialData, mode = 'cre
   }
 
   return (
-    <Card className="max-w-4xl mx-auto">
+    <Card className="mx-auto w-full min-w-0 max-w-4xl">
         <CardHeader className="flex justify-center items-center">
           <CardTitle>
             {mode === 'edit' ? 'Edit Quotation' : 'Create New Quotation'}
@@ -490,9 +490,9 @@ const QuotationForm = ({ customers, onSubmit, onCancel, initialData, mode = 'cre
 
             <div className="space-y-4">
               {items.map((item, index) => (
-                <div key={index} className="grid grid-cols-12 gap-2 items-end">
+                <div key={index} className="grid min-w-0 grid-cols-1 gap-3 items-end sm:grid-cols-12 sm:gap-2">
                   {index === 0 && (
-                    <div className="col-span-5">
+                    <div className="col-span-full min-w-0 sm:col-span-5">
                       <Label htmlFor={`description-${index}`}>Description *</Label>
                       <Select 
                         value={item.description} 
@@ -525,7 +525,7 @@ const QuotationForm = ({ customers, onSubmit, onCancel, initialData, mode = 'cre
                     </div>
                   )}
                   {index > 0 && (
-                    <div className="col-span-5">
+                    <div className="col-span-full min-w-0 sm:col-span-5">
                       <Select 
                         value={item.description} 
                         onValueChange={(value) => handleItemChange(index, "description", value)}
@@ -557,7 +557,7 @@ const QuotationForm = ({ customers, onSubmit, onCancel, initialData, mode = 'cre
                     </div>
                   )}
                   {index === 0 && (
-                    <div className="col-span-2">
+                    <div className="col-span-full min-w-0 sm:col-span-2">
                       <Label htmlFor={`shirt_size-${index}`}>Size *</Label>
                       {item.description === "__custom__" ? (
                         <Input
@@ -587,7 +587,7 @@ const QuotationForm = ({ customers, onSubmit, onCancel, initialData, mode = 'cre
                     </div>
                   )}
                   {index > 0 && (
-                    <div className="col-span-2">
+                    <div className="col-span-full min-w-0 sm:col-span-2">
                       {item.description === "__custom__" ? (
                         <Input
                           value={item.shirt_size}
@@ -614,7 +614,7 @@ const QuotationForm = ({ customers, onSubmit, onCancel, initialData, mode = 'cre
                       )}
                     </div>
                   )}
-                  <div className="col-span-2">
+                  <div className="col-span-full min-w-0 sm:col-span-2">
                     {index === 0 && <Label htmlFor={`quantity-${index}`}>Qty</Label>}
                     <Input
                       id={`quantity-${index}`}
@@ -624,7 +624,7 @@ const QuotationForm = ({ customers, onSubmit, onCancel, initialData, mode = 'cre
                       onChange={(e) => handleItemChange(index, "quantity", parseInt(e.target.value) || 0)}
                     />
                   </div>
-                  <div className="col-span-2">
+                  <div className="col-span-full min-w-0 sm:col-span-2">
                     {index === 0 && <Label htmlFor={`rate-${index}`}>Rate</Label>}
                     <Input
                       id={`rate-${index}`}
@@ -635,11 +635,11 @@ const QuotationForm = ({ customers, onSubmit, onCancel, initialData, mode = 'cre
                       onChange={(e) => handleItemChange(index, "rate", parseFloat(e.target.value) || 0)}
                     />
                   </div>
-                  <div className="col-span-2">
+                  <div className="col-span-full min-w-0 sm:col-span-2">
                     {index === 0 && <Label>Amount</Label>}
                     <Input value={`₹${item.amount.toFixed(2)}`} disabled />
                   </div>
-                  <div className="col-span-2">
+                  <div className="col-span-full min-w-0 sm:col-span-2">
                     {items.length > 1 && (
                       <Button
                         type="button"

@@ -208,7 +208,7 @@ const FabricPage = (_props: FabricPageProps) => {
 
       <Card>
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
+          <div className="w-full min-w-0 overflow-x-auto overscroll-x-contain rounded-md border">
             <table className="w-full min-w-[1200px] text-sm">
               <thead>
                 <tr className="border-y bg-[#edf5fc] text-left text-[#123766]">

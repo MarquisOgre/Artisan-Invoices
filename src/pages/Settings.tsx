@@ -31,11 +31,11 @@ const Settings = () => {
   const { customers, invoices, deleteCustomer, deleteInvoice } = useSupabaseData();
 
   if (loading || roleLoading) {
-    return <div className="p-6">Loading settings...</div>;
+    return <div className="p-3 sm:p-6">Loading settings...</div>;
   }
 
   if (!isAdmin) {
-    return <div className="p-6">You do not have permission to access this page.</div>;
+    return <div className="p-3 sm:p-6">You do not have permission to access this page.</div>;
   }
 
   const handleCompanyChange = (field: string, value: string) => {
@@ -93,11 +93,11 @@ const Settings = () => {
   };
 
   if (loading || roleLoading) {
-    return <div className="p-6">Loading settings...</div>;
+    return <div className="p-3 sm:p-6">Loading settings...</div>;
   }
 
   if (!isAdmin) {
-    return <div className="p-6">You do not have permission to access this page.</div>;
+    return <div className="p-3 sm:p-6">You do not have permission to access this page.</div>;
   }
 
   return (
@@ -122,7 +122,7 @@ const Settings = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
+          <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div>
               <Label htmlFor="companyName">Company Name</Label>
               <Input

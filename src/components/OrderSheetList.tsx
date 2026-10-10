@@ -240,7 +240,7 @@ const OrderSheetList = ({ onCreateNew, onEdit, onConvertToInvoice }: Props) => {
 
       <Card>
         <CardContent className="pt-5">
-          <div className="overflow-x-auto rounded-md border">
+          <div className="w-full min-w-0 overflow-x-auto overscroll-x-contain rounded-md border">
             <Table>
               <TableHeader><TableRow>
                 <TableHead>Order Form ID</TableHead><TableHead>Date</TableHead><TableHead>Customer ID</TableHead><TableHead>Customer</TableHead><TableHead>Delivery Date</TableHead><TableHead>Order Status</TableHead><TableHead className="text-right">Actions</TableHead>

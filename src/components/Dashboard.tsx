@@ -259,7 +259,7 @@ const Dashboard = ({ quotations, invoices, customers, onCreateQuotation, onCreat
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
+      <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-5 xl:gap-6">
         {stats.map((stat, index) => (
           <Card key={index} className="relative overflow-hidden hover:shadow-lg transition-all duration-300 animate-fade-in hover-scale border-border/50" style={{ animationDelay: `${index * 50}ms` }}>
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-50" />
