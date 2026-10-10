@@ -106,9 +106,9 @@ export const printOrderSheet = (order: OrderSheet, fabricCodes?: OrderFabricCode
   .pant .cell-head { background:linear-gradient(#fff2df,#f7e7d0); }
   .cell-body { padding:2mm 2.5mm 1.5mm; min-height:51mm; color:#08265b; }
   .fabric-body { display:flex; align-items:flex-start; justify-content:flex-start; padding:3mm 2mm; font-weight:700; font-size:3mm; line-height:1.45; overflow-wrap:anywhere; }
-  .measurements { padding:2mm 3mm; }
-  .measure-row { height:7mm; display:grid; grid-template-columns:20mm 3mm minmax(0, 1fr); align-items:end; font-size:3.3mm; }
-  .line-value { border-bottom:1px solid #123e73; min-width:10mm; height:5mm; padding-left:1mm; }
+  .measurements { padding:1mm 3mm; min-height:0; overflow:visible; }
+  .measure-row { height:6mm; min-height:6mm; display:grid; grid-template-columns:20mm 3mm minmax(0, 1fr); align-items:end; font-size:2.9mm; line-height:1.1; }
+  .line-value { border-bottom:1px solid #123e73; min-width:10mm; height:4.5mm; padding-left:1mm; }
   .style-list { padding:2mm 3mm; font-size:3.5mm; }
   .style-row { height:7.5mm; display:flex; align-items:center; gap:2mm; white-space:nowrap; }
   .check { font-size:5.5mm; line-height:1; width:5mm; }
