@@ -46,27 +46,27 @@ grant update (last_read_at) on public.chat_conversation_members to authenticated
 grant select, insert on public.chat_messages to authenticated;
 
 -- SECURITY DEFINER helpers avoid recursive RLS checks on the membership table.
-create or replace function public.is_chat_member(p_conversation_id uuid, p_user_id uuid default auth.uid())
+create or replace function public.is_chat_member(p_conversation_id uuid)
 returns boolean
 language sql stable security definer
 set search_path = public
-as 'select exists (select 1 from public.chat_conversation_members m where m.conversation_id = p_conversation_id and m.user_id = p_user_id)';
+as 'select exists (select 1 from public.chat_conversation_members m where m.conversation_id = p_conversation_id and m.user_id = auth.uid())';
 
-create or replace function public.is_chat_creator(p_conversation_id uuid, p_user_id uuid default auth.uid())
+create or replace function public.is_chat_creator(p_conversation_id uuid)
 returns boolean
 language sql stable security definer
 set search_path = public
-as 'select exists (select 1 from public.chat_conversations c where c.id = p_conversation_id and c.created_by = p_user_id)';
+as 'select exists (select 1 from public.chat_conversations c where c.id = p_conversation_id and c.created_by = auth.uid())';
 
-revoke all on function public.is_chat_member(uuid, uuid) from public;
-revoke all on function public.is_chat_creator(uuid, uuid) from public;
-grant execute on function public.is_chat_member(uuid, uuid) to authenticated;
-grant execute on function public.is_chat_creator(uuid, uuid) to authenticated;
+revoke all on function public.is_chat_member(uuid) from public;
+revoke all on function public.is_chat_creator(uuid) from public;
+grant execute on function public.is_chat_member(uuid) to authenticated;
+grant execute on function public.is_chat_creator(uuid) to authenticated;
 
 drop policy if exists "Members can view their conversations" on public.chat_conversations;
 create policy "Members can view their conversations" on public.chat_conversations
   for select to authenticated using (
-    (created_by = auth.uid() or public.is_chat_member(id, auth.uid()))
+    (created_by = auth.uid() or public.is_chat_member(id))
   );
 
 drop policy if exists "Authenticated users can create conversations" on public.chat_conversations;
@@ -76,20 +76,20 @@ create policy "Authenticated users can create conversations" on public.chat_conv
 drop policy if exists "Members can update their conversations" on public.chat_conversations;
 create policy "Members can update their conversations" on public.chat_conversations
   for update to authenticated using (
-    public.is_chat_member(id, auth.uid())
+    public.is_chat_member(id)
   ) with check (
-    public.is_chat_member(id, auth.uid())
+    public.is_chat_member(id)
   );
 
 drop policy if exists "Users can view their chat memberships" on public.chat_conversation_members;
 create policy "Users can view their chat memberships" on public.chat_conversation_members
   for select to authenticated using (
-    user_id = auth.uid() or public.is_chat_member(conversation_id, auth.uid())
+    user_id = auth.uid() or public.is_chat_member(conversation_id)
   );
 
 drop policy if exists "Conversation creators can add members" on public.chat_conversation_members;
 create policy "Conversation creators can add members" on public.chat_conversation_members
-  for insert to authenticated with check (public.is_chat_creator(conversation_id, auth.uid()));
+  for insert to authenticated with check (public.is_chat_creator(conversation_id));
 
 drop policy if exists "Users can update their own read marker" on public.chat_conversation_members;
 create policy "Users can update their own read marker" on public.chat_conversation_members
@@ -98,13 +98,13 @@ create policy "Users can update their own read marker" on public.chat_conversati
 drop policy if exists "Members can read conversation messages" on public.chat_messages;
 create policy "Members can read conversation messages" on public.chat_messages
   for select to authenticated using (
-    public.is_chat_member(chat_messages.conversation_id, auth.uid())
+    public.is_chat_member(chat_messages.conversation_id)
   );
 
 drop policy if exists "Members can send conversation messages" on public.chat_messages;
 create policy "Members can send conversation messages" on public.chat_messages
   for insert to authenticated with check (
-    sender_id = auth.uid() and public.is_chat_member(chat_messages.conversation_id, auth.uid())
+    sender_id = auth.uid() and public.is_chat_member(chat_messages.conversation_id)
   );
 
 -- Realtime is used by the client to receive new messages without polling.
