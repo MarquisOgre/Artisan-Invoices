@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, CheckCheck } from "lucide-react";
+import { Bell, CheckCheck, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAuth } from "@/hooks/useAuth";
@@ -125,6 +125,41 @@ export default function NotificationBell() {
     return () => { cancelled = true; };
   }, [open, user?.id]);
 
+  const deleteNotification = async (item: NotificationRow) => {
+    if (!user) return;
+    if (!window.confirm("Delete this notification from your list?")) return;
+
+    setItems(current => current.filter(row => row.id !== item.id));
+    const { error } = await (supabase as any).from("notifications")
+      .delete().eq("id", item.id).eq("user_id", user.id);
+    if (error) {
+      console.error("Unable to delete notification", error);
+      const { data } = await (supabase as any).from("notifications")
+        .select("id, event_type, title, message, target_path, entity_id, created_at, read_at")
+        .eq("user_id", user.id).order("created_at", { ascending: false }).limit(50);
+      if (data) setItems(data);
+      console.error("Notification deletion failed; list restored from server.");
+    }
+  };
+
+  const clearOwnNotifications = async () => {
+    if (!user || items.length === 0) return;
+    if (!window.confirm("Clear all your notifications, including unread ones? Other users' notifications will not be affected.")) return;
+
+    const previousItems = items;
+    setItems([]);
+    const { error } = await (supabase as any).from("notifications")
+      .delete().eq("user_id", user.id);
+    if (error) {
+      console.error("Unable to clear your notifications", error);
+      const { data } = await (supabase as any).from("notifications")
+        .select("id, event_type, title, message, target_path, entity_id, created_at, read_at")
+        .eq("user_id", user.id).order("created_at", { ascending: false }).limit(50);
+      setItems(data || previousItems);
+      return;
+    }
+  };
+
   const markRead = async (item: NotificationRow) => {
     if (!item.read_at) {
       const readAt = new Date().toISOString();
@@ -172,14 +207,15 @@ export default function NotificationBell() {
           <div className="absolute right-0 top-full z-[70] mt-2 w-[min(24rem,calc(100vw-1rem))] rounded-lg border bg-card text-card-foreground shadow-xl">
             <div className="flex items-center justify-between border-b p-3">
               <div><h2 className="font-semibold">Notifications</h2><p className="text-xs text-muted-foreground">{unreadCount ? `${unreadCount} unread` : "You're all caught up"}</p></div>
-              <Button variant="ghost" size="sm" disabled={!unreadCount} onClick={() => void markAllRead()}><CheckCheck className="mr-1 h-4 w-4" />Mark all read</Button>
+              <div className="flex items-center gap-1"><Button variant="ghost" size="sm" disabled={!unreadCount} onClick={() => void markAllRead()}><CheckCheck className="mr-1 h-4 w-4" />Mark all read</Button><Button variant="ghost" size="sm" disabled={!items.length} onClick={() => void clearOwnNotifications()}><Trash2 className="mr-1 h-4 w-4" />Clear all</Button></div>
             </div>
             <ScrollArea className="max-h-[min(65vh,28rem)]">
               {loading && <p className="p-5 text-center text-sm text-muted-foreground">Loading notifications…</p>}
               {!loading && items.length === 0 && <p className="p-6 text-center text-sm text-muted-foreground">No notifications yet.</p>}
               <div className="divide-y">
                 {items.map(item => (
-                  <button key={item.id} onClick={() => void markRead(item)} className={`block w-full p-3 text-left transition-colors hover:bg-muted/70 ${item.read_at ? "" : "bg-primary/5"}`}>
+                  <div key={item.id} className={`flex items-start gap-1 p-2 transition-colors hover:bg-muted/70 ${item.read_at ? "" : "bg-primary/5"}`}>
+                    <button onClick={() => void markRead(item)} className="min-w-0 flex-1 p-1 text-left">
                     <span className="flex items-start gap-2">
                       <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${item.read_at ? "bg-transparent" : "bg-primary"}`} />
                       <span className="min-w-0 flex-1">
@@ -188,7 +224,9 @@ export default function NotificationBell() {
                         <span className="mt-1 block text-xs text-muted-foreground">{new Date(item.created_at).toLocaleString()}</span>
                       </span>
                     </span>
-                  </button>
+                    </button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" title="Delete this notification" aria-label="Delete this notification" onClick={() => void deleteNotification(item)}><Trash2 className="h-4 w-4" /></Button>
+                  </div>
                 ))}
               </div>
             </ScrollArea>
