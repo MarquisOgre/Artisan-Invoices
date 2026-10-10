@@ -34,7 +34,7 @@ export default function NotificationManagement() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase.rpc("admin_list_notifications" as never);
+    const { data, error } = await (supabase as any).rpc("admin_list_notifications");
     if (error) {
       console.error("Unable to load admin notifications", error);
       toast({ title: "Unable to load notifications", description: error.message, variant: "destructive" });
@@ -78,10 +78,10 @@ export default function NotificationManagement() {
     if (!window.confirm(confirmation)) return;
 
     setBusy(true);
-    const { data, error } = await supabase.rpc("admin_delete_notifications" as never, {
+    const { data, error } = await (supabase as any).rpc("admin_delete_notifications", {
       p_ids: all ? null : selected,
       p_all: all,
-    } as never);
+    });
     if (error) {
       console.error("Unable to delete notifications", error);
       toast({ title: "Deletion failed", description: error.message, variant: "destructive" });
