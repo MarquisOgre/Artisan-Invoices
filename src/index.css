@@ -140,4 +140,10 @@ All colors MUST be HSL.
   main { overflow-wrap: anywhere; }
   [data-radix-popper-content-wrapper] { max-width: calc(100vw - 1rem); }
   input, select, textarea { font-size: 16px; }
+  button, [role="button"] { touch-action: manipulation; }
+  .container { width: 100%; max-width: 100%; padding-left: 1rem; padding-right: 1rem; }
+  [role="dialog"] { max-width: calc(100vw - 1rem); max-height: calc(100dvh - 1rem); overflow-y: auto; }
+  form .grid { min-width: 0; }
+  form label { overflow-wrap: anywhere; }
+  table { table-layout: auto; }
 }
