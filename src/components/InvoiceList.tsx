@@ -185,7 +185,7 @@ const InvoiceList = ({
         </CardHeader>
         <CardContent>
           <div className="w-full min-w-0 rounded-md border overflow-x-auto overscroll-x-contain">
-            <Table>
+            <Table className="min-w-[980px] whitespace-nowrap">
               <TableHeader>
                 <TableRow>
                   <TableHead>Invoice ID</TableHead>
