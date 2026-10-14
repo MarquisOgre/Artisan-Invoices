@@ -288,6 +288,54 @@ const QuotationList = ({
               </TableBody>
             </Table>
           </div>
+          <div className="space-y-3 sm:hidden">
+            {filteredQuotations.length === 0 ? (
+              <div className="rounded-lg border p-6 text-center text-sm text-muted-foreground">No quotations found.</div>
+            ) : filteredQuotations.map((quotation) => (
+              <article key={quotation.id} className="rounded-xl border bg-card p-4 shadow-sm">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="break-words font-semibold">{quotation.quotationNumber || "Quotation"}</p>
+                    <p className="mt-1 break-words text-sm text-muted-foreground">{quotation.customer}</p>
+                  </div>
+                  {getStatusBadge(quotation.status)}
+                </div>
+                <div className="mt-4 grid grid-cols-2 gap-x-3 gap-y-3 text-sm">
+                  <div><p className="text-xs text-muted-foreground">Amount</p><p className="mt-1 font-semibold">₹{quotation.amount.toLocaleString("en-IN")}</p></div>
+                  <div><p className="text-xs text-muted-foreground">Size</p><p className="mt-1 break-words">{quotation.shirtSizes}</p></div>
+                  <div><p className="text-xs text-muted-foreground">Quotation Date</p><p className="mt-1">{quotation.date || "-"}</p></div>
+                  <div><p className="text-xs text-muted-foreground">Valid Until</p><p className="mt-1">{quotation.validUntil || "-"}</p></div>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-2 border-t pt-3">
+                  <Button size="sm" variant="outline" className="flex-1" onClick={() => onViewQuotation(quotation.id)}><Eye className="mr-1 h-4 w-4" />View</Button>
+                  <Button size="sm" variant="outline" className="flex-1" onClick={() => onEditQuotation(quotation.fullQuotation)}><Edit className="mr-1 h-4 w-4" />Edit</Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild><Button size="sm" variant="secondary" aria-label={`More actions for ${quotation.quotationNumber}`}><MoreHorizontal className="h-4 w-4" />More</Button></DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56">
+                      <DropdownMenuItem onClick={async () => {
+                        const { generateQuotationPrintHTML } = await import('@/utils/printTemplate');
+                        const printWindow = window.open('', '_blank');
+                        if (!printWindow) return;
+                        printWindow.document.write(generateQuotationPrintHTML(quotation.fullQuotation, companySettings, invoiceSettings.termsAndConditions));
+                        printWindow.document.close();
+                        const images = Array.from(printWindow.document.images);
+                        await Promise.all(images.map(img => new Promise<void>(resolve => {
+                          if (img.complete) { resolve(); return; }
+                          const finish = () => { img.removeEventListener("load", finish); img.removeEventListener("error", finish); resolve(); };
+                          img.addEventListener("load", finish, { once: true }); img.addEventListener("error", finish, { once: true });
+                          window.setTimeout(finish, 5000);
+                        })));
+                        printWindow.focus(); printWindow.print();
+                      }}><Printer className="mr-2 h-4 w-4" />Print</DropdownMenuItem>
+                      {quotation.status !== "invoiced" && <DropdownMenuItem onClick={() => onQuotationToInvoice(quotation.id)}><FileText className="mr-2 h-4 w-4" />Quotation to Invoice</DropdownMenuItem>}
+                      {quotation.status === "sent" && <DropdownMenuItem onClick={() => onSendToCustomer?.(quotation.id)}><Send className="mr-2 h-4 w-4" />Send to Customer</DropdownMenuItem>}
+                      <DropdownMenuItem className="text-destructive" onClick={() => onDelete(quotation.id)}><Trash2 className="mr-2 h-4 w-4" />Delete</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </article>
+            ))}
+          </div>
         </CardContent>
       </Card>
 
