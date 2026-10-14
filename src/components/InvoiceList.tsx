@@ -242,6 +242,31 @@ const InvoiceList = ({
                                 const invoiceHtml = generateInvoicePrintHTML(invoice.fullInvoice, companySettings, invoiceSettings.termsAndConditions);
                                 printWindow.document.write(invoiceHtml);
                                 printWindow.document.close();
+
+                                // Wait for the logo and other images before opening print preview.
+                                const images = Array.from(printWindow.document.images);
+                                await Promise.all(images.map((img) => new Promise<void>((resolve) => {
+                                  let settled = false;
+                                  const finish = () => {
+                                    if (settled) return;
+                                    settled = true;
+                                    window.clearTimeout(timeout);
+                                    img.removeEventListener("load", finish);
+                                    img.removeEventListener("error", finish);
+                                    resolve();
+                                  };
+                                  const timeout = window.setTimeout(finish, 5000);
+                                  img.addEventListener("load", finish, { once: true });
+                                  img.addEventListener("error", finish, { once: true });
+                                  if (img.complete) finish();
+                                })));
+                                await Promise.all(images.map((img) =>
+                                  img.complete && img.naturalWidth > 0 && typeof img.decode === "function"
+                                    ? img.decode().catch(() => undefined)
+                                    : Promise.resolve()
+                                ));
+
+                                printWindow.focus();
                                 printWindow.print();
                               }
                             }}>
