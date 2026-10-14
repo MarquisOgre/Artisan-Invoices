@@ -65,25 +65,29 @@ const generateStyles = () => `
 
     /* HEADER */
     .header-top {
+      position: relative;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: center;
+      min-height: 100px;
       margin-bottom: 15px; /* uniform spacing */
     }
 
     .logo {
+      position: absolute;
+      left: 0;
+      top: 50%;
       display: block;
       height: 100px;
       width: 180px;
-      min-width: 180px;
       max-width: 180px;
       object-fit: contain;
-      object-position: center;
-      flex: 0 0 180px;
+      object-position: left center;
+      transform: translateY(-50%);
     }
 
     .title-block {
-      flex: 1;
+      width: 100%;
       text-align: center;
     }
 
@@ -103,7 +107,7 @@ const generateStyles = () => `
     }
 
     .spacer {
-      width: 60px;
+      display: none;
     }
 
     /* BILLING / CUSTOMER SECTION */
