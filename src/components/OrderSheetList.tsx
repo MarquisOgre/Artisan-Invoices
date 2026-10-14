@@ -240,7 +240,7 @@ const OrderSheetList = ({ onCreateNew, onEdit, onConvertToInvoice }: Props) => {
 
       <Card>
         <CardContent className="pt-5">
-          <div className="w-full min-w-0 overflow-x-auto overscroll-x-contain rounded-md border">
+          <div className="hidden w-full min-w-0 overflow-x-auto overscroll-x-contain rounded-md border sm:block">
             <Table>
               <TableHeader><TableRow>
                 <TableHead>Order Form ID</TableHead><TableHead>Date</TableHead><TableHead>Customer ID</TableHead><TableHead>Customer</TableHead><TableHead>Delivery Date</TableHead><TableHead>Order Status</TableHead><TableHead className="text-right">Actions</TableHead>
@@ -287,6 +287,31 @@ const OrderSheetList = ({ onCreateNew, onEdit, onConvertToInvoice }: Props) => {
                 ))}
               </TableBody>
             </Table>
+          </div>
+          <div className="space-y-3 sm:hidden">
+            {loading ? <div className="rounded-lg border p-6 text-center text-sm text-muted-foreground">Loading order forms...</div> :
+              filtered.length === 0 ? <div className="rounded-lg border p-6 text-center text-sm text-muted-foreground">No saved order forms found.</div> :
+              filtered.map(order => (
+                <article key={order.id} className="rounded-xl border bg-card p-4 shadow-sm">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0"><p className="break-words font-semibold">{order.order_no}</p><p className="mt-1 break-words text-sm text-muted-foreground">{order.customer_name}</p></div>
+                    <span className="shrink-0 rounded-full bg-muted px-2.5 py-1 text-xs font-medium">{order.status || "Pending"}</span>
+                  </div>
+                  <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
+                    <div><p className="text-xs text-muted-foreground">Order Date</p><p className="mt-1">{formatDate(order.order_date)}</p></div>
+                    <div><p className="text-xs text-muted-foreground">Delivery Date</p><p className="mt-1">{formatDate(order.delivery_date)}</p></div>
+                    <div><p className="text-xs text-muted-foreground">Customer ID</p><p className="mt-1 break-words">{order.customer_code || "-"}</p></div>
+                    <div><p className="text-xs text-muted-foreground">Contact</p><p className="mt-1 break-words">{order.contact_no || "-"}</p></div>
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-2 border-t pt-3">
+                    <Button size="sm" variant="outline" className="flex-1" onClick={() => setSelected(order)}><Eye className="mr-1 h-4 w-4" />View</Button>
+                    <Button size="sm" variant="outline" className="flex-1" onClick={() => onEdit(order)}><Pencil className="mr-1 h-4 w-4" />Edit</Button>
+                    <Button size="sm" variant="outline" className="flex-1" onClick={() => onConvertToInvoice(order)}><FilePlus2 className="mr-1 h-4 w-4" />Invoice</Button>
+                    <Button size="sm" variant="outline" onClick={() => printOrderSheet(order, fabricCodesByOrder[order.id], companySettings)} aria-label={`Print ${order.order_no}`}><Printer className="h-4 w-4" /></Button>
+                    <Button size="sm" variant="destructive" onClick={() => void handleDelete(order)} disabled={deletingId === order.id} aria-label={`Delete ${order.order_no}`}><Trash2 className="h-4 w-4" /></Button>
+                  </div>
+                </article>
+              ))}
           </div>
         </CardContent>
       </Card>
