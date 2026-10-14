@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Edit3, Plus, Search, Trash2, Upload, X } from "lucide-react";
+import { Edit3, Plus, Search, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -174,28 +174,31 @@ const FabricPage = (_props: FabricPageProps) => {
   };
 
   return (
-    <div className="mx-auto w-full max-w-[1500px] space-y-5">
+    <div className="mx-auto w-full min-w-0 max-w-[1500px] space-y-5 pb-[env(safe-area-inset-bottom)] [overflow-wrap:normal]">
       <div className="flex flex-col gap-4 rounded-2xl border bg-card p-5 shadow-sm lg:flex-row lg:items-center lg:justify-between">
         <h1 className="text-2xl font-bold text-primary">Fabric Master</h1>
 
-        <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center lg:w-auto">
-          <div className="relative w-full sm:w-[420px]">
+        <div className="flex w-full min-w-0 flex-col gap-3 sm:flex-row sm:items-center lg:w-auto">
+          <div className="relative w-full min-w-0 sm:max-w-[420px]">
             <Search className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
               value={search}
               onChange={e => setSearch(e.target.value)}
+              aria-label="Search fabrics"
               placeholder="Search code, article, design, composition..."
               className="h-10 pl-9 pr-9"
             />
             {search && (
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon"
                 onClick={() => setSearch("")}
-                className="absolute right-2 top-2 rounded p-1 text-muted-foreground hover:bg-muted"
+                className="absolute right-1 top-1 h-8 w-8 text-muted-foreground"
                 aria-label="Clear fabric search"
               >
                 <X className="h-4 w-4" />
-              </button>
+              </Button>
             )}
           </div>
 
@@ -206,10 +209,57 @@ const FabricPage = (_props: FabricPageProps) => {
         </div>
       </div>
 
-      <Card>
+      <div className="space-y-3 md:hidden" aria-label="Fabric list">
+        {loading ? (
+          <p className="py-10 text-center text-muted-foreground" role="status">Loading fabrics...</p>
+        ) : filtered.length === 0 ? (
+          <p className="py-10 text-center text-muted-foreground" role="status">No fabrics found.</p>
+        ) : (
+          filtered.map(fabric => (
+            <Card key={fabric.id}>
+              <CardContent className="p-4">
+                <article aria-label={`Fabric ${fabric.code}`}>
+                  <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+                    {[
+                      ["Category", fabric.category],
+                      ["Fabric Code", fabric.code],
+                      ["Brand", fabric.brand],
+                      ["Article", fabric.article],
+                      ["Design", fabric.design],
+                      ["Finish", fabric.finish],
+                      ["Count", fabric.count_spec],
+                      ["Composition", fabric.composition],
+                    ].map(([label, value]) => (
+                      <div key={label} className="min-w-0">
+                        <dt className="text-muted-foreground">{label}</dt>
+                        <dd className="mt-1 font-medium [overflow-wrap:anywhere]">{value || "—"}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                  <div className="mt-4 flex flex-wrap gap-2 border-t pt-3">
+                    <Button variant="outline" onClick={() => openEdit(fabric)}>
+                      <Edit3 className="h-4 w-4" />
+                      Edit
+                    </Button>
+                    <Button variant="ghost" className="text-destructive hover:text-destructive" onClick={() => handleDelete(fabric)}>
+                      <Trash2 className="h-4 w-4" />
+                      Deactivate
+                    </Button>
+                  </div>
+                </article>
+              </CardContent>
+            </Card>
+          ))
+        )}
+        <p className="text-xs text-muted-foreground">
+          Showing {filtered.length} of {fabrics.length} active fabrics.
+        </p>
+      </div>
+
+      <Card className="hidden min-w-0 md:block">
         <CardContent className="p-0">
           <div className="w-full min-w-0 overflow-x-auto overscroll-x-contain rounded-md border">
-            <table className="w-full min-w-[1200px] text-sm">
+            <table className="w-full min-w-[1200px] whitespace-nowrap text-sm">
               <thead>
                 <tr className="border-y bg-[#edf5fc] text-left text-[#123766]">
                   <th className="px-4 py-3 font-bold">Category</th>
