@@ -295,7 +295,7 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
         className="h-screen flex flex-col"
         style={{ paddingTop: HEADER_HEIGHT, paddingBottom: FOOTER_HEIGHT }}
       >
-        <main className="flex-1 min-h-0 min-w-0 overflow-auto p-3 sm:p-4 lg:p-6">
+        <main className="flex-1 min-h-0 min-w-0 overflow-auto p-3 pb-8 sm:p-4 sm:pb-8 lg:p-6">
           {children}
         </main>
       </div>
