@@ -23,20 +23,7 @@ interface InvoiceItem {
   quantity: number;
   rate: number;
   amount: number;
-  customDescription?: string;
 }
-
-const PRODUCTS = [
-  "Dark Blue",
-  "Ratan Blue",
-  "White",
-  "Black Plain",
-  "Brown",
-  "Jacuard White",
-  "Jacuard Black",
-  "White Dotted",
-  "Blue Dotted",
-];
 
 const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'create' }: InvoiceFormProps) => {
   const [formData, setFormData] = useState({
@@ -73,22 +60,7 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
         taxType: "IGST_18",
         taxMode: "inclusive",
       }));
-      setItems((initialData.items || []).map((item: InvoiceItem) => {
-        const description = item.description || "";
-        const isBuiltInProduct = PRODUCTS.includes(description);
-        return {
-          ...item,
-          // The product dropdown only accepts built-in product values or
-          // the special custom option. Preserve order-form descriptions as
-          // editable custom descriptions so they appear prefilled.
-          description: isBuiltInProduct ? description : "__custom__",
-          customDescription: isBuiltInProduct ? undefined : (item.customDescription || description),
-          shirt_size: item.shirt_size || "",
-          quantity: item.quantity || 1,
-          rate: item.rate || 0,
-          amount: item.amount || 0,
-        };
-      }));
+      setItems((initialData.items || []).map((item: InvoiceItem) => ({ ...item, description: item.description || "", shirt_size: item.shirt_size === "__custom_size__" ? "" : (item.shirt_size || ""), quantity: item.quantity || 1, rate: item.rate || 0, amount: item.amount || 0 })));
       return;
     }
 
@@ -109,19 +81,8 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
         advanceAmount: initialData.advance_amount || 0
       });
       
-      // Process items to handle products not in dropdown
-      const processedItems = (initialData.items || []).map((item: InvoiceItem) => {
-        const isInProductList = PRODUCTS.includes(item.description);
-        if (!isInProductList && item.description) {
-          return {
-            ...item,
-            description: "__custom__",
-            customDescription: item.description
-          };
-        }
-        return item;
-      });
-      setItems(processedItems);
+      // Preserve saved descriptions and sizes as free-form text.
+      setItems((initialData.items || []).map((item: InvoiceItem) => ({ ...item, description: item.description || "", shirt_size: item.shirt_size === "__custom_size__" ? "" : (item.shirt_size || "") })));
     }
   }, [initialData, mode, customers]);
 
@@ -156,16 +117,8 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
       return;
     }
 
-    // Process items to use custom description if applicable
-    const processedItems = items.map(item => {
-      if (item.description === "__custom__" && item.customDescription) {
-        return { ...item, description: item.customDescription, customDescription: undefined };
-      }
-      return item;
-    });
-    
     // Validate that ALL fields are filled for each item
-    const validItems = processedItems.filter(item => 
+    const validItems = items.filter(item => 
       item.description.trim() && item.shirt_size.trim() && item.quantity > 0 && item.rate > 0
     );
     
@@ -178,7 +131,7 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
       return;
     }
 
-    if (validItems.length !== processedItems.length) {
+    if (validItems.length !== items.length) {
       toast({
         title: "Validation Error",
         description: "Please fill all mandatory fields (Description and Size) for all items.",
@@ -558,129 +511,24 @@ const InvoiceForm = ({ customers, onSubmit, onCancel, initialData, mode = 'creat
             <div className="space-y-4">
               {items.map((item, index) => (
                 <div key={index} className="grid min-w-0 grid-cols-1 gap-3 items-end sm:grid-cols-12 sm:gap-2">
-                  {index === 0 && (
-                    <div className="col-span-full min-w-0 sm:col-span-4">
-                      <Label htmlFor={`description-${index}`}>Description *</Label>
-                      <Select 
-                        value={item.description} 
-                        onValueChange={(value) => handleItemChange(index, "description", value)}
-                      >
-                        <SelectTrigger id={`description-${index}`} className="bg-background">
-                          <SelectValue placeholder="Select or type product" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-popover z-50">
-                          <SelectItem value="__custom__">Custom Description</SelectItem>
-                          {PRODUCTS.map((product) => (
-                            <SelectItem key={product} value={product}>
-                              {product}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {item.description === "__custom__" && (
-                        <Input
-                          className="mt-2"
-                          value={item.customDescription || ""}
-                          onChange={(e) => {
-                            const newItems = [...items];
-                            newItems[index] = { ...newItems[index], customDescription: e.target.value };
-                            setItems(newItems);
-                          }}
-                          placeholder="Enter custom description"
-                        />
-                      )}
-                    </div>
-                  )}
-                  {index > 0 && (
-                    <div className="col-span-full min-w-0 sm:col-span-4">
-                      <Select 
-                        value={item.description} 
-                        onValueChange={(value) => handleItemChange(index, "description", value)}
-                      >
-                        <SelectTrigger className="bg-background">
-                          <SelectValue placeholder="Select or type product" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-popover z-50">
-                          <SelectItem value="__custom__">Custom Description</SelectItem>
-                          {PRODUCTS.map((product) => (
-                            <SelectItem key={product} value={product}>
-                              {product}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {item.description === "__custom__" && (
-                        <Input
-                          className="mt-2"
-                          value={item.customDescription || ""}
-                          onChange={(e) => {
-                            const newItems = [...items];
-                            newItems[index] = { ...newItems[index], customDescription: e.target.value };
-                            setItems(newItems);
-                          }}
-                          placeholder="Enter custom description"
-                        />
-                      )}
-                    </div>
-                  )}
-                  {index === 0 && (
-                    <div className="col-span-full min-w-0 sm:col-span-1 min-w-0">
-                      <Label htmlFor={`shirt_size-${index}`}>Size *</Label>
-                      {item.description === "__custom__" ? (
-                        <Input
-                          id={`shirt_size-${index}`}
-                          value={item.shirt_size}
-                          onChange={(e) => handleItemChange(index, "shirt_size", e.target.value)}
-                          placeholder="Size"
-                        />
-                      ) : (
-                        <Select 
-                          value={item.shirt_size} 
-                          onValueChange={(value) => handleItemChange(index, "shirt_size", value)}
-                        >
-                          <SelectTrigger id={`shirt_size-${index}`} className="bg-background">
-                            <SelectValue placeholder="Size" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-popover z-50">
-                            <SelectItem value="39">39</SelectItem>
-                            <SelectItem value="40">40</SelectItem>
-                            <SelectItem value="42">42</SelectItem>
-                            <SelectItem value="44">44</SelectItem>
-                            <SelectItem value="46">46</SelectItem>
-                            <SelectItem value="__custom_size__">Custom Size</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      )}
-                    </div>
-                  )}
-                  {index > 0 && (
-                    <div className="col-span-full min-w-0 sm:col-span-1 min-w-0">
-                      {item.description === "__custom__" ? (
-                        <Input
-                          value={item.shirt_size}
-                          onChange={(e) => handleItemChange(index, "shirt_size", e.target.value)}
-                          placeholder="Size"
-                        />
-                      ) : (
-                        <Select 
-                          value={item.shirt_size} 
-                          onValueChange={(value) => handleItemChange(index, "shirt_size", value)}
-                        >
-                          <SelectTrigger className="bg-background">
-                            <SelectValue placeholder="Size" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-popover z-50">
-                            <SelectItem value="39">39</SelectItem>
-                            <SelectItem value="40">40</SelectItem>
-                            <SelectItem value="42">42</SelectItem>
-                            <SelectItem value="44">44</SelectItem>
-                            <SelectItem value="46">46</SelectItem>
-                            <SelectItem value="__custom_size__">Custom Size</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      )}
-                    </div>
-                  )}
+                  <div className="col-span-full min-w-0 sm:col-span-4">
+                    {index === 0 && <Label htmlFor={`description-${index}`}>Description *</Label>}
+                    <Input
+                      id={`description-${index}`}
+                      value={item.description}
+                      onChange={(e) => handleItemChange(index, "description", e.target.value)}
+                      placeholder="Enter description"
+                    />
+                  </div>
+                  <div className="col-span-full min-w-0 sm:col-span-1">
+                    {index === 0 && <Label htmlFor={`shirt_size-${index}`}>Size *</Label>}
+                    <Input
+                      id={`shirt_size-${index}`}
+                      value={item.shirt_size === "__custom_size__" ? "" : item.shirt_size}
+                      onChange={(e) => handleItemChange(index, "shirt_size", e.target.value)}
+                      placeholder="Enter size"
+                    />
+                  </div>
                   <div className="col-span-full min-w-0 sm:col-span-2">
                     {index === 0 && <Label htmlFor={`quantity-${index}`}>Qty</Label>}
                     <Input
