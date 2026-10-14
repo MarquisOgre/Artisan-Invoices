@@ -53,7 +53,7 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
   };
 
   return (
-    <div className="h-screen overflow-hidden bg-background">
+    <div className="h-dvh overflow-hidden bg-background">
       {/* Fixed Header Navigation */}
       <header
         className="fixed top-0 left-0 right-0 z-50 bg-card border-b shadow-sm py-3"
