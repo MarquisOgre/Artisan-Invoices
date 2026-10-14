@@ -131,8 +131,8 @@ const InvoiceList = ({
     <div className="space-y-6">
       {/* Header with Search and Filter */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="relative flex-1 min-w-[200px]">
+        <div className="grid w-full grid-cols-1 gap-3 sm:flex sm:flex-wrap sm:items-center sm:gap-4">
+          <div className="relative w-full min-w-0 sm:min-w-[200px] sm:flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <Input
               placeholder="Search invoices..."
@@ -172,7 +172,7 @@ const InvoiceList = ({
             </Select>
           </div>
         </div>
-        <Button onClick={onCreateNew}>
+        <Button className="w-full sm:w-auto" onClick={onCreateNew}>
           <Receipt className="mr-2 h-4 w-4" />
           New Invoice
         </Button>
@@ -184,7 +184,7 @@ const InvoiceList = ({
           <CardTitle>All Invoices</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="w-full min-w-0 rounded-md border overflow-x-auto overscroll-x-contain">
+          <div className="hidden w-full min-w-0 rounded-md border overflow-x-auto overscroll-x-contain sm:block">
             <Table className="min-w-[980px] whitespace-nowrap">
               <TableHeader>
                 <TableRow>
