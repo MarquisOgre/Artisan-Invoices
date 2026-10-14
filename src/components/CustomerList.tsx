@@ -416,7 +416,7 @@ const CustomerList = ({ customers, onCreateNew, onViewCustomer, onEditCustomer, 
           <CardTitle>All Customers ({customers.length})</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="w-full min-w-0 rounded-md border overflow-x-auto overscroll-x-contain">
+          <div className="hidden w-full min-w-0 rounded-md border overflow-x-auto overscroll-x-contain sm:block">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -529,6 +529,33 @@ const CustomerList = ({ customers, onCreateNew, onViewCustomer, onEditCustomer, 
                 )}
               </TableBody>
             </Table>
+          </div>
+          <div className="space-y-3 sm:hidden">
+            {filteredCustomers.length === 0 ? (
+              <div className="rounded-lg border p-6 text-center text-sm text-muted-foreground">No customers found.</div>
+            ) : filteredCustomers.map((customer, index) => (
+              <article key={customer.id} className="rounded-xl border bg-card p-4 shadow-sm">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="break-words font-semibold">{customer.name}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">{customer.customer_code || `Customer ${index + 1}`}</p>
+                  </div>
+                  <Badge variant={customer.company ? "default" : "outline"}>{customer.company ? "Business" : "Individual"}</Badge>
+                </div>
+                <div className="mt-3 space-y-2 text-sm">
+                  <div className="flex min-w-0 items-start gap-2"><Mail className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" /><span className="break-all">{customer.email || "No email"}</span></div>
+                  <div className="flex items-start gap-2"><Phone className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" /><span>{customer.phone || "No phone"}</span></div>
+                  {(customer.company || customer.gst_no) && <div className="flex items-start gap-2"><Building className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" /><span className="break-words">{[customer.company, customer.gst_no ? `GST: ${customer.gst_no}` : ""].filter(Boolean).join(" · ")}</span></div>}
+                  <div className="flex items-start gap-2"><MapPin className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" /><span className="break-words">{[customer.city, customer.state].filter(Boolean).join(", ") || customer.address || "No address"}</span></div>
+                  <div className="text-xs text-muted-foreground">Size: {customer.shirt_size || "-"}</div>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-2 border-t pt-3">
+                  <Button size="sm" variant="outline" className="flex-1" onClick={() => handleViewCustomer(customer)}><Eye className="mr-1 h-4 w-4" />View</Button>
+                  <Button size="sm" variant="outline" className="flex-1" onClick={() => onEditCustomer(customer)}><Edit className="mr-1 h-4 w-4" />Edit</Button>
+                  <Button size="sm" variant="destructive" onClick={() => onDelete(customer.id)} aria-label={`Delete ${customer.name}`}><Trash2 className="h-4 w-4" /></Button>
+                </div>
+              </article>
+            ))}
           </div>
         </CardContent>
       </Card>
