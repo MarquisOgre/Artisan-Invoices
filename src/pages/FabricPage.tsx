@@ -174,8 +174,8 @@ const FabricPage = (_props: FabricPageProps) => {
   };
 
   return (
-    <div className="mx-auto w-full min-w-0 max-w-[1500px] space-y-5 pb-[env(safe-area-inset-bottom)] [overflow-wrap:normal]">
-      <div className="flex flex-col gap-4 rounded-2xl border bg-card p-5 shadow-sm lg:flex-row lg:items-center lg:justify-between">
+    <div className="mx-auto flex w-full min-w-0 max-w-[1500px] flex-col space-y-5 pb-[env(safe-area-inset-bottom)] [overflow-wrap:normal] md:h-full md:min-h-0 md:overflow-hidden md:space-y-4">
+      <div className="flex shrink-0 flex-col gap-4 rounded-2xl border bg-card p-5 shadow-sm lg:flex-row lg:items-center lg:justify-between">
         <h1 className="text-2xl font-bold text-primary">Fabric Master</h1>
 
         <div className="flex w-full min-w-0 flex-col gap-3 sm:flex-row sm:items-center lg:w-auto">
@@ -256,11 +256,11 @@ const FabricPage = (_props: FabricPageProps) => {
         </p>
       </div>
 
-      <Card className="hidden min-w-0 md:block">
-        <CardContent className="p-0">
-          <div className="w-full min-w-0 overflow-x-auto overscroll-x-contain rounded-md border">
-            <table className="w-full min-w-[1200px] whitespace-nowrap text-sm">
-              <thead>
+      <Card className="hidden min-h-0 min-w-0 flex-1 flex-col overflow-hidden md:flex">
+        <CardContent className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden p-0">
+          <div className="min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain rounded-md border">
+            <table className="w-full whitespace-nowrap text-sm">
+              <thead className="sticky top-0 z-10 bg-[#edf5fc]">
                 <tr className="border-y bg-[#edf5fc] text-left text-[#123766]">
                   <th className="px-4 py-3 font-bold">Category</th>
                   <th className="px-4 py-3 font-bold">Fabric Code</th>
@@ -289,15 +289,13 @@ const FabricPage = (_props: FabricPageProps) => {
                       <td className="px-4 py-3">{fabric.finish || "—"}</td>
                       <td className="px-4 py-3">{fabric.count_spec || "—"}</td>
                       <td className="px-4 py-3">{fabric.composition || "—"}</td>
-                      <td className="px-4 py-3">
-                        <div className="flex justify-end gap-2">
-                          <Button size="sm" variant="outline" onClick={() => openEdit(fabric)}>
-                            <Edit3 className="mr-1.5 h-3.5 w-3.5" />
-                            Edit
+                      <td className="px-3 py-3">
+                        <div className="flex justify-end gap-1.5">
+                          <Button type="button" size="icon" variant="outline" className="h-8 w-8" onClick={() => openEdit(fabric)} aria-label={`Edit fabric ${fabric.code}`} title={`Edit ${fabric.code}`}>
+                            <Edit3 className="h-4 w-4" />
                           </Button>
-                          <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => handleDelete(fabric)}>
-                            <Trash2 className="mr-1.5 h-3.5 w-3.5" />
-                            Deactivate
+                          <Button type="button" size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleDelete(fabric)} aria-label={`Deactivate fabric ${fabric.code}`} title={`Deactivate ${fabric.code}`}>
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
                       </td>
@@ -307,7 +305,7 @@ const FabricPage = (_props: FabricPageProps) => {
               </tbody>
             </table>
           </div>
-          <div className="border-t px-4 py-3 text-xs text-muted-foreground">
+          <div className="shrink-0 border-t px-4 py-3 text-xs text-muted-foreground">
             Showing {filtered.length} of {fabrics.length} active fabrics.
           </div>
         </CardContent>
