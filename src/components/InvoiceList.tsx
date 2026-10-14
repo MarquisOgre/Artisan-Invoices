@@ -304,6 +304,54 @@ const InvoiceList = ({
               </TableBody>
             </Table>
           </div>
+          <div className="space-y-3 sm:hidden">
+            {filteredInvoices.length === 0 ? (
+              <div className="rounded-lg border p-6 text-center text-sm text-muted-foreground">No invoices found.</div>
+            ) : filteredInvoices.map((invoice) => (
+              <article key={invoice.id} className="rounded-xl border bg-card p-4 shadow-sm">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="break-words font-semibold">{invoice.invoiceNumber}</p>
+                    <p className="mt-1 break-words text-sm text-muted-foreground">{invoice.customer}</p>
+                  </div>
+                  {getStatusBadge(invoice.status)}
+                </div>
+                <div className="mt-4 grid grid-cols-2 gap-x-3 gap-y-3 text-sm">
+                  <div><p className="text-xs text-muted-foreground">Amount</p><p className="mt-1 font-semibold">₹{(invoice.amount || 0).toLocaleString("en-IN")}</p></div>
+                  <div><p className="text-xs text-muted-foreground">Size</p><p className="mt-1 break-words">{invoice.shirtSizes}</p></div>
+                  <div><p className="text-xs text-muted-foreground">Invoice Date</p><p className="mt-1">{invoice.date || "-"}</p></div>
+                  <div><p className="text-xs text-muted-foreground">Due Date</p><p className="mt-1">{invoice.dueDate || "-"}</p></div>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-2 border-t pt-3">
+                  <Button size="sm" variant="outline" className="flex-1" onClick={() => onViewInvoice(invoice.id)}><Eye className="mr-1 h-4 w-4" />View</Button>
+                  <Button size="sm" variant="outline" className="flex-1" onClick={() => onEditInvoice(invoice.fullInvoice)}><Edit className="mr-1 h-4 w-4" />Edit</Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild><Button size="sm" variant="secondary" aria-label={`More actions for ${invoice.invoiceNumber}`}><MoreHorizontal className="h-4 w-4" />More</Button></DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-52">
+                      <DropdownMenuItem onClick={async () => {
+                        const { generateInvoicePrintHTML } = await import('@/utils/printTemplate');
+                        const printWindow = window.open('', '_blank');
+                        if (!printWindow) return;
+                        printWindow.document.write(generateInvoicePrintHTML(invoice.fullInvoice, companySettings, invoiceSettings.termsAndConditions));
+                        printWindow.document.close();
+                        const images = Array.from(printWindow.document.images);
+                        await Promise.all(images.map(img => new Promise<void>(resolve => {
+                          if (img.complete) { resolve(); return; }
+                          const finish = () => { img.removeEventListener("load", finish); img.removeEventListener("error", finish); resolve(); };
+                          img.addEventListener("load", finish, { once: true }); img.addEventListener("error", finish, { once: true });
+                          window.setTimeout(finish, 5000);
+                        })));
+                        printWindow.focus(); printWindow.print();
+                      }}><Receipt className="mr-2 h-4 w-4" />Print</DropdownMenuItem>
+                      {(invoice.status === "unpaid" || invoice.status === "sent") && <DropdownMenuItem onClick={() => onSendReminder?.(invoice.id)}><Send className="mr-2 h-4 w-4" />Send Reminder</DropdownMenuItem>}
+                      {invoice.status !== "paid" && <DropdownMenuItem onClick={() => onMarkAsPaid?.(invoice.id)}><CheckCircle className="mr-2 h-4 w-4" />Mark as Paid</DropdownMenuItem>}
+                      <DropdownMenuItem className="text-destructive" onClick={() => onDelete(invoice.id)}><Trash2 className="mr-2 h-4 w-4" />Delete</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </article>
+            ))}
+          </div>
         </CardContent>
       </Card>
 
