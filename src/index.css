@@ -148,7 +148,7 @@ All colors MUST be HSL.
   table { table-layout: auto; }
   /* Some measurement forms use fixed custom grid tracks on desktop. Stack those
      tracks on phones so labels and controls never become letter-wide columns. */
-  .grid[class*="grid-cols-\\["] { grid-template-columns: minmax(0, 1fr) !important; }
+  .grid[class*="grid-cols-[" { grid-template-columns: minmax(0, 1fr) !important; }
   .grid[class*="grid-cols-5"],
   .grid[class*="grid-cols-4"] { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
   .grid > * { min-width: 0; }
