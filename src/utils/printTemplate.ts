@@ -28,16 +28,13 @@ const getTaxRate = (taxType: string) => {
 };
 
 const generateCommonHeader = (title: string, companySettings: CompanySettings) => {
-  // Prefer the dedicated print logo, then the configured company logo.
-  // Resolve relative paths against the deployed app origin for the separate print window.
-  const configuredLogo = companySettings.printLogo || companySettings.logo || "/logo.png";
-  const logoUrl = new URL(configuredLogo, window.location.origin).href;
-  const fallbackLogoUrl = new URL("/logo.png", window.location.origin).href;
+  // Always use the bundled public logo so print output does not depend on Settings.
+  const logoUrl = new URL("/logo.png", window.location.origin).href;
 
   return `
   <div class="header">
     <div class="header-top">
-      <img src="${logoUrl}" alt="Company Logo" class="logo" onerror="if (!this.dataset.fallbackTried) { this.dataset.fallbackTried = 'true'; this.src = '${fallbackLogoUrl}'; } else { this.style.visibility = 'hidden'; }" />
+      <img src="${logoUrl}" alt="Company Logo" class="logo" />
       <div class="title-block">
         <h1>${title}</h1>
         <h2>${companySettings.name || 'Artisan Apparels'}</h2>
