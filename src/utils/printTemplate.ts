@@ -461,6 +461,7 @@ export const generateQuotationPrintHTML = (quotation: any, companySettings: Comp
     </table>
 
     <div class="totals-wrapper">
+      ${generateFabricFeatureBoxes(showFabricFeatures)}
       <table class="totals-table">
         <tr><td colspan="4" class="text-right bold">Total:</td><td class="text-right bold">${subtotal.toFixed(2)}</td></tr>
         <tr><td colspan="4" class="text-right">Discount:</td><td class="text-right">0.00</td></tr>
@@ -496,7 +497,6 @@ export const generateQuotationPrintHTML = (quotation: any, companySettings: Comp
         <p style="margin-top: 40px;"><strong>Authorised Signatory</strong></p>
       </div>
     </div>
-    ${generateFabricFeatureBoxes(showFabricFeatures)}
   </body>
   </html>`;
 };
