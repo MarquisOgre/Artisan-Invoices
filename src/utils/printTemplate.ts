@@ -150,8 +150,23 @@ const generateStyles = () => `
     /* TOTALS */
     .totals-wrapper {
       display: flex;
-      justify-content: flex-end;
-      margin-top: 15px; /* uniform spacing */
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-top: 15px;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    .fabric-specifications {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+    .fabric-specifications-title {
+      font-size: 10px;
+      font-weight: bold;
+      margin: 0 0 5px;
+      text-transform: none;
     }
 
     .totals-table {
@@ -197,14 +212,13 @@ const generateStyles = () => `
 
     .fabric-features {
       display: grid;
-      grid-template-columns: repeat(6, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 5px;
-      margin-top: 10px;
       page-break-inside: avoid;
       break-inside: avoid;
     }
     .fabric-feature {
-      min-height: 70px;
+      min-height: 48px;
       border: 1px solid #777;
       border-radius: 8px;
       padding: 5px 3px;
@@ -230,7 +244,7 @@ const generateStyles = () => `
     .fabric-feature strong { font-size: 7.5px; line-height: 1.15; }
     .fabric-feature span:last-child { font-size: 7px; line-height: 1.15; }
     @media print {
-      .fabric-features { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+      .fabric-features { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     }
     @media print {
       body {
@@ -245,13 +259,16 @@ const generateStyles = () => `
 
 
 const generateFabricFeatureBoxes = (enabled: boolean) => enabled ? `
-  <section class="fabric-features" aria-label="Fabric features">
+  <section class="fabric-specifications" aria-label="Fabric specifications">
+    <h3 class="fabric-specifications-title">Fabric Specifications</h3>
+    <div class="fabric-features">
     <div class="fabric-feature"><span class="fabric-feature-icon">✣</span><strong>ANTI-MICROBIAL</strong><span>Helps inhibit the growth of microbes</span></div>
     <div class="fabric-feature"><span class="fabric-feature-icon">↟</span><strong>SUPER WICK</strong><span>Moisture management</span></div>
     <div class="fabric-feature"><span class="fabric-feature-icon">☼</span><strong>UV PROTECTION</strong><span>UPF 50+ protection</span></div>
     <div class="fabric-feature"><span class="fabric-feature-icon">羽</span><strong>ULTRA SOFT</strong><span>Gentle on skin · High comfort</span></div>
     <div class="fabric-feature"><span class="fabric-feature-icon">◉</span><strong>COLOR RETENTION</strong><span>Long-lasting color vibrancy</span></div>
     <div class="fabric-feature"><span class="fabric-feature-icon">200</span><strong>200 GSM</strong><span>Fabric weight</span></div>
+    </div>
   </section>` : '';
 
 export const generateInvoicePrintHTML = (invoice: any, companySettings: CompanySettings, termsAndConditions?: string, showFabricFeatures = true): string => {
@@ -327,6 +344,7 @@ export const generateInvoicePrintHTML = (invoice: any, companySettings: CompanyS
     </table>
 
     <div class="totals-wrapper">
+      ${generateFabricFeatureBoxes(showFabricFeatures)}
       <table class="totals-table">
         <tr><td colspan="4" class="text-right bold">Total:</td><td class="text-right bold">${subtotal.toFixed(2)}</td></tr>
         <tr><td colspan="4" class="text-right">Discount:</td><td class="text-right">0.00</td></tr>
@@ -364,7 +382,6 @@ export const generateInvoicePrintHTML = (invoice: any, companySettings: CompanyS
         <p style="margin-top: 40px;"><strong>Authorised Signatory</strong></p>
       </div>
     </div>
-    ${generateFabricFeatureBoxes(showFabricFeatures)}
   </body>
   </html>`;
 };
