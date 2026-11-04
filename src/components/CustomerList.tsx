@@ -367,14 +367,16 @@ const CustomerList = ({ customers, onCreateNew, onViewCustomer, onEditCustomer, 
       (customer.customer_code || "").toLowerCase().includes(searchTerm.toLowerCase())
     )
     .sort((a, b) => {
+      // Newest customer records first; use the sequential customer code as a fallback.
+      const aCreated = a.created_at ? new Date(a.created_at).getTime() : 0;
+      const bCreated = b.created_at ? new Date(b.created_at).getTime() : 0;
+      if (aCreated !== bCreated) return bCreated - aCreated;
+
       const getCustomerNumber = (code?: string | null) => {
         const match = code?.match(/^(?:CUS-)?(\d+)$/i);
-        return match ? Number(match[1]) : Number.MAX_SAFE_INTEGER;
+        return match ? Number(match[1]) : 0;
       };
-      const aNumber = getCustomerNumber(a.customer_code);
-      const bNumber = getCustomerNumber(b.customer_code);
-      if (aNumber !== bNumber) return aNumber - bNumber;
-      return a.name.localeCompare(b.name);
+      return getCustomerNumber(b.customer_code) - getCustomerNumber(a.customer_code);
     });
 
   return (
