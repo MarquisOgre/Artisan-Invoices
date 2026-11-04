@@ -274,12 +274,12 @@ const generateFabricFeatureBoxes = (enabled: boolean) => enabled ? `
   <section class="fabric-specifications" aria-label="Fabric specifications">
     <h3 class="fabric-specifications-title">Fabric Specifications</h3>
     <div class="fabric-features">
-    <div class="fabric-feature"><span class="fabric-feature-icon">200</span><strong>200 GSM</strong><span>Fabric weight</span></div>
-    <div class="fabric-feature"><span class="fabric-feature-icon">✣</span><strong>ANTI-MICROBIAL</strong><span>Helps inhibit the growth of microbes</span></div>
-    <div class="fabric-feature"><span class="fabric-feature-icon">↟</span><strong>SUPER WICK</strong><span>Moisture management</span></div>
-    <div class="fabric-feature"><span class="fabric-feature-icon">☼</span><strong>UV PROTECTION</strong><span>UPF 50+ protection</span></div>
-    <div class="fabric-feature"><span class="fabric-feature-icon">羽</span><strong>ULTRA SOFT</strong><span>Gentle on skin · High comfort</span></div>
-    <div class="fabric-feature"><span class="fabric-feature-icon">◉</span><strong>COLOR RETENTION</strong><span>Long-lasting color vibrancy</span></div>
+    <div class="fabric-feature" style="background: #f2f2f2 !important; background-color: #f2f2f2 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact;"><span class="fabric-feature-icon">200</span><strong>200 GSM</strong><span>Fabric weight</span></div>
+    <div class="fabric-feature" style="background: #f2f2f2 !important; background-color: #f2f2f2 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact;"><span class="fabric-feature-icon">✣</span><strong>ANTI-MICROBIAL</strong><span>Helps inhibit the growth of microbes</span></div>
+    <div class="fabric-feature" style="background: #f2f2f2 !important; background-color: #f2f2f2 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact;"><span class="fabric-feature-icon">↟</span><strong>SUPER WICK</strong><span>Moisture management</span></div>
+    <div class="fabric-feature" style="background: #f2f2f2 !important; background-color: #f2f2f2 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact;"><span class="fabric-feature-icon">☼</span><strong>UV PROTECTION</strong><span>UPF 50+ protection</span></div>
+    <div class="fabric-feature" style="background: #f2f2f2 !important; background-color: #f2f2f2 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact;"><span class="fabric-feature-icon">羽</span><strong>ULTRA SOFT</strong><span>Gentle on skin · High comfort</span></div>
+    <div class="fabric-feature" style="background: #f2f2f2 !important; background-color: #f2f2f2 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact;"><span class="fabric-feature-icon">◉</span><strong>COLOR RETENTION</strong><span>Long-lasting color vibrancy</span></div>
     </div>
   </section>` : '';
 
