@@ -287,6 +287,18 @@ const Settings = () => {
             />
           </div>
 
+          <div className="flex items-center justify-between rounded-lg border p-4">
+            <div className="space-y-1">
+              <Label htmlFor="showFabricFeatures">Display Fabric Feature Boxes</Label>
+              <p className="text-sm text-muted-foreground">Show the six fabric specification boxes at the bottom of printed quotations and invoices.</p>
+            </div>
+            <Switch
+              id="showFabricFeatures"
+              checked={invoiceSettings.showFabricFeatures !== false}
+              onCheckedChange={(checked) => handleInvoiceChange("showFabricFeatures", checked)}
+            />
+          </div>
+
           <div>
             <Label htmlFor="termsAndConditions">Terms and Conditions (Optional)</Label>
             <Textarea
