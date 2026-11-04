@@ -72,7 +72,7 @@ const InvoiceList = ({
 }: InvoiceListProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const currentDate = new Date();
-  const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth() + 1);
+  const [selectedMonth, setSelectedMonth] = useState(0);
   const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
   const { companySettings, invoiceSettings } = useSettings();
 
@@ -119,12 +119,10 @@ const InvoiceList = ({
     const matchesSearch = invoice.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
       invoice.id.toLowerCase().includes(searchTerm.toLowerCase());
     
-    if (selectedMonth === 0) return matchesSearch;
-    
     const invDate = new Date(invoice.date);
-    return matchesSearch && 
-      invDate.getMonth() + 1 === selectedMonth && 
-      invDate.getFullYear() === selectedYear;
+    return matchesSearch &&
+      invDate.getFullYear() === selectedYear &&
+      (selectedMonth === 0 || invDate.getMonth() + 1 === selectedMonth);
   }).sort((a, b) => {
     const dateDifference = new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime();
     if (dateDifference !== 0) return dateDifference;
