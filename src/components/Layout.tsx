@@ -296,7 +296,9 @@ const Layout = ({ children, currentPage, onPageChange }: LayoutProps) => {
         style={{ paddingTop: HEADER_HEIGHT, paddingBottom: FOOTER_HEIGHT }}
       >
         <main className="flex-1 min-h-0 min-w-0 overflow-auto p-3 pb-14 sm:p-4 sm:pb-14 lg:p-6 lg:pb-14">
-          {children}
+          <div className="w-full min-w-0 lg:mx-auto lg:max-w-7xl">
+            {children}
+          </div>
         </main>
       </div>
 
