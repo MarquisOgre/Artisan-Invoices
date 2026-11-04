@@ -137,6 +137,8 @@ const generateStyles = () => `
     th {
       background-color: #f2f2f2;
       font-weight: bold;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
     }
 
     .text-right {
