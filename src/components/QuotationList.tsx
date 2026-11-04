@@ -121,6 +121,10 @@ const QuotationList = ({
     return matchesSearch && 
       qDate.getMonth() + 1 === selectedMonth && 
       qDate.getFullYear() === selectedYear;
+  }).sort((a, b) => {
+    const dateDifference = new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime();
+    if (dateDifference !== 0) return dateDifference;
+    return new Date(b.fullQuotation?.created_at || 0).getTime() - new Date(a.fullQuotation?.created_at || 0).getTime();
   });
 
   return (
