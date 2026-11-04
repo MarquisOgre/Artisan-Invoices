@@ -38,7 +38,7 @@ const InvoiceDetails = ({ invoice, isOpen, onClose }: InvoiceDetailsProps) => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
-    const invoiceHtml = generateInvoicePrintHTML(invoice, companySettings, invoiceSettings.termsAndConditions);
+    const invoiceHtml = generateInvoicePrintHTML(invoice, companySettings, invoiceSettings.termsAndConditions, invoiceSettings.showFabricFeatures !== false);
     printWindow.document.write(invoiceHtml);
     printWindow.document.close();
 
