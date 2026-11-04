@@ -125,6 +125,10 @@ const InvoiceList = ({
     return matchesSearch && 
       invDate.getMonth() + 1 === selectedMonth && 
       invDate.getFullYear() === selectedYear;
+  }).sort((a, b) => {
+    const dateDifference = new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime();
+    if (dateDifference !== 0) return dateDifference;
+    return new Date(b.fullInvoice?.created_at || 0).getTime() - new Date(a.fullInvoice?.created_at || 0).getTime();
   });
 
   return (
