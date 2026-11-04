@@ -391,7 +391,8 @@ export const generateInvoicePrintHTML = (invoice: any, companySettings: CompanyS
 
       <div class="signature">
         <p><strong>For ${companySettings.name || 'Artisan Apparels'}</strong></p>
-        <p style="margin-top: 40px;"><strong>Authorised Signatory</strong></p>
+        <p style="margin-top: 40px;"><strong>Prashanth Rambhatla</strong></p>
+        <p style="margin-top: 3px;"><strong>Authorised Signatory</strong></p>
       </div>
     </div>
   </body>
@@ -499,7 +500,8 @@ export const generateQuotationPrintHTML = (quotation: any, companySettings: Comp
 
       <div class="signature">
         <p><strong>For ${companySettings.name || 'Artisan Apparels'}</strong></p>
-        <p style="margin-top: 40px;"><strong>Authorised Signatory</strong></p>
+        <p style="margin-top: 40px;"><strong>Prashanth Rambhatla</strong></p>
+        <p style="margin-top: 3px;"><strong>Authorised Signatory</strong></p>
       </div>
     </div>
   </body>
