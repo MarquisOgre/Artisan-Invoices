@@ -43,7 +43,7 @@ const Settings = () => {
     setCompanySettings(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleInvoiceChange = (field: string, value: string) => {
+  const handleInvoiceChange = (field: string, value: string | boolean) => {
     setInvoiceSettings(prev => ({ ...prev, [field]: value }));
   };
 
