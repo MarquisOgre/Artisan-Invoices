@@ -70,7 +70,7 @@ const QuotationList = ({
 }: QuotationListProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const currentDate = new Date();
-  const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth() + 1);
+  const [selectedMonth, setSelectedMonth] = useState(0);
   const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
   const { companySettings, invoiceSettings } = useSettings();
 
@@ -115,12 +115,10 @@ const QuotationList = ({
     const matchesSearch = quotation.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
       quotation.quotationNumber?.toLowerCase().includes(searchTerm.toLowerCase());
     
-    if (selectedMonth === 0) return matchesSearch;
-    
     const qDate = new Date(quotation.date);
-    return matchesSearch && 
-      qDate.getMonth() + 1 === selectedMonth && 
-      qDate.getFullYear() === selectedYear;
+    return matchesSearch &&
+      qDate.getFullYear() === selectedYear &&
+      (selectedMonth === 0 || qDate.getMonth() + 1 === selectedMonth);
   }).sort((a, b) => {
     const dateDifference = new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime();
     if (dateDifference !== 0) return dateDifference;
