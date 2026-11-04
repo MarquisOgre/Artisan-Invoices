@@ -226,10 +226,13 @@ const generateStyles = () => `
     }
     .fabric-feature {
       min-height: 48px;
-      border: 1px solid #777;
+      border: 1px solid #b8b8b8;
       border-radius: 8px;
+      background-color: #f2f2f2;
       padding: 5px 3px;
       text-align: center;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
       display: flex;
       flex-direction: column;
       align-items: center;
