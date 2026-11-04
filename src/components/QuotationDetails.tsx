@@ -37,7 +37,7 @@ const QuotationDetails = ({ quotation, isOpen, onClose }: QuotationDetailsProps)
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
-    const quotationHtml = generateQuotationPrintHTML(quotation, companySettings, invoiceSettings.termsAndConditions, invoiceSettings.defaultNotes);
+    const quotationHtml = generateQuotationPrintHTML(quotation, companySettings, invoiceSettings.termsAndConditions, invoiceSettings.defaultNotes, invoiceSettings.showFabricFeatures !== false);
     printWindow.document.write(quotationHtml);
     printWindow.document.close();
 
