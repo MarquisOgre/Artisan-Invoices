@@ -149,18 +149,22 @@ const generateStyles = () => `
 
     /* TOTALS */
     .totals-wrapper {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 12px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 250px;
+      align-items: start;
+      column-gap: 12px;
+      width: 100%;
       margin-top: 15px;
       page-break-inside: avoid;
       break-inside: avoid;
     }
 
     .fabric-specifications {
-      flex: 1 1 auto;
+      display: block;
+      width: 100%;
       min-width: 0;
+      grid-column: 1;
+      grid-row: 1;
     }
     .fabric-specifications-title {
       font-size: 10px;
@@ -170,8 +174,11 @@ const generateStyles = () => `
     }
 
     .totals-table {
-      width: auto;
+      width: 250px;
       min-width: 250px;
+      grid-column: 2;
+      grid-row: 1;
+      margin: 0;
       border-collapse: collapse;
       font-size: 11px;
     }
