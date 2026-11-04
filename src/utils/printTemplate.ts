@@ -198,37 +198,37 @@ const generateStyles = () => `
     .fabric-features {
       display: grid;
       grid-template-columns: repeat(6, minmax(0, 1fr));
-      gap: 8px;
-      margin-top: 18px;
+      gap: 5px;
+      margin-top: 10px;
       page-break-inside: avoid;
       break-inside: avoid;
     }
     .fabric-feature {
-      min-height: 104px;
+      min-height: 70px;
       border: 1px solid #777;
-      border-radius: 10px;
-      padding: 9px 5px;
+      border-radius: 8px;
+      padding: 5px 3px;
       text-align: center;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 4px;
+      gap: 2px;
     }
     .fabric-feature-icon {
-      width: 30px;
-      height: 30px;
+      width: 21px;
+      height: 21px;
       border: 1.5px solid #222;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 15px;
+      font-size: 11px;
       font-weight: bold;
-      margin-bottom: 3px;
+      margin-bottom: 1px;
     }
-    .fabric-feature strong { font-size: 9px; line-height: 1.2; }
-    .fabric-feature span:last-child { font-size: 8px; line-height: 1.25; }
+    .fabric-feature strong { font-size: 7.5px; line-height: 1.15; }
+    .fabric-feature span:last-child { font-size: 7px; line-height: 1.15; }
     @media print {
       .fabric-features { grid-template-columns: repeat(6, minmax(0, 1fr)); }
     }
