@@ -383,7 +383,7 @@ const InvoiceList = ({
                               const { generateInvoicePrintHTML } = await import('@/utils/printTemplate');
                               const printWindow = window.open('', '_blank');
                               if (printWindow) {
-                                const invoiceHtml = generateInvoicePrintHTML(invoice.fullInvoice, companySettings, invoiceSettings.termsAndConditions);
+                                const invoiceHtml = generateInvoicePrintHTML(invoice.fullInvoice, companySettings, invoiceSettings.termsAndConditions, invoiceSettings.showFabricFeatures !== false);
                                 printWindow.document.write(invoiceHtml);
                                 printWindow.document.close();
 
@@ -476,7 +476,7 @@ const InvoiceList = ({
                         const { generateInvoicePrintHTML } = await import('@/utils/printTemplate');
                         const printWindow = window.open('', '_blank');
                         if (!printWindow) return;
-                        printWindow.document.write(generateInvoicePrintHTML(invoice.fullInvoice, companySettings, invoiceSettings.termsAndConditions));
+                        printWindow.document.write(generateInvoicePrintHTML(invoice.fullInvoice, companySettings, invoiceSettings.termsAndConditions, invoiceSettings.showFabricFeatures !== false));
                         printWindow.document.close();
                         const images = Array.from(printWindow.document.images);
                         await Promise.all(images.map(img => new Promise<void>(resolve => {
