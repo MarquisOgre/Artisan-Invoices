@@ -135,7 +135,7 @@ const InvoiceList = ({
     ]);
 
     const csv = [columns, ...rows].map(row => row.map(escapeCsv).join(",")).join("\r\n");
-    const blob = new Blob(["\\uFEFF", csv], { type: "text/csv;charset=utf-8;" });
+    const blob = new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     const monthLabel = selectedMonth === 0 ? "all-months" : MONTHS.find(month => month.value === selectedMonth)?.label.toLowerCase();
