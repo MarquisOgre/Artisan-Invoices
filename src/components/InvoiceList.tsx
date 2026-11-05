@@ -163,7 +163,7 @@ const InvoiceList = ({
       "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
     })[char] || char);
     const money = (value: number) => value.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    const logo = companySettings.printLogo || companySettings.logo || "/logo.png";
+    const logo = "/favicon.png";
     const tableRows = rows.map(row => `
       <tr>
         <td>${escapeHtml(row.invoiceNumber)}</td><td>${escapeHtml(row.customer)}</td>
@@ -189,7 +189,7 @@ const InvoiceList = ({
         @media screen { body { padding:16px; } }
       </style></head><body>
       <header class="header">
-        <img class="logo" src="${escapeHtml(logo)}" alt="Artisan Apparels logo">
+        <img class="logo" src="${escapeHtml(logo)}" alt="Artisan Apparels favicon">
         <div class="company"><h1>${escapeHtml(companySettings.name || "Artisan Apparels")}</h1>
           <p>${escapeHtml(companySettings.address || "")}</p>
           <p>${escapeHtml(companySettings.phone || "")} ${companySettings.email ? " | " + escapeHtml(companySettings.email) : ""}</p>
