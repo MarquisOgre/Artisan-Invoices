@@ -30,7 +30,8 @@ import {
   Send,
   CheckCircle,
   Clock,
-  Banknote
+  Banknote,
+  Download
 } from "lucide-react";
 
 interface InvoiceListProps {
@@ -96,6 +97,55 @@ const InvoiceList = ({
       fullInvoice: i
     };
   });
+
+  const exportInvoiceList = () => {
+    const columns = [
+      "Invoice Number",
+      "Customer Name",
+      "Customer GSTIN",
+      "Invoice Date",
+      "Due Date",
+      "Subtotal (INR)",
+      "Discount (INR)",
+      "GST Amount (INR)",
+      "Total Amount (INR)",
+      "Advance Amount (INR)",
+      "Status",
+      "Paid Date"
+    ];
+
+    const escapeCsv = (value: unknown) => {
+      const text = value == null ? "" : String(value);
+      return `"${text.replace(/"/g, '""')}"`;
+    };
+
+    const rows = filteredInvoices.map(({ fullInvoice }) => [
+      fullInvoice.invoice_number,
+      fullInvoice.customer_name,
+      fullInvoice.customer_gst_no,
+      fullInvoice.invoice_date,
+      fullInvoice.due_date,
+      fullInvoice.subtotal,
+      fullInvoice.discount,
+      fullInvoice.gst_amount,
+      fullInvoice.total_amount,
+      fullInvoice.advance_amount,
+      fullInvoice.status,
+      fullInvoice.paid_date
+    ]);
+
+    const csv = [columns, ...rows].map(row => row.map(escapeCsv).join(",")).join("\r\n");
+    const blob = new Blob(["\\uFEFF", csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const monthLabel = selectedMonth === 0 ? "all-months" : MONTHS.find(month => month.value === selectedMonth)?.label.toLowerCase();
+    link.href = url;
+    link.download = `artisan-invoices-${selectedYear}-${monthLabel}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  };
 
   const getStatusBadge = (status: string) => {
     const statusLower = status?.toLowerCase() || 'unpaid';
@@ -174,10 +224,16 @@ const InvoiceList = ({
             </Select>
           </div>
         </div>
-        <Button className="w-full sm:w-auto" onClick={onCreateNew}>
-          <Receipt className="mr-2 h-4 w-4" />
-          New Invoice
-        </Button>
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+          <Button variant="outline" className="w-full sm:w-auto" onClick={exportInvoiceList} disabled={filteredInvoices.length === 0}>
+            <Download className="mr-2 h-4 w-4" />
+            EXPORT LIST
+          </Button>
+          <Button className="w-full sm:w-auto" onClick={onCreateNew}>
+            <Receipt className="mr-2 h-4 w-4" />
+            New Invoice
+          </Button>
+        </div>
       </div>
 
       {/* Invoices Table */}
