@@ -98,53 +98,122 @@ const InvoiceList = ({
     };
   });
 
-  const exportInvoiceList = () => {
-    const columns = [
-      "Invoice Number",
-      "Customer Name",
-      "Customer GSTIN",
-      "Invoice Date",
-      "Due Date",
-      "Subtotal (INR)",
-      "Discount (INR)",
-      "GST Amount (INR)",
-      "Total Amount (INR)",
-      "Advance Amount (INR)",
-      "Status",
-      "Paid Date"
-    ];
+  const getGstRate = (invoice: any) => {
+    const taxType = String(invoice.tax_type || "").toUpperCase();
+    if (taxType.includes("5")) return 5;
+    if (taxType.includes("12")) return 12;
+    if (taxType.includes("18")) return 18;
+    const subtotal = Number(invoice.subtotal) || 0;
+    const gstAmount = Number(invoice.gst_amount) || 0;
+    if (subtotal <= 0 || gstAmount <= 0) return 0;
+    return Number(((gstAmount / subtotal) * 100).toFixed(2));
+  };
 
+  const getExportRows = () => filteredInvoices.map(({ fullInvoice }) => ({
+    invoiceNumber: fullInvoice.invoice_number || "",
+    customer: fullInvoice.customer_name || "",
+    gstin: fullInvoice.customer_gst_no || "",
+    date: fullInvoice.invoice_date || "",
+    dueDate: fullInvoice.due_date || "",
+    subtotal: Number(fullInvoice.subtotal) || 0,
+    discount: Number(fullInvoice.discount) || 0,
+    gstRate: getGstRate(fullInvoice),
+    gstAmount: Number(fullInvoice.gst_amount) || 0,
+    total: Number(fullInvoice.total_amount) || 0,
+    advance: Number(fullInvoice.advance_amount) || 0,
+    status: fullInvoice.status || "",
+    paidDate: fullInvoice.paid_date || ""
+  }));
+
+  const getExportFileName = () => {
+    const monthLabel = selectedMonth === 0 ? "all-months" : MONTHS.find(month => month.value === selectedMonth)?.label.toLowerCase();
+    return `artisan-invoices-${selectedYear}-${monthLabel}`;
+  };
+
+  const exportInvoiceCsv = () => {
+    const columns = [
+      "Invoice Number", "Customer Name", "Customer GSTIN", "Invoice Date", "Due Date",
+      "Subtotal (INR)", "Discount (INR)", "GST %", "GST Amount (INR)",
+      "Total Amount (INR)", "Advance Amount (INR)", "Status", "Paid Date"
+    ];
     const escapeCsv = (value: unknown) => {
       const text = value == null ? "" : String(value);
       return `"${text.replace(/"/g, '""')}"`;
     };
-
-    const rows = filteredInvoices.map(({ fullInvoice }) => [
-      fullInvoice.invoice_number,
-      fullInvoice.customer_name,
-      fullInvoice.customer_gst_no,
-      fullInvoice.invoice_date,
-      fullInvoice.due_date,
-      fullInvoice.subtotal,
-      fullInvoice.discount,
-      fullInvoice.gst_amount,
-      fullInvoice.total_amount,
-      fullInvoice.advance_amount,
-      fullInvoice.status,
-      fullInvoice.paid_date
+    const rows = getExportRows().map(row => [
+      row.invoiceNumber, row.customer, row.gstin, row.date, row.dueDate,
+      row.subtotal, row.discount, row.gstRate, row.gstAmount, row.total,
+      row.advance, row.status, row.paidDate
     ]);
-
-    const csv = [columns, ...rows].map(row => row.map(escapeCsv).join(",")).join("\r\n");
-    const blob = new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8;" });
+    const csv = [columns, ...rows].map(row => row.map(escapeCsv).join(",")).join("\\r\\n");
+    const blob = new Blob(["\\uFEFF", csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
-    const monthLabel = selectedMonth === 0 ? "all-months" : MONTHS.find(month => month.value === selectedMonth)?.label.toLowerCase();
     link.href = url;
-    link.download = `artisan-invoices-${selectedYear}-${monthLabel}.csv`;
+    link.download = `${getExportFileName()}.csv`;
     document.body.appendChild(link);
     link.click();
     link.remove();
     URL.revokeObjectURL(url);
+  };
+
+  const exportInvoicePdf = () => {
+    const rows = getExportRows();
+    const escapeHtml = (value: unknown) => String(value ?? "").replace(/[&<>"']/g, char => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    })[char] || char);
+    const money = (value: number) => value.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const logo = companySettings.printLogo || companySettings.logo || "/logo.png";
+    const tableRows = rows.map(row => `
+      <tr>
+        <td>${escapeHtml(row.invoiceNumber)}</td><td>${escapeHtml(row.customer)}</td>
+        <td>${escapeHtml(row.gstin)}</td><td>${escapeHtml(row.date)}</td>
+        <td class="num">${money(row.subtotal)}</td><td class="num">${row.gstRate}%</td>
+        <td class="num">${money(row.gstAmount)}</td><td class="num">${money(row.total)}</td>
+        <td>${escapeHtml(row.status)}</td>
+      </tr>`).join("");
+    const html = `<!doctype html><html><head><meta charset="utf-8"><title>Invoice Register</title>
+      <style>
+        @page { size: A4 landscape; margin: 12mm; }
+        * { box-sizing: border-box; } body { font: 10px Arial, sans-serif; color: #222; }
+        .header { display:flex; align-items:center; gap:16px; border-bottom:2px solid #222; padding-bottom:12px; margin-bottom:14px; }
+        .logo { width:76px; height:76px; object-fit:contain; object-position:left center; }
+        .company h1 { margin:0 0 4px; font-size:20px; } .company p { margin:2px 0; color:#555; }
+        h2 { font-size:15px; margin:14px 0 8px; }
+        .meta { margin:0 0 10px; color:#555; }
+        table { width:100%; border-collapse:collapse; font-size:9px; }
+        th { background:#eee; text-align:left; } th,td { border:1px solid #bbb; padding:6px 5px; }
+        .num { text-align:right; white-space:nowrap; }
+        tfoot td { font-weight:bold; background:#f4f4f4; }
+        .footer { margin-top:12px; text-align:right; font-size:9px; color:#666; }
+        @media screen { body { padding:16px; } }
+      </style></head><body>
+      <header class="header">
+        <img class="logo" src="${escapeHtml(logo)}" alt="Artisan Apparels logo">
+        <div class="company"><h1>${escapeHtml(companySettings.name || "Artisan Apparels")}</h1>
+          <p>${escapeHtml(companySettings.address || "")}</p>
+          <p>${escapeHtml(companySettings.phone || "")} ${companySettings.email ? " | " + escapeHtml(companySettings.email) : ""}</p>
+          ${companySettings.taxNumber ? `<p>GSTIN: ${escapeHtml(companySettings.taxNumber)}</p>` : ""}
+        </div>
+      </header>
+      <h2>INVOICE REGISTER</h2>
+      <p class="meta">Period: ${selectedMonth === 0 ? "All months" : MONTHS.find(month => month.value === selectedMonth)?.label} ${selectedYear} &nbsp; | &nbsp; Invoices: ${rows.length}</p>
+      <table><thead><tr>
+        <th>Invoice No.</th><th>Customer</th><th>Customer GSTIN</th><th>Date</th>
+        <th class="num">Taxable Value (₹)</th><th class="num">GST %</th>
+        <th class="num">GST Amount (₹)</th><th class="num">Total (₹)</th><th>Status</th>
+      </tr></thead><tbody>${tableRows || '<tr><td colspan="9">No invoices found.</td></tr>'}</tbody>
+      <tfoot><tr><td colspan="4">TOTAL</td><td class="num">${money(rows.reduce((sum,row)=>sum+row.subtotal,0))}</td>
+        <td></td><td class="num">${money(rows.reduce((sum,row)=>sum+row.gstAmount,0))}</td>
+        <td class="num">${money(rows.reduce((sum,row)=>sum+row.total,0))}</td><td></td></tr></tfoot></table>
+      <div class="footer">Generated on ${new Date().toLocaleString("en-IN")}</div>
+      <script>window.addEventListener("load",()=>{const img=document.querySelector(".logo");const print=()=>setTimeout(()=>window.print(),250);if(img.complete)print();else{img.onload=print;img.onerror=print;setTimeout(print,3000);}}</script>
+      </body></html>`;
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) return;
+    printWindow.document.open();
+    printWindow.document.write(html);
+    printWindow.document.close();
   };
 
   const getStatusBadge = (status: string) => {
@@ -225,10 +294,18 @@ const InvoiceList = ({
           </div>
         </div>
         <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-          <Button variant="outline" className="w-full sm:w-auto" onClick={exportInvoiceList} disabled={filteredInvoices.length === 0}>
-            <Download className="mr-2 h-4 w-4" />
-            EXPORT LIST
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="w-full sm:w-auto" disabled={filteredInvoices.length === 0}>
+                <Download className="mr-2 h-4 w-4" />
+                EXPORT LIST
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={exportInvoiceCsv}>Export as CSV</DropdownMenuItem>
+              <DropdownMenuItem onClick={exportInvoicePdf}>Export as PDF</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Button className="w-full sm:w-auto" onClick={onCreateNew}>
             <Receipt className="mr-2 h-4 w-4" />
             New Invoice
