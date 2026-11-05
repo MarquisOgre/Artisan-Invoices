@@ -118,7 +118,12 @@ const InvoiceList = ({
     subtotal: Number(fullInvoice.subtotal) || 0,
     discount: Number(fullInvoice.discount) || 0,
     gstRate: getGstRate(fullInvoice),
-    gstAmount: Number(fullInvoice.gst_amount) || 0,
+    igstAmount: String(fullInvoice.tax_type || "").toUpperCase().includes("IGST")
+      ? Number(fullInvoice.gst_amount) || 0 : 0,
+    cgstAmount: String(fullInvoice.tax_type || "").toUpperCase().includes("IGST")
+      ? 0 : Math.round(((Number(fullInvoice.gst_amount) || 0) / 2) * 100) / 100,
+    sgstAmount: String(fullInvoice.tax_type || "").toUpperCase().includes("IGST")
+      ? 0 : (Number(fullInvoice.gst_amount) || 0) - Math.round(((Number(fullInvoice.gst_amount) || 0) / 2) * 100) / 100,
     total: Number(fullInvoice.total_amount) || 0,
     advance: Number(fullInvoice.advance_amount) || 0,
     status: fullInvoice.status || "",
@@ -133,7 +138,7 @@ const InvoiceList = ({
   const exportInvoiceCsv = () => {
     const columns = [
       "Invoice Number", "Customer Name", "Customer GSTIN", "Invoice Date", "Due Date",
-      "Subtotal (INR)", "Discount (INR)", "GST %", "GST Amount (INR)",
+      "Subtotal (INR)", "Discount (INR)", "GST %", "IGST (INR)", "CGST (INR)", "SGST (INR)",
       "Total Amount (INR)", "Advance Amount (INR)", "Status", "Paid Date"
     ];
     const escapeCsv = (value: unknown) => {
@@ -142,7 +147,7 @@ const InvoiceList = ({
     };
     const rows = getExportRows().map(row => [
       row.invoiceNumber, row.customer, row.gstin, row.date, row.dueDate,
-      row.subtotal, row.discount, row.gstRate, row.gstAmount, row.total,
+      row.subtotal, row.discount, row.gstRate, row.igstAmount, row.cgstAmount, row.sgstAmount, row.total,
       row.advance, row.status, row.paidDate
     ]);
     const csv = [columns, ...rows].map(row => row.map(escapeCsv).join(",")).join("\\r\\n");
@@ -169,23 +174,24 @@ const InvoiceList = ({
         <td>${escapeHtml(row.invoiceNumber)}</td><td>${escapeHtml(row.customer)}</td>
         <td>${escapeHtml(row.gstin)}</td><td>${escapeHtml(row.date)}</td>
         <td class="num">${money(row.subtotal)}</td><td class="num">${row.gstRate}%</td>
-        <td class="num">${money(row.gstAmount)}</td><td class="num">${money(row.total)}</td>
+        <td class="num">${money(row.igstAmount)}</td><td class="num">${money(row.cgstAmount)}</td>
+        <td class="num">${money(row.sgstAmount)}</td><td class="num">${money(row.total)}</td>
         <td>${escapeHtml(row.status)}</td>
       </tr>`).join("");
     const html = `<!doctype html><html><head><meta charset="utf-8"><title>Invoice Register</title>
       <style>
         @page { size: A4 landscape; margin: 12mm; }
-        * { box-sizing: border-box; } body { font: 10px Arial, sans-serif; color: #222; }
-        .header { display:flex; align-items:center; gap:16px; border-bottom:2px solid #222; padding-bottom:12px; margin-bottom:14px; }
-        .logo { width:76px; height:76px; object-fit:contain; object-position:left center; }
-        .company h1 { margin:0 0 4px; font-size:20px; } .company p { margin:2px 0; color:#555; }
-        h2 { font-size:15px; margin:14px 0 8px; }
-        .meta { margin:0 0 10px; color:#555; }
-        table { width:100%; border-collapse:collapse; font-size:9px; }
-        th { background:#eee; text-align:left; } th,td { border:1px solid #bbb; padding:6px 5px; }
+        * { box-sizing: border-box; } body { font: 12px Arial, sans-serif; color: #222; }
+        .header { display:flex; align-items:center; gap:18px; border-bottom:2px solid #222; padding-bottom:14px; margin-bottom:16px; }
+        .logo { width:82px; height:82px; object-fit:contain; object-position:left center; }
+        .company h1 { margin:0 0 5px; font-size:24px; } .company p { margin:3px 0; color:#555; font-size:12px; }
+        h2 { font-size:19px; margin:16px 0 10px; }
+        .meta { margin:0 0 12px; color:#555; font-size:12px; }
+        table { width:100%; border-collapse:collapse; font-size:11px; }
+        th { background:#eee; text-align:left; } th,td { border:1px solid #bbb; padding:8px 6px; }
         .num { text-align:right; white-space:nowrap; }
         tfoot td { font-weight:bold; background:#f4f4f4; }
-        .footer { margin-top:12px; text-align:right; font-size:9px; color:#666; }
+        .footer { margin-top:14px; text-align:right; font-size:10px; color:#666; }
         @media screen { body { padding:16px; } }
       </style></head><body>
       <header class="header">
@@ -201,10 +207,13 @@ const InvoiceList = ({
       <table><thead><tr>
         <th>Invoice No.</th><th>Customer</th><th>Customer GSTIN</th><th>Date</th>
         <th class="num">Taxable Value (₹)</th><th class="num">GST %</th>
-        <th class="num">GST Amount (₹)</th><th class="num">Total (₹)</th><th>Status</th>
-      </tr></thead><tbody>${tableRows || '<tr><td colspan="9">No invoices found.</td></tr>'}</tbody>
+        <th class="num">IGST (₹)</th><th class="num">CGST (₹)</th><th class="num">SGST (₹)</th>
+        <th class="num">Total (₹)</th><th>Status</th>
+      </tr></thead><tbody>${tableRows || '<tr><td colspan="11">No invoices found.</td></tr>'}</tbody>
       <tfoot><tr><td colspan="4">TOTAL</td><td class="num">${money(rows.reduce((sum,row)=>sum+row.subtotal,0))}</td>
-        <td></td><td class="num">${money(rows.reduce((sum,row)=>sum+row.gstAmount,0))}</td>
+        <td></td><td class="num">${money(rows.reduce((sum,row)=>sum+row.igstAmount,0))}</td>
+        <td class="num">${money(rows.reduce((sum,row)=>sum+row.cgstAmount,0))}</td>
+        <td class="num">${money(rows.reduce((sum,row)=>sum+row.sgstAmount,0))}</td>
         <td class="num">${money(rows.reduce((sum,row)=>sum+row.total,0))}</td><td></td></tr></tfoot></table>
       <div class="footer">Generated on ${new Date().toLocaleString("en-IN")}</div>
       <script>window.addEventListener("load",()=>{const img=document.querySelector(".logo");const print=()=>setTimeout(()=>window.print(),250);if(img.complete)print();else{img.onload=print;img.onerror=print;setTimeout(print,3000);}}</script>
